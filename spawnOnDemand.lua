@@ -3280,15 +3280,6 @@ do
 				[5] = {["CLSID"] = "{GAR-8}"}, [6] = {["CLSID"] = "{GAR-8}"},
 				[7] = {["CLSID"] = "{PTB_120_F86F35}"}, [4] = {["CLSID"] = "{PTB_120_F86F35}"}
 		}, task = "CAP"})
-		--[[
-		table.insert(spawnOnDemand.planes.other, {type = "Hawk",
-			livery = {"USAF Aggressor 269", "Tiger Scheme", "Ilmavoimat 35 vuotta", "Ilmavoimat Camo", "Ilmavoimat Gray", "Red Arrows 2014 - XX244", "Red Arrows 2015 - XX310", "RedBull-33", "XX172 St. Athan Red Dragon",
-				"XX320 - Hawk & Valley Anniversary"},
-			fuel = 1272, pylons = {
-				[2] = {["CLSID"] = "{AIM-9M-ON-ADAPTER"}, [4] = {["CLSID"] = "{AIM-9M-ON-ADAPTER}"},
-				[3] = {["CLSID"] = "{ADEN_GUNPOD}"}
-		}, task = "CAP"})
-		--]]
 		table.insert(spawnOnDemand.planes.other, {type = "L-39C",
 			livery = {"Aggressor", "Baltic Bees 01", "Blue Angel 7", "Firecat NX39LW", "Merlin", "Monochrome", "N223PG", "N247SG", "N2399X", "NX63MX", "HuAF Airshow 2007 #119 Capeti II (Kecskemet AB)",
 				"Royal Thai Airforce 20th Anniversary", "Vandy1 Jet Team", "LetUchKA", "SaAF", "CDF L-39C", "RAAF Fanta Can", "RAAF Low Viz Dark", "RAAF Low Viz No.76 Sqn", "RAAF Low Viz No.79 Sqn", "German Bundeswehr 28+60"},
@@ -4638,12 +4629,13 @@ do
 			v1.4.3  - Added AFAC
 			v1.4.4  - Generating radom AFAC laser code
 			v1.5 - Cleaned up code
-			v1.5.1  - Added MiG-19P, removed Hawk and mods (until working again)
+			v1.5.1  - Added MiG-19P, removed mods (until working again)
+			v1.5.2  - Removed Hawk
 		--]]
 
 		spawnOnDemand.version = {}
 		spawnOnDemand.version.major = 1
-		spawnOnDemand.version.minor = 5.1 -- including revision
+		spawnOnDemand.version.minor = 5.2 -- including revision
 		spawnOnDemand.toLog(string.format("v%i.%g locked and loaded.", spawnOnDemand.version.major, spawnOnDemand.version.minor))
 	end
 

@@ -2802,6 +2802,10 @@ do
 				GunnersAISkill = 90, -- in %
 				ExhaustScreen = true
 			}
+		elseif type == "MiG-19P" then
+			props = {
+				MountSIRENA = true
+			}
 		end
 		return props
 	end
@@ -3122,7 +3126,7 @@ do
 		table.insert(spawnOnDemand.planes.cargo, {type = "An-30M", livery = {"RF Air Force"}, fuel = 8300, flare = 192, chaff = 192})
 		table.insert(spawnOnDemand.planes.cargo, {type = "C-130", livery = {"169th FW 478 (SC)", "US Air Force", "USAF SEA Generic"}, fuel = 20830, flare = 60, chaff = 120})
 		table.insert(spawnOnDemand.planes.cargo, {type = "C-17A", livery = {"usaf standard"}, fuel = 132405, flare = 60, chaff = 120})
-		table.insert(spawnOnDemand.planes.cargo, {type = "DC3", livery = {"DC3 Buffalo", "DC3 PanAm", "Metal No Markings", "USAF DO IT"}, fuel = 1094}) -- mod
+		--table.insert(spawnOnDemand.planes.cargo, {type = "DC3", livery = {"DC3 Buffalo", "DC3 PanAm", "Metal No Markings", "USAF DO IT"}, fuel = 1094}) -- mod
 		table.insert(spawnOnDemand.planes.cargo, {type = "IL-76MD", livery = {"FSB aeroflot", "MVD aeroflot", "RF Air Force", "Air Almaty", "Sky Way Airlines"}, fuel = 80000, flare = 96, chaff = 96})
 		table.insert(spawnOnDemand.planes.cargo, {type = "Yak-40", livery = {"DELTA", "NORTHWEST", "VistaJet", "Yugoslavian AF Yak-40", "Argentina Fokker F28", "RAAF", "Russian Naval Blue", "Russian Naval Gray", "USMC"}, fuel = 3080})
 		table.insert(spawnOnDemand.planes.cargo, {type = "A_380",
@@ -3276,6 +3280,7 @@ do
 				[5] = {["CLSID"] = "{GAR-8}"}, [6] = {["CLSID"] = "{GAR-8}"},
 				[7] = {["CLSID"] = "{PTB_120_F86F35}"}, [4] = {["CLSID"] = "{PTB_120_F86F35}"}
 		}, task = "CAP"})
+		--[[
 		table.insert(spawnOnDemand.planes.other, {type = "Hawk",
 			livery = {"USAF Aggressor 269", "Tiger Scheme", "Ilmavoimat 35 vuotta", "Ilmavoimat Camo", "Ilmavoimat Gray", "Red Arrows 2014 - XX244", "Red Arrows 2015 - XX310", "RedBull-33", "XX172 St. Athan Red Dragon",
 				"XX320 - Hawk & Valley Anniversary"},
@@ -3283,6 +3288,7 @@ do
 				[2] = {["CLSID"] = "{AIM-9M-ON-ADAPTER"}, [4] = {["CLSID"] = "{AIM-9M-ON-ADAPTER}"},
 				[3] = {["CLSID"] = "{ADEN_GUNPOD}"}
 		}, task = "CAP"})
+		--]]
 		table.insert(spawnOnDemand.planes.other, {type = "L-39C",
 			livery = {"Aggressor", "Baltic Bees 01", "Blue Angel 7", "Firecat NX39LW", "Merlin", "Monochrome", "N223PG", "N247SG", "N2399X", "NX63MX", "HuAF Airshow 2007 #119 Capeti II (Kecskemet AB)",
 				"Royal Thai Airforce 20th Anniversary", "Vandy1 Jet Team", "LetUchKA", "SaAF", "CDF L-39C", "RAAF Fanta Can", "RAAF Low Viz Dark", "RAAF Low Viz No.76 Sqn", "RAAF Low Viz No.79 Sqn", "German Bundeswehr 28+60"},
@@ -3313,6 +3319,12 @@ do
 				[3] = {["CLSID"] = "{PTB_490C_MIG21}"},
 				[4] = {["CLSID"] = "{R-3R}"}, [5] = {["CLSID"] = "{R-60 2R}"},
 				[6] = {["CLSID"] = "{ASO-2}"}
+		}, task = "CAP"})
+		table.insert(spawnOnDemand.planes.other, {type = "MiG-19P",
+			livery = {"default", "Snow Camouflage Fictional", "234 Fighter Regiment (234 IAP)", "Germany DDR camouflage (Fictional)", "764th Fighter Aviation Regiment"},
+			fuel = 1800, ammoType = 1, pylons = {
+				[1] = {["CLSID"] = "{K-13A}"}, [6] = {["CLSID"] = "{K-13A}"},
+				[2] = {["CLSID"] = "PTB760_MIG19"}, [5] = {["CLSID"] = "PTB760_MIG19"}
 		}, task = "CAP"})
 		-- CAS
 		-- TODO: use random selection from "attack" instead of duplicate definition? (what about payload)
@@ -3346,15 +3358,15 @@ do
 		-- vehicles
 		spawnOnDemand.vehicles = {}
 		spawnOnDemand.vehicles.cargo = {}
-		table.insert(spawnOnDemand.vehicles.cargo, "SEMI_BLUE") -- Semi Truck Blue (ranger)
-		table.insert(spawnOnDemand.vehicles.cargo, "SEMI_RED") -- Semi Truck Red (ranger)
+		--table.insert(spawnOnDemand.vehicles.cargo, "SEMI_BLUE") -- Semi Truck Blue (ranger)
+		--table.insert(spawnOnDemand.vehicles.cargo, "SEMI_RED") -- Semi Truck Red (ranger)
 		table.insert(spawnOnDemand.vehicles.cargo, "GAZ-3307")
 		table.insert(spawnOnDemand.vehicles.cargo, "MAZ-6303")
 		table.insert(spawnOnDemand.vehicles.cargo, "UAZ-469")
 		table.insert(spawnOnDemand.vehicles.cargo, "VAZ Car") -- VAZ-2109 (wheels not animated)
 		table.insert(spawnOnDemand.vehicles.cargo, "Trolley bus") -- ZIU-9
 		table.insert(spawnOnDemand.vehicles.cargo, "ZIL-4331") -- ZIL-4334
-		table.insert(spawnOnDemand.vehicles.cargo, "Mercedes700K") -- (markindel)
+		--table.insert(spawnOnDemand.vehicles.cargo, "Mercedes700K") -- (markindel)
 		-- aa
 		spawnOnDemand.vehicles.aa = {}
 		table.insert(spawnOnDemand.vehicles.aa, "ZSU-23-4 Shilka")--aa
@@ -3368,10 +3380,10 @@ do
 		spawnOnDemand.vehicles.other = {}
 		table.insert(spawnOnDemand.vehicles.other, "BTR-80")
 		table.insert(spawnOnDemand.vehicles.other, "BRDM-2")
-		table.insert(spawnOnDemand.vehicles.other, "DODGE_TECH") -- Technical large 12.7mm (ranger)
+		--table.insert(spawnOnDemand.vehicles.other, "DODGE_TECH") -- Technical large 12.7mm (ranger)
 		table.insert(spawnOnDemand.vehicles.other, "M1043 HMMWV Armament")
 		table.insert(spawnOnDemand.vehicles.other, "M1126 Stryker ICV")
-		table.insert(spawnOnDemand.vehicles.other, "TOYO_TECH") -- Technical Small 12.7mm (ranger)
+		--table.insert(spawnOnDemand.vehicles.other, "TOYO_TECH") -- Technical Small 12.7mm (ranger)
 
 		-- helicopters
 		spawnOnDemand.helos = {}
@@ -3444,22 +3456,22 @@ do
 		-- ships
 		spawnOnDemand.ships = {}
 		spawnOnDemand.ships.cargo = {}
-		table.insert(spawnOnDemand.ships.cargo, "Cruise_Ship") -- cruise ship (crazyeddie)
+		--table.insert(spawnOnDemand.ships.cargo, "Cruise_Ship") -- cruise ship (crazyeddie)
 		table.insert(spawnOnDemand.ships.cargo, "Dry-cargo ship-1") -- dry cargo
 		table.insert(spawnOnDemand.ships.cargo, "Dry-cargo ship-2") -- dry cargo
 		table.insert(spawnOnDemand.ships.cargo, "ELNYA") -- tanker
 		table.insert(spawnOnDemand.ships.cargo, "KILO") -- unarmed, sub
 		table.insert(spawnOnDemand.ships.cargo, "SOM") -- SSK 641B, unarmed, sub
 		table.insert(spawnOnDemand.ships.cargo, "ZWEZDNY") -- cruise ship
-		table.insert(spawnOnDemand.ships.cargo, "Amerigo Vespucci Full Sail") -- (markindel)
-		table.insert(spawnOnDemand.ships.cargo, "Amerigo Vespucci Furled Sails") -- (markindel)
-		table.insert(spawnOnDemand.ships.cargo, "USS_Constitution") -- (markindel)
+		--table.insert(spawnOnDemand.ships.cargo, "Amerigo Vespucci Full Sail") -- (markindel)
+		--table.insert(spawnOnDemand.ships.cargo, "Amerigo Vespucci Furled Sails") -- (markindel)
+		--table.insert(spawnOnDemand.ships.cargo, "USS_Constitution") -- (markindel)
 		-- navy
 		spawnOnDemand.ships.other = {}
 		table.insert(spawnOnDemand.ships.other, "speedboat") -- armed
 		table.insert(spawnOnDemand.ships.other, "PERRY") -- frigate
-		table.insert(spawnOnDemand.ships.other, "Rebel_Boat") -- fishing (upuaut)
-		table.insert(spawnOnDemand.ships.other, "Supply Ship") -- armed (upuaut)
+		--table.insert(spawnOnDemand.ships.other, "Rebel_Boat") -- fishing (upuaut)
+		--table.insert(spawnOnDemand.ships.other, "Supply Ship") -- armed (upuaut)
 		table.insert(spawnOnDemand.ships.other, "TICONDEROG") -- normandy, cruiser
 		--table.insert(spawnOnDemand.ships.other, "VINSON") -- carrier
 		--table.insert(spawnOnDemand.ships.other, "KUZNECOW") -- carrier
@@ -3835,162 +3847,28 @@ do
 
 		-- beacons already used in theater
 		local mapFreqs = {}
-		if env.mission.theatre == "Caucasus" then
-			if require then -- check for sanitize
+
+		if require then -- check for sanitize
+			if env.mission.theatre == "Caucasus" then
 				dofile("./Mods/terrains/Caucasus/Beacons.lua")
-			end
-			if beacons then
-				for name, data in pairs(beacons) do
-					if (data.type == BEACON_TYPE_HOMER or data.type == BEACON_TYPE_AIRPORT_HOMER or data.type == BEACON_TYPE_AIRPORT_HOMER_WITH_MARKER or data.type == BEACON_TYPE_ILS_FAR_HOMER or data.type == BEACON_TYPE_ILS_NEAR_HOMER) and data.frequency then
-						mapFreqs[tostring(math.floor(data.frequency))] = data.callsign
-					end
-				end
-			else
-				mapFreqs = {
-					-- BEACON_TYPE_HOMER
-					["745000"] = "AS", ["381000"] = "AG", ["384000"] = "AL", ["300500"] = "AH", ["1175000"] = "BA", ["342000"] = "BD", ["735000"] = "BJ",
-					--["300500"] = "BS", -- BEACON_INACTIVE
-					["353000"] = "AL", ["440000"] = "AR", ["525000"] = "DA", ["520000"] = "DF", ["690000"] = "DM",
-					--["1175000"] = "DO", -- duplicate frequency
-					["625000"] = "DW", ["435000"] = "ER",
-					--["300500"] = "GE", -- BEACON_INACTIVE
-					["920000"] = "GW", -- BEACON_INACTIVE
-					["1065000"] = "HS",
-					--["300500"] = "IL", -- duplicate frequency
-					["580000"] = "KC",
-					["602000"] = "KC", -- duplicate callsign
-					["750000"] = "LA", ["485000"] = "KH", ["950000"] = "KM", ["214000"] = "KP", ["1025000"] = "KS", ["730000"] = "KT", ["995000"] = "KW", ["455000"] = "KZ",
-					["307000"] = "LA", -- duplicate callsign
-					["670000"] = "LY", ["1030000"] = "NK", ["395000"] = "LE", ["770000"] = "MA", ["380000"] = "VZ", ["705000"] = "MN", ["507000"] = "ND", ["740000"] = "NE",
-					--["1030000"] = "NK", -- duplicate frequency
-					["515000"] = "RC", ["330000"] = "NZ", ["348000"] = "OD", ["462000"] = "OE", ["905000"] = "PA", ["352000"] = "PK", ["1210000"] = "PR",
-					--["435000"] = "QG", -- duplicate frequency
-					["324000"] = "RF", ["320000"] = "RE", ["420000"] = "DV", ["311000"] = "CA", ["389000"] = "SH",
-					["396000"] = "SH", -- duplicate callsign
-					["862000"] = "SH", -- duplicate callsign
-					["680000"] = "SK", ["662000"] = "SM", ["866000"] = "SN", ["907000"] = "SR", ["882000"] = "TA", ["309500"] = "TD",
-					--["515000"] = "TH", -- duplicate frequency
-					["470000"] = "TC",
-					--["342000"] = "TO", -- duplicate frequency
-					["1182000"] = "TP", ["720000"] = "TY", ["528000"] = "UH", ["337000"] = "UP", ["830000"] = "WK",
-					--["740000"] = "VM", -- duplicate frequency
-					--["309500"] = "WR", -- duplicate frequency
-					["641000"] = "WS", ["312000"] = "XT", ["722000"] = "BK", ["682000"] = "MA",
-					["1050000"] = "KC", -- duplicate callsign
-					-- BEACON_TYPE_AIRPORT_HOMER
-					["935000"] = "BF", ["1000000"] = "GN", ["430000"] = "LU",
-					-- BEACON_TYPE_AIRPORT_HOMER_WITH_MARKER
-					["374000"] = "UJ", ["362000"] = "XK", ["761000"] = "CO",
-					--["395000"] = "XC", -- duplicate frequency
-					["477000"] = "TI",
-					-- BEACON_TYPE_ILS_FAR_HOMER
-					--["374000"] = "DT", -- duplicate frequency
-					["588000"] = "LH",
-					--["588000"] = "CK", -- duplicate frequency
-					["895000"] = "TL",
-					--["895000"] = "MR", -- duplicate frequency
-					["1309000"] = "RL",
-					--["1309000"] = "RQ", -- duplicate frequency
-					["820000"] = "DN",
-					--["820000"] = "GX", -- duplicate frequency
-					--["662000"] = "FC", -- duplicate frequency
-					--["662000"] = "DX", -- duplicate frequency
-					["289000"] = "FX",
-					--["289000"] = "AW", -- duplicate frequency
-					["365000"] = "RU", ["1681000"] = "KG",
-					--["1681000"] = "KE", -- duplicate frequency
-					["472000"] = "CB",
-					--["472000"] = "TB", -- duplicate frequency
-					["535000"] = "RB",
-					--["535000"] = "UE", -- duplicate frequency
-					["443000"] = "AN",
-					--["443000"] = "AP", -- duplicate frequency
-					--["625000"] = "MB", -- duplicate frequency
-					--["625000"] = "OC", -- duplicate frequency
-					["408000"] = "OX",
-					--["408000"] = "KW", -- duplicate frequency
-					--["289000"] = "DG", -- duplicate frequency
-					--["289000"] = "RK", -- duplicate frequency
-					["493000"] = "KR",
-					--["493000"] = "LD", -- duplicate frequency
-					["489000"] = "AV", ["335000"] = "BI",
-					["870000"] = "KT", -- duplicate callsign
-					["583000"] = "MD",
-					--["583000"] = "NR", -- duplicate frequency
-					["718000"] = "NL",
-					--["525000"] = "DO", -- duplicate frequency
-					--["525000"] = "RM", -- duplicate frequency
-					--["324000"] = "BP", -- duplicate frequency
-					["211000"] = "NA",
-					--["1050000"] = "CX", -- duplicate frequency
-					-- BEACON_TYPE_ILS_NEAR_HOMER
-					["760000"] = "D", ["285000"] = "L",
-					--["285000"] = "C", -- duplicate frequency
-					["441000"] = "T",
-					--["441000"] = "M", -- duplicate frequency
-					["164000"] = "L", -- duplicate callsign
-					--["164000"] = "Q", -- duplicate frequency
-					["401000"] = "D",
-					--["401000"] = "G", -- duplicate frequency
-					["595000"] = "F",
-					--["595000"] = "A", -- duplicate frequency
-					--["735000"] = "R", -- duplicate frequency
-					["624000"] = "G", -- duplicate callsign
-					--["624000"] = "E", -- duplicate frequency
-					["960000"] = "C", -- duplicate callsign
-					--["960000"] = "T", -- duplicate frequency
-					["527000"] = "R", -- duplicate callsign
-					--["527000"] = "U", -- duplicate frequency
-					["215000"] = "N",
-					--["215000"] = "P", -- duplicate frequency
-					["303000"] = "M",
-					--["303000"] = "O", -- duplicate frequency
-					["803000"] = "O", -- duplicate callsign
-					--["803000"] = "K", -- duplicate frequency
-					["591000"] = "D", -- duplicate callsign
-					--["591000"] = "R", -- duplicate callsign/frequency
-					["240000"] = "K", -- duplicate callsign
-					--["240000"] = "L", -- duplicate callsign/frequency
-					--["995000"] = "A", -- duplicate frequency
-					["688000"] = "B",
-					["490000"] = "T", -- duplicate callsign
-					["283000"] = "D", -- duplicate callsign
-					--["283000"] = "N", -- duplicate callsign/frequency
-					["350000"] = "N", -- duplicate callsign
-					--["1065000"] = "D", -- duplicate callsign/frequency
-					--["1065000"] = "R", -- duplicate callsign/frequency
-					["923000"] = "B", -- duplicate callsign
-					--["435000"] = "N", -- duplicate callsign/frequency
-					["250000"] = "C" -- duplicate callsign
-				}
-			end
-		elseif env.mission.theatre == "Nevada" then
-			if require then -- check for sanitize
+			elseif env.mission.theatre == "Nevada" then
 				dofile("./Mods/terrains/Nevada/Beacons.lua")
-			end
-			if beacons then
-				for name, data in pairs(beacons) do
-					if (data.type == BEACON_TYPE_AIRPORT_HOMER or data.type == BEACON_TYPE_HOMER) and data.frequency then
-						mapFreqs[tostring(math.floor(data.frequency))] = data.callsign
-					end
-				end
+			elseif env.mission.theatre == "Normandy" then
+				dofile("./Mods/terrains/Normandy/Beacons.lua")
+			elseif env.mission.theatre == "PersianGulf" then
+				dofile("./Mods/terrains/PersianGulf/Beacons.lua")
 			else
-				mapFreqs = {
-					-- BEACON_TYPE_AIRPORT_HOMER
-					["326000"] = "MCY",
-					-- extra beacons by gospadin
-					-- BEACON_TYPE_HOMER
-					["209000"] = "AEC", ["217000"] = "EC", ["278000"] = "XSD", ["407000"] = "CHD", ["403000"] = "AZC", ["378000"] = "CPM", ["284000"] = "DGP", ["359000"] = "EMT",
-					["282000"] = "GWF", ["414000"] = "PYD", ["281000"] = "FFZ", ["337000"] = "NA", ["370000"] = "PAI", ["251000"] = "NO", ["205000"] = "COR", ["371000"] = "TVY"
-				}
+				spawnOnDemand.toLog("ERROR: Theatre not found!")
+				return
 			end
-		elseif env.mission.theatre == "Normandy" then
-			-- TODO
-		elseif env.mission.theatre == "PersianGulf" then
-			-- TODO
-		else
-			spawnOnDemand.toLog("ERROR: Theatre not found!")
-			return
+		end
+
+		if beacons then
+			for name, data in pairs(beacons) do
+				if string.find(string.upper(data.type), "HOMER") ~= nil and data.frequency and data.callsign then
+					mapFreqs[tostring(math.floor(data.frequency))] = data.callsign
+				end
+			end
 		end
 
 		-- for debug
@@ -4023,7 +3901,7 @@ do
 			lower = 100000
 			upper = 1750000
 			interval = 10000
-		elseif typeName == "MiG-15bis" then
+		elseif typeName == "MiG-15bis" or typeName == "MiG-19P" then
 			-- 150 - 1,300 kHz x 10 kHz
 			lower = 150000
 			upper = 1300000
@@ -4760,11 +4638,12 @@ do
 			v1.4.3  - Added AFAC
 			v1.4.4  - Generating radom AFAC laser code
 			v1.5 - Cleaned up code
+			v1.5.1  - Added MiG-19P, removed Hawk and mods (until working again)
 		--]]
 
 		spawnOnDemand.version = {}
 		spawnOnDemand.version.major = 1
-		spawnOnDemand.version.minor = 5 -- including revision
+		spawnOnDemand.version.minor = 5.1 -- including revision
 		spawnOnDemand.toLog(string.format("v%i.%g locked and loaded.", spawnOnDemand.version.major, spawnOnDemand.version.minor))
 	end
 

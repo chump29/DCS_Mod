@@ -1,9 +1,5 @@
--- * Disabled beacons
--- * Modified getPlayerData
-
 -- TODO: add light/heavy vehicle categories
 -- TODO: add location/spawnNum/noRoute to all spawners
--- TODO: add theatre beacon data for new maps
 
 -- SpawnOnDemand by Chump
 
@@ -3122,40 +3118,42 @@ do
 		-- planes
 		spawnOnDemand.planes = {}
 		spawnOnDemand.planes.cargo = {}
-		table.insert(spawnOnDemand.planes.cargo, {type = "An-26B", livery = {"Aeroflot", "An-26B Expendables", "RF Air Force", "United Nations", "Yugoslavian AF An-26 #369"}, fuel = 5500, flare = 384, chaff = 384})
+		table.insert(spawnOnDemand.planes.cargo, {type = "An-26B", livery = {"Aeroflot"}, fuel = 5500, flare = 384, chaff = 384})
 		table.insert(spawnOnDemand.planes.cargo, {type = "An-30M", livery = {"RF Air Force"}, fuel = 8300, flare = 192, chaff = 192})
-		table.insert(spawnOnDemand.planes.cargo, {type = "C-130", livery = {"169th FW 478 (SC)", "US Air Force", "USAF SEA Generic"}, fuel = 20830, flare = 60, chaff = 120})
+		table.insert(spawnOnDemand.planes.cargo, {type = "C-130", livery = {"US Air Force"}, fuel = 20830, flare = 60, chaff = 120})
 		table.insert(spawnOnDemand.planes.cargo, {type = "C-17A", livery = {"usaf standard"}, fuel = 132405, flare = 60, chaff = 120})
 		--table.insert(spawnOnDemand.planes.cargo, {type = "DC3", livery = {"DC3 Buffalo", "DC3 PanAm", "Metal No Markings", "USAF DO IT"}, fuel = 1094}) -- mod
-		table.insert(spawnOnDemand.planes.cargo, {type = "IL-76MD", livery = {"FSB aeroflot", "MVD aeroflot", "RF Air Force", "Air Almaty", "Sky Way Airlines"}, fuel = 80000, flare = 96, chaff = 96})
-		table.insert(spawnOnDemand.planes.cargo, {type = "Yak-40", livery = {"DELTA", "NORTHWEST", "VistaJet", "Yugoslavian AF Yak-40", "Argentina Fokker F28", "RAAF", "Russian Naval Blue", "Russian Naval Gray", "USMC"}, fuel = 3080})
+		table.insert(spawnOnDemand.planes.cargo, {type = "IL-76MD", livery = {"RF Air Force"}, fuel = 80000, flare = 96, chaff = 96})
+		table.insert(spawnOnDemand.planes.cargo, {type = "Yak-40", livery = {"Aeroflot", "Olympic Airways (Vintage)"}, fuel = 3080})
+
+		-- Civil Aircraft Mod
 		table.insert(spawnOnDemand.planes.cargo, {type = "A_380",
 			livery = {"Air France", "British Airways", "China Southern", "_Clean", "Emirates", "Korean Air", "Lufthansa", "Lufthansa Test", "Qantas Airways", "Qatar Airways", "Singapore Airlines", "Thai Airways"},
-			fuel = 90700}) -- Civil Aircraft Mod
+			fuel = 90700})
 		table.insert(spawnOnDemand.planes.cargo, {type = "B_727",
 			livery = {"AEROFLOT", "Air France", "Alaska Airlines", "Alitalia", "American Airlines", "Basic", "Delta Airlines", "Delta Airlines old", "FedEx", "Hapag Lloyd", "Lufthansa", "Lufthansa Oberhausen Old", "NORTHWEST", "Pan Am",
 				"Singapore Airlines", "SOUTHWEST", "UNITED", "UNITED OLD", "ZERO G"},
-			fuel = 90700}) -- Civil Aircraft Mod
+			fuel = 90700})
 		table.insert(spawnOnDemand.planes.cargo, {type = "B_737",
 			livery = {"Air Algerie", "Air Berlin", "Air France", "airBaltic", "Airzena", "Aero Mexico", "American Airlines Retro", "British Airways", "C40s", "Clean", "Disney", "EGYPTAIR", "easyJet", "FINNAIR", "TUI fly", "Janet",
 				"Jet2.com", "kulula", "Lufthansa", "Lufthansa BA", "Lufthansa KR", "Old British Airways", "OMAN AIR", "PAN AM", "Polskie Linie Lotnicze LOT", "QANTAS", "RYANAIR", "SouthWest Lone Star", "ThomsonFly", "TNT",
 				"Ukraine Airlines", "UPS"},
-			fuel = 90700}) -- Civil Aircraft Mod
+			fuel = 90700})
 		table.insert(spawnOnDemand.planes.cargo, {type = "B_747",
 			livery = {"Air France", "Air Force One", "Air India", "Cathay Pacific Hong Kong", "Iron Maiden World Tour 2016", "Royal Dutch Airlines KLM", "Lufthansa", "Northwest (old Colors)", "Pan Am (old Colors)",
 				"Qantas Airlines (1984 Colors)", "Turkish Airlines"},
-			fuel = 90700}) -- Civil Aircraft Mod
+			fuel = 90700})
 		table.insert(spawnOnDemand.planes.cargo, {type = "B_757",
 			livery = {"American Airways", "British Airways", "USAir Force C-32", "Delta Airlines", "DHL Cargo", "easyJet", "Swiss", "Thomson TUI"},
-			fuel = 90700}) -- Civil Aircraft Mod
+			fuel = 90700})
 		table.insert(spawnOnDemand.planes.cargo, {type = "Cessna_210N",
 			livery = {"Blank", "D-EKVW", "Greece Army", "Muster", "N9572H", "Silver Eagle Blue", "Silver Eagle Red", "U.S.A.F Academy", "V5-BUG", "VH-JGA"},
-			fuel = 5500}) -- Civil Aircraft Mod
+			fuel = 5500})
 
 		-- attack
 		spawnOnDemand.planes.other = {}
 		table.insert(spawnOnDemand.planes.other, {type = "A-10C",
-			livery = {"Fictional A-10C Peanut Camo scheme", "Red Baron", "303rd Whiteman AFB, Missouri (KC)", "89th AW", "107th FS Selfridge ANGB, Michigan (MI), Red Devil 100th Anniversary"},
+			livery = {"A-10 Grey"},
 			fuel = 5029, flare = 120, chaff = 240, ammoType = 1, pylons = { -- ammoType 1 = Combat Mix
 				[1] = {["CLSID"] = "ALQ_184"},
 				[2] = {["CLSID"] = "{69926055-0DA8-4530-9F2F-C86B157EA9F6}"}, -- LAU-131 M151
@@ -3167,21 +3165,14 @@ do
 				[11] = {["CLSID"] = "{DB434044-F5D0-4F1F-9BA9-B73027E18DD3}"} -- LAU-105 AIM9M [NEGATIVE WEIGHT OF PAYLOAD]
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.planes.other, {type = "AJS37",
-			livery = {"BareMetal", "Swedish AF 01", "The Pike", "USA Agressor Camo", "US Navy Wolf Pack VF-1", "#57 AJS F10", "Petter 11 F16 Upplands Flygflottilj", "Johan Rod F10 Upplands Flygflottilj", "#28 F16 Upplands Flygflottilj",
-				"#24 F16 Upplands Flygflottilj", "N300SE", "Shiftie", "Viggen Spirit", "Johan Röd - THE SHOW MUST GO ON", "M90 F10 - Christmas Card Greetings '95", "Johan Gul", "Ravens Dark Camo", "Ravens Desert", "Ravens Forest",
-				"Ravens Snow Camo"},
+			livery = {"#2 Bare Metal F7 Skaraborgs Flygflottilj"},
 			fuel = 4476, flare = 36, chaff = 105, pylons = {
 				[2] = {["CLSID"] = "{ARAKM70BHE}"}, [3] = {["CLSID"] = "{ARAKM70BHE}"},
 				[4] = {["CLSID"] = "{VIGGEN_X-TANK}"},
 				[5] = {["CLSID"] = "{ARAKM70BHE}"}, [6] = {["CLSID"] = "{ARAKM70BHE}"}
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.planes.other, {type = "AV8BNA",
-			livery = {"Ravens Dark Camo", "Ravens Forest Camo", "Ravens Snow Camo", "VMAT-542FR", "1 Squadron RAF GR.5 ZD403 (Green)", "3 Squadron RAF GR.5 ZD349 (Green)", "4 Squadron RAF GR.5 ZG533 (Green)",
-				"19 Squadron RAF GR.5 ZK421 (Blue Tail - Green) *Fictional*", "19 Squadron RAF GR.5 ZK421 (Green) *Fictional*", "71 Squadron RAF GR.5 ZG570 (Green) *Fictional*", "RAF GR.5 Generic (Green)",
-				"VMA-X02/Desert", "VMA-X02/Night", "VMA-X02/Woodland", "JASDF 3rd Tactical Fighter Squadron Alternate 60th Anniversary", "JASDF 3rd Tactical Fighter Squadron Camo",
-				"JASDF 3rd Tactical Fighter Squadron Camo 60th Anniversary", "JASDF 3rd Tactical Fighter Squadron Camo Alternate 60th Anniversary", "JASDF 3rd Tactical Fighter Squadron F-1 Forest Camouflage",
-				"JASDF 3rd Tactical Fighter Squadron F-1 Sea Camouflage", "VMA-231 CAG-01 Number/164562", "Zebra", "VMA-231-91L", "VMA-231-91D", "USA VMA-223-000_EUR", "USA VMA-223-00_ODS", "USA VMA-223/CAG_01/BuNo_165384",
-				"USA VMA-223_ODS_GENERIC", "USA VMA-223_EUR_GENERIC", "USMC--White Knight"},
+			livery = {"default"},
 			fuel = 3520, flare = 120, chaff = 60, pylons = {
 				[1] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, [8] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, -- AIM-9M
 				[2] = {["CLSID"] = "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"}, [3] = {["CLSID"] = "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"}, -- GBU-16
@@ -3189,45 +3180,41 @@ do
 				[4] = {["CLSID"] = "{GAU_12_Equalizer}"},
 				[5] = {["CLSID"] = "{A111396E-D3E8-4b9c-8AC9-2432489304D5}"} -- AN/AAQ-28 litening
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.planes.other, {type = "C-101CC", livery = {"Aviodev Skin", "USAF Fictional"}, fuel = 1885, pylons = {
-			[1] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"}, [7] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"}, -- LAU-161 M151
-			[2] = {["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}"}, [6] = {["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}"}, -- LAU-68 M151
-			[3] = {["CLSID"] = "BIN_200"}, [5] = {["CLSID"] = "BIN_200"},
-			[4] = {["CLSID"] = "{C-101-DEFA553}"}
+		table.insert(spawnOnDemand.planes.other, {type = "C-101CC",
+			livery = {"USAF Agressor Fictional"},
+			fuel = 1885, pylons = {
+				[1] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"}, [7] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"}, -- LAU-161 M151
+				[2] = {["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}"}, [6] = {["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}"}, -- LAU-68 M151
+				[3] = {["CLSID"] = "BIN_200"}, [5] = {["CLSID"] = "BIN_200"},
+				[4] = {["CLSID"] = "{C-101-DEFA553}"}
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.planes.other, {type = "F-5E-3",
-			livery = {"black 'Mig-28'", "USA standard", "USAF Bare Metal", "OADF F-5E SP", "USAF Euro Camo", "J-3001 GRD Emmen 1986", "J-3001 GRD Emmen 1996", "J-3001 FlSt 08 2000", "J-3008 FlSt 08/19 February 2005",
-				"J-3025 FlSt 11/18 January 2006", "J-3026 FlSt 11 approx. 1989", "J-3033_2017", "J-3036 FlSt 01 1985", "J-3036 Sion 2017", "J-3038", "J-3073_2017", "J-3074", "J-3079", "J-3098", "Swiss Generic two-tone skin",
-				"Area 88 Shin Kazama F-5E New", "HAF 349Sqdn Kronos", "Tiger II - N716ER", "USAF - Jnks Blue F-5E", "USAF T-38A Talon", "Turkish Stars", "Ravens Forest Camo", "Ravens Dark Grey", "Ravens Splinter", "Ravens Desert Camo",
-				"ROCAF AIDC Tiger 2001", "ROCAF AIDC Tiger 2001 (WHITE)"},
+			livery = {"black 'Mig-28'", "USA standard"},
 			fuel = 2046, flare = 15, chaff = 30, ammoType = 2, pylons = { -- ammoType 2 = Combat Mix
 				[1] = {["CLSID"] = "{9BFD8C90-F7AE-4e90-833B-BFD0CED0E536}"}, [7] = {["CLSID"] = "{9BFD8C90-F7AE-4e90-833B-BFD0CED0E536}"}, -- AIM-9P
 				[2] = {["CLSID"] = "{LAU3_HE5}"}, [3] = {["CLSID"] = "{LAU3_HE5}"}, [5] = {["CLSID"] = "{LAU3_HE5}"}, [6] = {["CLSID"] = "{LAU3_HE5}"}, -- MK5 HEAT
 				[4] = {["CLSID"] = "{0395076D-2F77-4420-9D33-087A4398130B}"} -- 275gal
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.planes.other, {type = "F-86F Sabre",
-			livery = {"Brig Gen H R Spicer ATC", "HAF 335sqn", "Tigerskin Matte", "Tigerskin Shiny", "AMI Cl-13, 4 Stormo", "IAF DASSAULT MYSTERY FICTIONAL", "51stFW 25thFIS Father Dan", "The_Huff", "El_Diablo_Late", "Lady Luck",
-				"Jnk's F-86F I", "USAF Bare Metal Polished", "US Air Force (3 Tone Digital Army Camo, Weathered, Version 5)", "US Air Force (3 Tone Digital Blue Camo, Weathered, Version 5)",
-				"US Air Force (3 Tone Digital Dark Camo, Weathered, Version 5)", "US Air Force (3 Tone Digital Flanker Camo, Weathered, Version 5)", "US Air Force (3 Tone Digital Green Camo, Weathered, Version 5)",
-				"US Air Force (3 Tone Digital Jungle Camo, Weathered, Version 5)", "US Air Force (3 Tone Digital Sand Camo, Weathered, Version 5)", "US Air Force (3 Tone Digital Winter Camo, Weathered, Version 5)"},
+			livery = {"default livery"},
 	 		fuel = 1282, pylons = {
 				[1] = {["CLSID"] = "{HVARx2}"}, [2] = {["CLSID"] = "{HVARx2}"}, [3] = {["CLSID"] = "{HVARx2}"}, [4] = {["CLSID"] = "{HVARx2}"},
 				[7] = {["CLSID"] = "{HVARx2}"}, [8] = {["CLSID"] = "{HVARx2}"}, [10] = {["CLSID"] = "{HVARx2}"}, [9] = {["CLSID"] = "{HVARx2}"}
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.planes.other, {type = "L-39ZA",
-			livery = {"HuAF Airshow 2007 #119 (Kecskemet AB)", "HuAF Airshow 2007 #135 (Kecskemet AB)", "Romanian Airt Force 145", "Splinter camo desert", "Splinter camo woodland", "SaAF", "CDF L-39ZA", "RAAF Fanta Can",
-				"RAAF Low Viz Dark", "RAAF Low Viz No.76 Sqn", "RAAF Low Viz No.79 Sqn", "German Bundeswehr 28+56"},
+			livery = {"Splinter camo woodland"},
 			fuel = 980, pylons = {
 				[1] = {["CLSID"] = "{UB-16-57UMP}"}, [5] = {["CLSID"] = "{UB-16-57UMP}"},
 				[2] = {["CLSID"] = "{FB3CE165-BF07-4979-887C-92B87F13276B}"}, [4] = {["CLSID"] = "{FB3CE165-BF07-4979-887C-92B87F13276B}"} -- FAB-100
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.planes.other, {type = "MQ-9 Reaper", livery = {"standard"}, fuel = 1300, pylons = {
-			[1] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, [4] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, -- AGM-114K
-			[2] = {["CLSID"] = "AGM114x2_OH_58"}, [3] = {["CLSID"] = "AGM114x2_OH_58"}
+		table.insert(spawnOnDemand.planes.other, {type = "MQ-9 Reaper",
+			livery = {"standard"},
+			fuel = 1300, pylons = {
+				[1] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, [4] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, -- AGM-114K
+				[2] = {["CLSID"] = "AGM114x2_OH_58"}, [3] = {["CLSID"] = "AGM114x2_OH_58"}
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.planes.other, {type = "MiG-21Bis",
-			livery = {"Bare Metal", "Croatia Kockica 165", "Somalia", "7714 Slovak Air Force (Sliac)", "FARE 4a Escuadrilla/Grupo 26", "India No15Sqn The flying Lances n2113", "NVA_Mig-21MF_Night_Fighter",
-				"Bulgaria - b/n 114 (Graf Ignatevo AB)", "Czechoslovakia Air Force 8208"},
+			livery = {"VVS Metal"},
 			fuel = 2280, flare = 32, chaff = 32, ammoType = 2, pylons = { -- ammoType 2 = A/G
 				[1] = {["CLSID"] = "{4203753F-8198-4E85-9924-6F8FF679F9FF}"}, [5] = {["CLSID"] = "{4203753F-8198-4E85-9924-6F8FF679F9FF}"}, -- RBK-250
 				[2] = {["CLSID"] = "{UB-32_S5M}"}, [4] = {["CLSID"] = "{UB-32_S5M}"},
@@ -3236,9 +3223,7 @@ do
 		}, task = "CAS"})
 		-- fighter
 		table.insert(spawnOnDemand.planes.other, {type = "AJS37",
-			livery = {"BareMetal", "Swedish AF 01", "The Pike", "USA Agressor Camo", "US Navy Wolf Pack VF-1", "#57 AJS F10", "Petter 11 F16 Upplands Flygflottilj", "Johan Rod F10 Upplands Flygflottilj", "#28 F16 Upplands Flygflottilj",
-				"#24 F16 Upplands Flygflottilj", "N300SE", "Shiftie", "Viggen Spirit", "Johan Röd - THE SHOW MUST GO ON", "M90 F10 - Christmas Card Greetings '95", "Johan Gul", "Ravens Dark Camo", "Ravens Desert", "Ravens Forest",
-				"Ravens Snow Camo"},
+			livery = {"#2 Bare Metal F7 Skaraborgs Flygflottilj"},
 			fuel = 4476, flare = 36, chaff = 105, pylons = {
 				[1] = {["CLSID"] = "{Robot24J}"}, [7] = {["CLSID"] = "{Robot24J}"},
 				[2] = {["CLSID"] = "{Robot74}"}, [3] = {["CLSID"] = "{Robot74}"},
@@ -3246,65 +3231,50 @@ do
 				[5] = {["CLSID"] = "{Robot74}"}, [6] = {["CLSID"] = "{Robot74}"}
 		}, task = "CAP"})
 		table.insert(spawnOnDemand.planes.other, {type = "AV8BNA",
-			livery = {"Ravens Dark Camo", "Ravens Forest Camo", "Ravens Snow Camo", "VMAT-542FR", "1 Squadron RAF GR.5 ZD403 (Green)", "3 Squadron RAF GR.5 ZD349 (Green)", "4 Squadron RAF GR.5 ZG533 (Green)",
-				"19 Squadron RAF GR.5 ZK421 (Blue Tail - Green) *Fictional*", "19 Squadron RAF GR.5 ZK421 (Green) *Fictional*", "71 Squadron RAF GR.5 ZG570 (Green) *Fictional*", "RAF GR.5 Generic (Green)",
-				"VMA-X02/Desert", "VMA-X02/Night", "VMA-X02/Woodland", "JASDF 3rd Tactical Fighter Squadron Alternate 60th Anniversary", "JASDF 3rd Tactical Fighter Squadron Camo",
-				"JASDF 3rd Tactical Fighter Squadron Camo 60th Anniversary", "JASDF 3rd Tactical Fighter Squadron Camo Alternate 60th Anniversary", "JASDF 3rd Tactical Fighter Squadron F-1 Forest Camouflage",
-				"JASDF 3rd Tactical Fighter Squadron F-1 Sea Camouflage", "VMA-231 CAG-01 Number/164562", "Zebra", "VMA-231-91L", "VMA-231-91D", "USA VMA-223-000_EUR", "USA VMA-223-00_ODS", "USA VMA-223/CAG_01/BuNo_165384",
-				"USA VMA-223_ODS_GENERIC", "USA VMA-223_EUR_GENERIC", "USMC--White Knight"},
+			livery = {"default"},
 			fuel = 3520, flare = 120, chaff = 60, pylons = {
 				[1] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, [8] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, -- AIM-9M
 				[2] = {["CLSID"] = "{LAU_7_AGM_122_SIDEARM}"}, [7] = {["CLSID"] = "{LAU_7_AGM_122_SIDEARM}"},
 				[3] = {["CLSID"] = "LAU_117_AGM_65G"}, [6] = {["CLSID"] = "LAU_117_AGM_65G"},
 				[4] = {["CLSID"] = "{GAU_12_Equalizer}"}, [5] = {["CLSID"] = "{ALQ_164_RF_Jammer}"}
 		}, task = "CAP"})
-		table.insert(spawnOnDemand.planes.other, {type = "C-101CC", livery = {"Aviodev Skin", "USAF Fictional"}, fuel = 1885, pylons = {
-			[1] = {["CLSID"] = "{9BFD8C90-F7AE-4e90-833B-BFD0CED0E536}"}, [7] = {["CLSID"] = "{9BFD8C90-F7AE-4e90-833B-BFD0CED0E536}"}, -- AIM-9P
-			[4] = {["CLSID"] = "{AN-M3}"}
+		table.insert(spawnOnDemand.planes.other, {type = "C-101CC",
+			livery = {"USAF Agressor Fictional"},
+			fuel = 1885, pylons = {
+				[1] = {["CLSID"] = "{9BFD8C90-F7AE-4e90-833B-BFD0CED0E536}"}, [7] = {["CLSID"] = "{9BFD8C90-F7AE-4e90-833B-BFD0CED0E536}"}, -- AIM-9P
+				[4] = {["CLSID"] = "{AN-M3}"}
 		}, task = "CAP"})
 		table.insert(spawnOnDemand.planes.other, {type = "F-5E-3",
-			livery = {"black 'Mig-28'", "USA standard", "USAF Bare Metal", "OADF F-5E SP", "USAF Euro Camo", "J-3001 GRD Emmen 1986", "J-3001 GRD Emmen 1996", "J-3001 FlSt 08 2000", "J-3008 FlSt 08/19 February 2005",
-				"J-3025 FlSt 11/18 January 2006", "J-3026 FlSt 11 approx. 1989", "J-3033_2017", "J-3036 FlSt 01 1985", "J-3036 Sion 2017", "J-3038", "J-3073_2017", "J-3074", "J-3079", "J-3098", "Swiss Generic two-tone skin",
-				"Area 88 Shin Kazama F-5E New", "HAF 349Sqdn Kronos", "Tiger II - N716ER", "USAF - Jnks Blue F-5E", "USAF T-38A Talon", "Turkish Stars", "Ravens Forest Camo", "Ravens Dark Grey", "Ravens Splinter", "Ravens Desert Camo",
-				"ROCAF AIDC Tiger 2001", "ROCAF AIDC Tiger 2001 (WHITE)"},
+			livery = {"black 'Mig-28'", "USA standard"},
 			fuel = 2046, flare = 15, chaff = 30, ammoType = 2, pylons = { -- ammoType 2 = Combat Mix
 				[1] = {["CLSID"] = "{AIM-9P5}"}, [7] = {["CLSID"] = "{AIM-9P5}"},
 				[3] = {["CLSID"] = "{PTB-150GAL}"}, [4] = {["CLSID"] = "{PTB-150GAL}"}, [5] = {["CLSID"] = "{PTB-150GAL}"}
 		}, task = "CAP"})
 		table.insert(spawnOnDemand.planes.other, {type = "F-86F Sabre",
-			livery = {"Brig Gen H R Spicer ATC", "HAF 335sqn", "Tigerskin Matte", "Tigerskin Shiny", "AMI Cl-13, 4 Stormo", "IAF DASSAULT MYSTERY FICTIONAL", "51stFW 25thFIS Father Dan", "The_Huff", "El_Diablo_Late", "Lady Luck",
-				"Jnk's F-86F I", "USAF Bare Metal Polished", "US Air Force (3 Tone Digital Army Camo, Weathered, Version 5)", "US Air Force (3 Tone Digital Blue Camo, Weathered, Version 5)",
-				"US Air Force (3 Tone Digital Dark Camo, Weathered, Version 5)", "US Air Force (3 Tone Digital Flanker Camo, Weathered, Version 5)", "US Air Force (3 Tone Digital Green Camo, Weathered, Version 5)",
-				"US Air Force (3 Tone Digital Jungle Camo, Weathered, Version 5)", "US Air Force (3 Tone Digital Sand Camo, Weathered, Version 5)", "US Air Force (3 Tone Digital Winter Camo, Weathered, Version 5)"},
+			livery = {"default livery"},
 			fuel = 1282, pylons = {
 				[5] = {["CLSID"] = "{GAR-8}"}, [6] = {["CLSID"] = "{GAR-8}"},
 				[7] = {["CLSID"] = "{PTB_120_F86F35}"}, [4] = {["CLSID"] = "{PTB_120_F86F35}"}
 		}, task = "CAP"})
 		table.insert(spawnOnDemand.planes.other, {type = "L-39C",
-			livery = {"Aggressor", "Baltic Bees 01", "Blue Angel 7", "Firecat NX39LW", "Merlin", "Monochrome", "N223PG", "N247SG", "N2399X", "NX63MX", "HuAF Airshow 2007 #119 Capeti II (Kecskemet AB)",
-				"Royal Thai Airforce 20th Anniversary", "Vandy1 Jet Team", "LetUchKA", "SaAF", "CDF L-39C", "RAAF Fanta Can", "RAAF Low Viz Dark", "RAAF Low Viz No.76 Sqn", "RAAF Low Viz No.79 Sqn", "German Bundeswehr 28+60"},
+			livery = {"Black Diamond Jet Team"},
 			fuel = 980, pylons = {
 				[1] = {["CLSID"] = "{R-3S}"}, [3] = {["CLSID"] = "{R-3S}"}
 		}, task = "CAP"})
 		table.insert(spawnOnDemand.planes.other, {type = "M-2000C",
-			livery = {"2011 NATO Tigermeet", "Aeronavale", "Chevaliers du Ciel Black", "Digi Jackdaws", "JACKDAWS - BLUE FLAME", "Last Flight", "M2KC_TM2011", "RedBull v2", "Pegasus LF-2", "2016 RAMEX DELTA", "RDAF Danish Dynamite",
-				"SAAF Bandit", "SAAF Vlaggie", "Swordfish Mark II", "French Air Force D520 Heritage", "2017 OUADI DOUM", "Lightning M2000 by DirkLarien", "ROCAF AIDC Tiger 2001", "ROCAF AIDC Tiger 2001 (WHITE)", "ALA 46 Arido",
-				"ALA 46 Invernal", "ALA 46", "ALA 46 Gris", "RCAF-M2000C-425-Grey", "Navy Grey Camo Agressor", "56 Squadron Red Tail", "RAF 111 squadron", "Fictional Swiss J-2303 FlSt 16/17 approx 1988",
-				"Fictional Swiss J-2306 FlSt 03/16 approx 1996", "Fictional Swiss R-2109 FlSt 10", "M2000C_Red Arrows 2016", "Israeli Air Force 101 Sqn 1967 scheme", "AdA 1/2 Cigognes Guynemer", "IAF 101 squadron Mirage number 158",
-				"N81RD", "Black Flag", "Flying Baguette", "QatariAF", "M2000 Patriote", "Spirit Of Fire", "Ravens Dark Camo", "Ravens Desert Camo", "Ravens Forest Camo", "Ravens Light Grey", "SAAF Mirage IIICZ Fictional"},
+			livery = {"UAE Air Defense Air Force"},
 			fuel = 3165, flare = 16, chaff = 112, pylons = {
 				[8] = {["CLSID"] = "{Matra_S530D}"}, [2] = {["CLSID"] = "{Matra_S530D}"}, -- [NEGATIVE WEIGHT OF PAYLOAD]
 				[9] = {["CLSID"] = "{MMagicII}"}, [1] = {["CLSID"] = "{MMagicII}"},
 				[5] = {["CLSID"] = "{M2KC_RPL_522}"}
 		}, task = "CAP"})
 		table.insert(spawnOnDemand.planes.other, {type = "MiG-15bis",
-			livery = {"Jungle_Camo", "USSR_Orion Hunters", "JACKDAWS - REDBULL", "Chinese PLAAF (OAM)", "Jnk's Nigerian AF-Green"},
+			livery = {"default livery"},
 			fuel = 1172, pylons = {
 				[1] = {["CLSID"] = "PTB300_MIG15"}, [2] = {["CLSID"] = "PTB300_MIG15"}
 		}, task = "CAP"})
 		table.insert(spawnOnDemand.planes.other, {type = "MiG-21Bis",
-			livery = {"Bare Metal", "Croatia Kockica 165", "Somalia", "7714 Slovak Air Force (Sliac)", "FARE 4a Escuadrilla/Grupo 26", "India No15Sqn The flying Lances n2113", "NVA_Mig-21MF_Night_Fighter",
-				"Bulgaria - b/n 114 (Graf Ignatevo AB)", "Czechoslovakia Air Force 8208"},
+			livery = {"VVS Metal"},
 			fuel = 2280, flare = 32, chaff = 32, ammoType = 3, pylons = { -- ammoType 3 = A/A
 				[1] = {["CLSID"] = "{R-60 2L}"}, [2] = {["CLSID"] = "{R-3R}"},
 				[3] = {["CLSID"] = "{PTB_490C_MIG21}"},
@@ -3312,8 +3282,8 @@ do
 				[6] = {["CLSID"] = "{ASO-2}"}
 		}, task = "CAP"})
 		table.insert(spawnOnDemand.planes.other, {type = "MiG-19P",
-			livery = {"default", "Snow Camouflage Fictional", "234 Fighter Regiment (234 IAP)", "Germany DDR camouflage (Fictional)", "764th Fighter Aviation Regiment"},
-			fuel = 1800, ammoType = 1, pylons = {
+			livery = {"default", "Snow Camouflage Fictional"},
+			fuel = 1800, ammoType = 1, pylons = { -- ammoType 1 = AP-T, APHE, HEI-T, HEI-T, HEI-T
 				[1] = {["CLSID"] = "{K-13A}"}, [6] = {["CLSID"] = "{K-13A}"},
 				[2] = {["CLSID"] = "PTB760_MIG19"}, [5] = {["CLSID"] = "PTB760_MIG19"}
 		}, task = "CAP"})
@@ -3321,7 +3291,7 @@ do
 		-- TODO: use random selection from "attack" instead of duplicate definition? (what about payload)
 		spawnOnDemand.planes.CAS = {}
 		table.insert(spawnOnDemand.planes.CAS, {type = "A-10C",
-			livery = {"Fictional A-10C Peanut Camo scheme", "Red Baron", "303rd Whiteman AFB, Missouri (KC)", "89th AW", "107th FS Selfridge ANGB, Michigan (MI), Red Devil 100th Anniversary"},
+			livery = {"A-10 Grey"},
 			fuel = 2515, flare = 120, chaff = 240, ammoType = 1, pylons = { -- ammoType 1 = Combat Mix
 				[1] = {["CLSID"] = "ALQ_184"},
 				[3] = {["CLSID"] = "LAU_88_AGM_65D_ONE"}, [9] = {["CLSID"] = "LAU_88_AGM_65D_ONE"},
@@ -3329,12 +3299,7 @@ do
 				[10] = {["CLSID"] = "{A111396E-D3E8-4b9c-8AC9-2432489304D5}"} -- AAQ-28
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.planes.CAS, {type = "AV8BNA",
-			livery = {"Ravens Dark Camo", "Ravens Forest Camo", "Ravens Snow Camo", "VMAT-542FR", "1 Squadron RAF GR.5 ZD403 (Green)", "3 Squadron RAF GR.5 ZD349 (Green)", "4 Squadron RAF GR.5 ZG533 (Green)",
-				"19 Squadron RAF GR.5 ZK421 (Blue Tail - Green) *Fictional*", "19 Squadron RAF GR.5 ZK421 (Green) *Fictional*", "71 Squadron RAF GR.5 ZG570 (Green) *Fictional*", "RAF GR.5 Generic (Green)",
-				"VMA-X02/Desert", "VMA-X02/Night", "VMA-X02/Woodland", "JASDF 3rd Tactical Fighter Squadron Alternate 60th Anniversary", "JASDF 3rd Tactical Fighter Squadron Camo",
-				"JASDF 3rd Tactical Fighter Squadron Camo 60th Anniversary", "JASDF 3rd Tactical Fighter Squadron Camo Alternate 60th Anniversary", "JASDF 3rd Tactical Fighter Squadron F-1 Forest Camouflage",
-				"JASDF 3rd Tactical Fighter Squadron F-1 Sea Camouflage", "VMA-231 CAG-01 Number/164562", "Zebra", "VMA-231-91L", "VMA-231-91D", "USA VMA-223-000_EUR", "USA VMA-223-00_ODS", "USA VMA-223/CAG_01/BuNo_165384",
-				"USA VMA-223_ODS_GENERIC", "USA VMA-223_EUR_GENERIC", "USMC--White Knight"},
+			livery = {"default"},
 			fuel = 3520, flare = 120, chaff = 60, pylons = {
 				[1] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, [8] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, -- AIM-9M
 				[2] = {["CLSID"] = "{LAU_7_AGM_122_SIDEARM}"}, [7] = {["CLSID"] = "{LAU_7_AGM_122_SIDEARM}"},
@@ -3386,28 +3351,33 @@ do
 		table.insert(spawnOnDemand.helos.cargo, {type = "UH-60A", livery = {"standard"}, fuel = 1100, flare = 30, chaff = 30})
 		-- attack
 		spawnOnDemand.helos.other = {}
-		table.insert(spawnOnDemand.helos.other, {type = "AH-1W", livery = {"standard", "USA X Black"}, fuel = 1250, flare = 30, chaff = 30, pylons = {
-			[1] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, [4] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, -- AGM-114
-			[2] = {["CLSID"] = "{M260_HYDRA}"}, [3] = {["CLSID"] = "{M260_HYDRA}"}
+		table.insert(spawnOnDemand.helos.other, {type = "AH-1W",
+			livery = {"standard"},
+			fuel = 1250, flare = 30, chaff = 30, pylons = {
+				[1] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, [4] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, -- AGM-114
+				[2] = {["CLSID"] = "{M260_HYDRA}"}, [3] = {["CLSID"] = "{M260_HYDRA}"}
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.helos.other, {type = "AH-64D", livery = {"standard"}, fuel = 1157, flare = 30, chaff = 30, pylons = {
-			[1] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, [4] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, -- AGM-114K
-			[2] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"}, [3] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"} -- MK151 HE
+		table.insert(spawnOnDemand.helos.other, {type = "AH-64D",
+			livery = {"standard"},
+			fuel = 1157, flare = 30, chaff = 30, pylons = {
+				[1] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, [4] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, -- AGM-114K
+				[2] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"}, [3] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"} -- MK151 HE
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.helos.other, {type = "Ka-50",
-			livery = {"us army", "Battle Eagle Skin Black_Grey", "Battle Eagle Skin Black_White", "Battle Eagle Skin Red_Grey", "Battle Eagle Skin Tiger_Shark", "Cuba 361Sqn 36Reg", "Ravens Dark Grey", "Ravens Desert Camo",
-				"Ravens Forest Camo", "Ravens Snow Camo"},
+			livery = {"US army"},
 			fuel = 1450, flare = 128, chaff = 0, pylons = {
 				[1] = {["CLSID"] = "{A6FD14D3-6D30-4C85-88A7-8D17BEE120E2}"}, [4] = {["CLSID"] = "{A6FD14D3-6D30-4C85-88A7-8D17BEE120E2}"}, -- 9A4172 Vikhr
 				[2] = {["CLSID"] = "{6A4B9E69-64FE-439a-9163-3A87FB6A4D81}"}, [3] = {["CLSID"] = "{6A4B9E69-64FE-439a-9163-3A87FB6A4D81}"} -- S-8KOM
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.helos.other, {type = "Mi-24V", livery = {"Russia_FSB", "Russia_MVD"}, fuel = 1704, flare = 192, chaff = 0, pylons = {
-			[1] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"}, [2] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"},
-			[5] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"}, [6] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"}, -- 9M114 Shturm-V
-			[3] = {["CLSID"] = "{637334E4-AB5A-47C0-83A6-51B7F1DF3CD5}"}, [4] = {["CLSID"] = "{637334E4-AB5A-47C0-83A6-51B7F1DF3CD5}"} -- S-5KO
+		table.insert(spawnOnDemand.helos.other, {type = "Mi-24V",
+			livery = {"standard"},
+			fuel = 1704, flare = 192, chaff = 0, pylons = {
+				[1] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"}, [2] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"},
+				[5] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"}, [6] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"}, -- 9M114 Shturm-V
+				[3] = {["CLSID"] = "{637334E4-AB5A-47C0-83A6-51B7F1DF3CD5}"}, [4] = {["CLSID"] = "{637334E4-AB5A-47C0-83A6-51B7F1DF3CD5}"} -- S-5KO
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.helos.other, {type = "Mi-8MT",
-			livery = {"USA Desert", "ORNGE", "Helix", "Ravens Dark Grey", "Ravens Desert Camo", "Ravens Grey Camo", "Ravens Snow Camo", "Blue Wizard"},
+			livery = {"Standard"},
 			fuel = 1929, flare = 192, chaff = 0, pylons = {
 				[1] = {["CLSID"] = "GUV_VOG"}, [6] = {["CLSID"] = "GUV_VOG"},
 				[2] = {["CLSID"] = "GUV_YakB_GSHP"}, [5] = {["CLSID"] = "GUV_YakB_GSHP"},
@@ -3422,22 +3392,20 @@ do
 				[6] = {["CLSID"] = "{IR_Deflector}"}
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.helos.other, {type = "SA342M",
-			livery = {"Low Level Hell", "OH-16 Arapaho", "HunAF86", "UN 664 Squadron AAC", "Ravens Gazelle Desert Camo", "Ravens Gazelle Forest Camo", "Ravens Gazelle Snow Camo"},
+			livery = {"US Marines Fictional"},
 			fuel = 291, flare = 32, chaff = 0, pylons = {
 				[1] = {["CLSID"] = "{HOT3D}"}, [3] = {["CLSID"] = "{HOT3D}"},
 				[2] = {["CLSID"] = "{HOT3G}"}, [4] = {["CLSID"] = "{HOT3G}"}
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.helos.other, {type = "SA342Mistral",
-			livery = {"Low Level Hell", "OH-16 Arapaho", "HunAF86", "UN 664 Squadron AAC", "Ravens Gazelle Desert Camo", "Ravens Gazelle Forest Camo", "Ravens Gazelle Snow Camo"},
+			livery = {"US Marines Fictional"},
 			fuel = 416, flare = 32, chaff = 0, pylons = {
 				[1] = {["CLSID"] = "{MBDA_MistralD}"}, [2] = {["CLSID"] = "{MBDA_MistralD}"},
 				[3] = {["CLSID"] = "{MBDA_MistralD}"}, [4] = {["CLSID"] = "{MBDA_MistralD}"},
 				[6] = {["CLSID"] = "{IR_Deflector}"}
 		}, task = "CAS"})
 		table.insert(spawnOnDemand.helos.other, {type = "UH-1H",
-			livery = {"Playboy", "ACSA / FAMET VIRTUAL - HEXACAMO DESERT", "ACSA / NO MARKINGS - OCTOCAMO DESERT TCHCM", "Cobra - G1 Classic Blue", "Uncle Sam", "Deniable Operations", "[Civilian] Standard", "Tigermeet",
-				"Umbrella corporation", "Lt. Colonel Kilgore's Huey", "helicoptair", "US Flag LV", "UH-1 UAF SAR", "UH-1 Ustian army", "UH-1 Ustian army medic", "Ravens Desert Camo", "Ravens Green Camo", "Ravens Snow Camo",
-				"SWEAF HKP 3 45", "SWEAF HKP 3 46", "SWEAF HKP 3 47", "US Army 059", "USAF Winter", "MARINE RESCUE", "HEER GERMAN", "San Diego"},
+			livery = {"US ARMY 1972"},
 			fuel = 631, flare = 60, chaff = 0, pylons = {
 				[1] = {["CLSID"] = "M134_L"}, [6] = {["CLSID"] = "M134_R"},
 				[2] = {["CLSID"] = "M261_MK151"}, [5] = {["CLSID"] = "M261_MK151"},
@@ -4631,11 +4599,12 @@ do
 			v1.5 - Cleaned up code
 			v1.5.1  - Added MiG-19P, removed mods (until working again)
 			v1.5.2  - Removed Hawk
+			v1.5.3  - Cleaned up skins (using only defaults)
 		--]]
 
 		spawnOnDemand.version = {}
 		spawnOnDemand.version.major = 1
-		spawnOnDemand.version.minor = 5.2 -- including revision
+		spawnOnDemand.version.minor = 5.3 -- including revision
 		spawnOnDemand.toLog(string.format("v%i.%g locked and loaded.", spawnOnDemand.version.major, spawnOnDemand.version.minor))
 	end
 

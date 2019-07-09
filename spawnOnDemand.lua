@@ -2811,7 +2811,7 @@ do
 			props = {
 				MountSIRENA = true
 			}
-		elseif type = "F-5E-3" then
+		elseif type == "F-5E-3" then
 			props = {
 				LAU68ROF = 0,
 				ChaffSalvo = 0,

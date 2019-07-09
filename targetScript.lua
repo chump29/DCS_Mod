@@ -2,7 +2,7 @@
 
 targetScript = {
 	groupNames = {"Targets1", "Targets2", "Targets3", "Targets4", "Targets5"},
-	jtac = {"JTAC", 1234}
+	jtac = {"JTAC", 1688}
 }
 
 do

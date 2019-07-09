@@ -2784,7 +2784,8 @@ do
 		elseif type == "C-101CC" or type == "C-101EB" then
 			props = {
 				SoloFlight = true,
-				MountIFRHood = false
+				MountIFRHood = false,
+				CameraRecorder = false
 			}
 		elseif type == "L-39C" or type == "L-39ZA" then
 			props = {
@@ -2793,18 +2794,36 @@ do
 			}
 		elseif type == "Mi-8MT" then
 			props = {
+				LeftEngineResource = 90,
+                RightEngineResource = 90,
+                GunnersAISkill = 90,
 				ExhaustScreen = true,
 				AdditionalArmor = true,
 				CargoHalfdoor = true
 			}
 		elseif type == "UH-1H" then
 			props = {
-				GunnersAISkill = 90, -- in %
+				EngineResource = 90,
+				GunnersAISkill = 90,
 				ExhaustScreen = true
 			}
 		elseif type == "MiG-19P" then
 			props = {
 				MountSIRENA = true
+			}
+		elseif type = "F-5E-3" then
+			props = {
+				LAU68ROF = 0,
+				ChaffSalvo = 0,
+				ChaffSalvoInt = 0,
+				LAU3ROF = 0,
+				ChaffBurstInt = 0,
+				LaserCode100 = 6,
+				LaserCode1 = 8,
+				ChaffBurst = 0,
+				FlareBurst = 0,
+				LaserCode10 = 8,
+				FlareBurstInt = 0
 			}
 		end
 		return props
@@ -4605,6 +4624,7 @@ do
 			v1.5.2  - Removed Hawk
 			v1.5.3  - Cleaned up skins (using only defaults)
 			v1.5.4  - Added option for ground units to attack air units
+			v1.5.5  - Updated plane propeties
 		--]]
 
 		spawnOnDemand.version = {}

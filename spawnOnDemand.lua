@@ -797,6 +797,9 @@ do
 		end
 		if not isCargo and spawnOnDemand.settings.vehicleShoot then
 			controller:setOption(AI.Option.Ground.id.ROE, AI.Option.Ground.val.ROE.OPEN_FIRE)
+			if isAA then
+				controller:setOption(AI.Option.Ground.id.ENGAGE_AIR_WEAPONS, true)
+			end
 		else
 			controller:setOption(AI.Option.Ground.id.ROE, AI.Option.Ground.val.ROE.WEAPON_HOLD)
 		end
@@ -967,6 +970,7 @@ do
 		controller:setOption(AI.Option.Ground.id.DISPERSE_ON_ATTACK, 60) -- disperse for 60 seconds
 		if spawnOnDemand.settings.troopShoot then
 			controller:setOption(AI.Option.Ground.id.ROE, AI.Option.Ground.val.ROE.OPEN_FIRE)
+			controller:setOption(AI.Option.Ground.id.ENGAGE_AIR_WEAPONS, true)
 		else
 			controller:setOption(AI.Option.Ground.id.ROE, AI.Option.Ground.val.ROE.WEAPON_HOLD)
 		end
@@ -4600,11 +4604,12 @@ do
 			v1.5.1  - Added MiG-19P, removed mods (until working again)
 			v1.5.2  - Removed Hawk
 			v1.5.3  - Cleaned up skins (using only defaults)
+			v1.5.4  - Added option for ground units to attack air units
 		--]]
 
 		spawnOnDemand.version = {}
 		spawnOnDemand.version.major = 1
-		spawnOnDemand.version.minor = 5.3 -- including revision
+		spawnOnDemand.version.minor = 5.4 -- including revision
 		spawnOnDemand.toLog(string.format("v%i.%g locked and loaded.", spawnOnDemand.version.major, spawnOnDemand.version.minor))
 	end
 

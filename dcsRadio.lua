@@ -71,8 +71,11 @@ do
 		if dcsRadio.files then
 			dcsRadio.song = dcsRadio.path .. dcsRadio.files[math.random(#dcsRadio.files)]
 
+			local song = string.format("dcsRadio: Song is %s", dcsRadio.song)
+			trigger.action.outTextForCoalition(coalition.side.BLUE, song, 10, false)
+
 			if dcsRadio.debug then
-				env.info(string.format("dcsRadio: Song is %s", dcsRadio.song))
+				env.info(song)
 			end
 		else
 			if dcsRadio.debug then

@@ -2869,7 +2869,7 @@ do
 				end
 			end
 			if showText then
-				trigger.action.outTextForCoalition(coa, str, delay)
+				trigger.action.outTextForCoalition(coa, str, delay, false)
 			end
 		end
 	end

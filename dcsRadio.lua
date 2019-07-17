@@ -59,7 +59,7 @@ do
 			local controller = unit:getController()
 			if controller then
 				dcsRadio.createStation(controller, 2000000, radio.modulation.AM) -- LF
-				dcsRadio.createStation(controller, 30000000, radio.modulation.FM) -- FM
+				dcsRadio.createStation(controller, 32000000, radio.modulation.FM) -- FM
 				dcsRadio.createStation(controller, 132000000, radio.modulation.AM) -- VHF
 				dcsRadio.createStation(controller, 232000000, radio.modulation.AM) -- UHF
 			else

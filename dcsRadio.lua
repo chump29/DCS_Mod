@@ -2,7 +2,7 @@
 
 dcsRadio = {
 	debug = false,
-	path = "C:\Users\Chump\Saved Games\DCS\Sounds\Custom\Radio",
+	path = "C:\\Users\\Chump\\Saved Games\\DCS\\Sounds\\Custom\\Radio\\",
 	unit = "Radio"
 }
 

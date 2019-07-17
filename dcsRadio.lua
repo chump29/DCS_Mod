@@ -1,7 +1,7 @@
 -- DCS Radio by Chump
 
 dcsRadio = {
-	debug = false,
+	debug = true,
 	path = "C:\\Users\\Chump\\Saved Games\\DCS\\Sounds\\Custom\\Radio\\",
 	unit = "Radio"
 }
@@ -17,17 +17,21 @@ do
 			missionCommands.removeItemForCoalition(coalition.side.BLUE, dcsRadio.menuPath)
 		end
 		dcsRadio.menuPath = missionCommands.addSubMenuForCoalition(coalition.side.BLUE, "DCS Radio")
-		missionCommands.addCommandForCoalition(coalition.side.BLUE, "Re-Index", dcsRadio.menuPath, dcsRadio.init)
+
+		missionCommands.addCommandForCoalition(coalition.side.BLUE, "New song", dcsRadio.menuPath, dcsRadio.play)
+		missionCommands.addCommandForCoalition(coalition.side.BLUE, "Re-index songs", dcsRadio.menuPath, dcsRadio.init)
 	end
 
 	function dcsRadio.init()
 		dcsRadio.files = {}
 		for file in lfs.dir(dcsRadio.path) do
 			if file ~= "." and file ~= ".." then
+
 				if file:find(".ogg") ~= nil or file:find(".mp3") ~= nil then
 					table.insert(dcsRadio.files, file)
+
 					if dcsRadio.debug then
-						env.info(string.format("dcsRadio: Added %s to file list", file)
+						env.info(string.format("dcsRadio: Added %s to song list", file)
 					end
 				end
 			end
@@ -46,22 +50,35 @@ do
 			id = "TransmitMessage",
 	        params = {
 	            loop = true,
-	            file = dcsRadio.path .. dcsRadio.files[math.random(#dcsRadio.files)]
+	            file = dcsRadio.song
 	        }
 		}
 		controller:setCommand(freqCommand)
 		controller:setCommand(msgCommand)
+
+		if dcsRadio.debug then
+			env.info(string.format("dcsRadio: Created station (%i, %i, %s)", freq, amfm, dcsRadio.song))
+		end
 	end
 
 	function dcsRadio.play()
+		if dcsRadio.files then
+			dcsRadio.song = dcsRadio.path .. dcsRadio.files[math.random(#dcsRadio.files)]
+		else
+			env.info("dcsRadio: songs not found")
+			return
+		end
+
 		local unit = Unit.getByName(dcsRadio.unit)
 		if unit then
 			local controller = unit:getController()
 			if controller then
+
 				dcsRadio.createStation(controller, 2000000, radio.modulation.AM) -- LF
 				dcsRadio.createStation(controller, 32000000, radio.modulation.FM) -- FM
 				dcsRadio.createStation(controller, 132000000, radio.modulation.AM) -- VHF
 				dcsRadio.createStation(controller, 232000000, radio.modulation.AM) -- UHF
+
 			else
 				if dcsRadio.debug then
 					env.info("dcsRadio: controller not found")

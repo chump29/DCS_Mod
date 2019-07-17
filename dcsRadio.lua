@@ -9,7 +9,7 @@ dcsRadio = {
 		{"UHF", 232000000, radio.modulation.AM}
 	},
 	path = "C:\\Users\\Chump\\Saved Games\\DCS\\Sounds\\Custom\\Radio\\",
-	unit = "Radio"
+	unit = "JTAC"
 }
 
 do
@@ -37,7 +37,7 @@ do
 					table.insert(dcsRadio.files, file)
 
 					if dcsRadio.debug then
-						env.info(string.format("dcsRadio: Added %s to song list", file)
+						env.info(string.format("dcsRadio: Added %s to song list", file))
 					end
 				end
 			end
@@ -69,13 +69,14 @@ do
 
 	function dcsRadio.play()
 		if dcsRadio.files then
-			dcsRadio.song = dcsRadio.path .. dcsRadio.files[math.random(#dcsRadio.files)]
+			local song = dcsRadio.files[math.random(#dcsRadio.files)]
+			dcsRadio.song = dcsRadio.path .. song
 
-			local song = string.format("dcsRadio: Song is %s", dcsRadio.song)
-			trigger.action.outTextForCoalition(coalition.side.BLUE, song, 10, false)
+			local strSong = string.format("dcsRadio: Song is %s", song)
+			trigger.action.outTextForCoalition(coalition.side.BLUE, strSong, 10, false)
 
 			if dcsRadio.debug then
-				env.info(song)
+				env.info(strSong)
 			end
 		else
 			if dcsRadio.debug then
@@ -90,8 +91,8 @@ do
 			local controller = unit:getController()
 			if controller then
 
-				for freq in dcsRadio.freqs do
-					dcsRadio.createStation(controller, freq[0], freq[1], freq[2])
+				for _, freq in pairs(dcsRadio.freqs) do
+					dcsRadio.createStation(controller, freq[1], freq[2], freq[3])
 				end
 
 			else
@@ -102,6 +103,7 @@ do
 		else
 			if dcsRadio.debug then
 				env.info("dcsRadio: unit not found")
+			end
 		end
 	end
 

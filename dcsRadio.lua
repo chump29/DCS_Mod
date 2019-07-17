@@ -2,6 +2,12 @@
 
 dcsRadio = {
 	debug = true,
+	freqs = {
+		{"LF", 2000000, radio.modulation.AM},
+		{"FM", 32000000, radio.modulation.FM},
+		{"VHF", 132000000, radio.modulation.AM},
+		{"UHF", 232000000, radio.modulation.AM}
+	},
 	path = "C:\\Users\\Chump\\Saved Games\\DCS\\Sounds\\Custom\\Radio\\",
 	unit = "Radio"
 }
@@ -38,7 +44,7 @@ do
 		end
 	end
 
-	function dcsRadio.createStation(controller, freq, amfm)
+	function dcsRadio.createStation(controller, name, freq, amfm)
 		local freqCommand = {
 			id = "SetFrequency",
 			params = {
@@ -57,15 +63,22 @@ do
 		controller:setCommand(msgCommand)
 
 		if dcsRadio.debug then
-			env.info(string.format("dcsRadio: Created station (%i, %i, %s)", freq, amfm, dcsRadio.song))
+			env.info(string.format("dcsRadio: Created station (%s)", name))
 		end
 	end
 
 	function dcsRadio.play()
 		if dcsRadio.files then
 			dcsRadio.song = dcsRadio.path .. dcsRadio.files[math.random(#dcsRadio.files)]
+
+			if dcsRadio.debug then
+				env.info(string.format("dcsRadio: Song is %s", dcsRadio.song))
+			end
 		else
-			env.info("dcsRadio: songs not found")
+			if dcsRadio.debug then
+				env.info("dcsRadio: songs not found")
+			end
+
 			return
 		end
 
@@ -74,10 +87,9 @@ do
 			local controller = unit:getController()
 			if controller then
 
-				dcsRadio.createStation(controller, 2000000, radio.modulation.AM) -- LF
-				dcsRadio.createStation(controller, 32000000, radio.modulation.FM) -- FM
-				dcsRadio.createStation(controller, 132000000, radio.modulation.AM) -- VHF
-				dcsRadio.createStation(controller, 232000000, radio.modulation.AM) -- UHF
+				for freq in dcsRadio.freqs do
+					dcsRadio.createStation(controller, freq[0], freq[1], freq[2])
+				end
 
 			else
 				if dcsRadio.debug then
@@ -91,7 +103,6 @@ do
 	end
 
 	dcsRadio.init()
-
 	dcsRadio.play()
 
 	if dcsRadio.debug then

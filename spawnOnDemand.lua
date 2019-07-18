@@ -3951,7 +3951,7 @@ do
 				id = "SetFrequency",
 				params = {
 					frequency = freq,
-					modulation = 0 -- AM
+					modulation = radio.modulation.AM
 				}
 			}
 			local msgCommand = {

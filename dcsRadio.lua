@@ -2,13 +2,13 @@
 
 dcsRadio = {
 	debug = true,
-	freqs = {
+	freqs = { -- in Hz
 		{"LF", 2000000, radio.modulation.AM},
 		{"FM", 32000000, radio.modulation.FM},
 		{"VHF", 132000000, radio.modulation.AM},
 		{"UHF", 232000000, radio.modulation.AM}
 	},
-	path = "C:\\Users\\Chump\\Saved Games\\DCS\\Sounds\\Custom\\Radio\\",
+	path = "l10n/DEFAULT/",
 	unit = "JTAC"
 }
 
@@ -33,7 +33,7 @@ do
 		for file in lfs.dir(dcsRadio.path) do
 			if file ~= "." and file ~= ".." then
 
-				if file:find(".ogg") ~= nil or file:find(".mp3") ~= nil then
+				if file:find('.ogg$') ~= nil or file:find('.mp3$') ~= nil then
 					table.insert(dcsRadio.files, file)
 
 					if dcsRadio.debug then
@@ -45,6 +45,8 @@ do
 	end
 
 	function dcsRadio.createStation(controller, name, freq, amfm)
+		if not controller or not freq or not amfm then return end
+
 		local freqCommand = {
 			id = "SetFrequency",
 			params = {
@@ -110,6 +112,14 @@ do
 		dcsRadio.buildControls()
 	end
 
-	env.info("dcsRadio: tuned in.")
+	--[[ Changelog
+		v1.0 - Initial release
+	--]]
+
+	dcsRadio.version = {}
+	dcsRadio.version.major = 1
+	dcsRadio.version.minor = 0 -- including revision
+
+	env.info(string.format("dcsRadio: v%i.%g tuned in.", dcsRadio.version.major, dcsRadio.version.minor))
 
 end

@@ -86,11 +86,17 @@ do
 		end
 	end
 
+	function targetScript.newTargets()
+		targetScript.deactivateGroups()
+		targetScript.activateGroup()
+	end
+
 	function targetScript.generateMenu()
 		if targetScript.menuPath then
 			missionCommands.removeItemForCoalition(coalition.side.BLUE, targetScript.menuPath)
 		end
 		targetScript.menuPath = missionCommands.addSubMenuForCoalition(coalition.side.BLUE, "TargetScript")
+		missionCommands.addCommandForCoalition(coalition.side.BLUE, "New Targets", targetScript.menuPath, targetScript.newTargets)
 		if not targetScript.eventId then
 			missionCommands.addCommandForCoalition(coalition.side.BLUE, "Start", targetScript.menuPath, targetScript.start)
 		else

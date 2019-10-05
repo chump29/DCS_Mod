@@ -13,6 +13,7 @@ do
 		local plane = RAT:New(name)
 		plane:ATC_Messages(false)
 		plane:Commute()
+		plane:RadioFrequency(124)
 		plane:RespawnAfterCrashON()
 		plane:SetCoalitionAircraft("blue")
 		plane:SetDeparture(from)
@@ -22,7 +23,7 @@ do
 		plane:SetSpawnDelay(mist.random(10, 30))
 		plane:SetSpawnInterval(mist.random(30, 60))
 		plane:SetTakeoffCold()
-		plane:StatusReports(false)
+		plane:StatusReports(true)
 		if not plane:Spawn(3) then env.info("RAT: Failed to spawn " .. name) end
 	end
 

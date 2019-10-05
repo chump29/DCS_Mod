@@ -27,8 +27,5 @@ do
 	end
 
 	fromBatumi("RAT_Yak")
-	fromBatumi("RAT_Cessna")
-
-	fromKobuleti("RAT_C130")
-	fromKobuleti("RAT_A380")
+	fromKobuleti("RAT_Cessna")
 end

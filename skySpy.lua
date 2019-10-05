@@ -54,7 +54,7 @@ do
 
 			elseif unit and unit:getCategory() == Object.Category.UNIT then
 
-				if string.find(unit:getGroup():getName(), "%(R%)") ~= nil then return end -- do not handle RAT planes
+				if string.find(unit:getGroup():getName(), "RAT_") ~= nil then return end -- do not handle RAT planes
 
 				local name = ""
 				if playerName then

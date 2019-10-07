@@ -3179,11 +3179,11 @@ do
 			livery = {"A-10 Grey"},
 			fuel = 5029, flare = 120, chaff = 240, ammoType = 1, pylons = { -- ammoType 1 = Combat Mix
 				[1] = {["CLSID"] = "ALQ_184"},
-				[2] = {["CLSID"] = "{69926055-0DA8-4530-9F2F-C86B157EA9F6}"}, -- LAU-131 M151
-				[3] = {["CLSID"] = "LAU_88_AGM_65H_2_L"},
-				[4] = {["CLSID"] = "{DB769D48-67D7-42ED-A2BE-108D566C8B1E}"}, [8] = {["CLSID"] = "{DB769D48-67D7-42ED-A2BE-108D566C8B1E}"}, -- GBU-12
+				[2] = {["CLSID"] = "{69926055-0DA8-4530-9F2F-C86B157EA9F6}"}, -- LAU-131 M151 HE
+				[3] = {["CLSID"] = "{E6A6262A-CA08-4B3D-B030-E1A993B98452}"}, -- AGM-65D
+				[4] = {["CLSID"] = "{60CC734F-0AFA-4E2E-82B8-93B941AB11CF}"}, [8] = {["CLSID"] = "{60CC734F-0AFA-4E2E-82B8-93B941AB11CF}"}, -- 3 x Mk82
 				[5] = {["CLSID"] = "{GBU-38}"}, [7] = {["CLSID"] = "{GBU-38}"},
-				[9] = {["CLSID"] = "{E6A6262A-CA08-4B3D-B030-E1A993B98453}"}, -- AGM65D
+				[9] = {["CLSID"] = "LAU_88_AGM_65H_2_R"},
 				[10] = {["CLSID"] = "{A111396E-D3E8-4b9c-8AC9-2432489304D5}"}, -- AAQ-28
 				[11] = {["CLSID"] = "{DB434044-F5D0-4F1F-9BA9-B73027E18DD3}"} -- LAU-105 AIM9M [NEGATIVE WEIGHT OF PAYLOAD]
 		}, task = "CAS"})
@@ -3898,6 +3898,11 @@ do
 			lower = 100000
 			upper = 999500
 			interval = 500
+		elseif typeName == "A-10C"
+			-- 116 - 151.975 MHz x .25 MHz
+			lower = 116000000
+			upper = 151975000
+			interval = 25000
 		else -- Ka-50 = presets only, F-5E-3 = UHF ADF
 			-- 0 (100) - 999.9 kHz x 100 Hz (SA342)
 			lower = 100

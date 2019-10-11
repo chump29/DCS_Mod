@@ -3898,7 +3898,7 @@ do
 			lower = 100000
 			upper = 999500
 			interval = 500
-		elseif typeName == "A-10C"
+		elseif typeName == "A-10C" then
 			-- 116 - 151.975 MHz x .25 MHz
 			lower = 116000000
 			upper = 151975000

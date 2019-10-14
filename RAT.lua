@@ -12,7 +12,7 @@ do
 	function createPlane(name, from, to, liveries)
 		local plane = RAT:New(name)
 		plane:ATC_Messages(false)
-		plane:Commute()
+		plane:Commute(false)
 		plane:Livery(liveries)
 		plane:RespawnAfterCrashON()
 		plane:SetAISkill("Random")

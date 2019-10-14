@@ -1,7 +1,7 @@
 -- TargetScript by Chump
 
 targetScript = {
-	groupNames = {"Targets1", "Targets2", "Targets3", "Targets4", "Targets5"},
+	groupNames = {"TS_BRDM", "TS_BTR", "TS_Infantry", "TS_MTLB", "TS_AAA"},
 	jtac = {"JTAC", 1688}
 }
 
@@ -72,12 +72,12 @@ do
 		local status = obj.status
 		if status == nil then status = true end
 		if status and not targetScript.jtacOn then
-			ctld.JTACAutoLase(targetScript.jtac[1], targetScript.jtac[2], false, "all")
+			ctld.JTACAutoLase(targetScript.jtac[1], targetScript.jtac[2], false)
 			targetScript.jtacOn = true
 			targetScript.say("JTAC enabled.")
 			targetScript.generateMenu()
 		elseif not status and targetScript.jtacOn then
-			ctld.JTACAutoLaseStop(targetScript.jtacName)
+			ctld.JTACAutoLaseStop(targetScript.jtac[1])
 			targetScript.jtacOn = false
 			targetScript.say("JTAC disabled.")
 			targetScript.generateMenu()

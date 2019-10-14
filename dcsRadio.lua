@@ -3,12 +3,12 @@
 dcsRadio = {
 	debug = true,
 	freqs = { -- in Hz
-		{"LF", 2000000, radio.modulation.AM},
+		--{"LF", 2000000, radio.modulation.AM},
 		{"FM", 32000000, radio.modulation.FM},
-		{"VHF", 132000000, radio.modulation.AM},
-		{"UHF", 232000000, radio.modulation.AM}
+		--{"VHF", 132000000, radio.modulation.AM},
+		--{"UHF", 232000000, radio.modulation.AM}
 	},
-	path = "l10n/DEFAULT/",
+	path = "Sounds\\Custom\\Radio\\",
 	unit = "JTAC"
 }
 
@@ -30,11 +30,17 @@ do
 
 	function dcsRadio.init()
 		dcsRadio.files = {}
-		for file in lfs.dir(dcsRadio.path) do
+		local path = lfs.writedir() .. dcsRadio.path
+
+		if dcsRadio.debug then
+			env.info(string.format("dcsRadio: Scanning path %s...", path))
+		end
+
+		for file in lfs.dir(path) do
 			if file ~= "." and file ~= ".." then
 
 				if file:find('.ogg$') ~= nil or file:find('.mp3$') ~= nil then
-					table.insert(dcsRadio.files, file)
+					table.insert(dcsRadio.files, path .. file)
 
 					if dcsRadio.debug then
 						env.info(string.format("dcsRadio: Added %s to song list", file))
@@ -71,7 +77,7 @@ do
 
 	function dcsRadio.play()
 		if dcsRadio.files then
-			dcsRadio.song = dcsRadio.path .. dcsRadio.files[math.random(#dcsRadio.files)]
+			dcsRadio.song = dcsRadio.files[math.random(#dcsRadio.files)]
 
 			if dcsRadio.debug then
 				env.info(string.format("dcsRadio: Song is %s", dcsRadio.song))

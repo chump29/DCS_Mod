@@ -68,9 +68,9 @@ do
 		end
 	end
 
-	function targetScript.jtac(obj)
+	function targetScript.doJTAC(obj)
+		if not obj then obj = { status = true } end
 		local status = obj.status
-		if status == nil then status = true end
 		if status and not targetScript.jtacOn then
 			ctld.JTACAutoLase(targetScript.jtac[1], targetScript.jtac[2], false)
 			targetScript.jtacOn = true
@@ -103,9 +103,9 @@ do
 			missionCommands.addCommandForCoalition(coalition.side.BLUE, "Stop", targetScript.menuPath, targetScript.stop)
 		end
 		if not targetScript.jtacOn then
-			missionCommands.addCommandForCoalition(coalition.side.BLUE, "JTAC On", targetScript.menuPath, targetScript.jtac)
+			missionCommands.addCommandForCoalition(coalition.side.BLUE, "JTAC On", targetScript.menuPath, targetScript.doJTAC)
 		else
-			missionCommands.addCommandForCoalition(coalition.side.BLUE, "JTAC Off", targetScript.menuPath, targetScript.jtac, {status = false})
+			missionCommands.addCommandForCoalition(coalition.side.BLUE, "JTAC Off", targetScript.menuPath, targetScript.doJTAC, {status = false})
 		end
 	end
 

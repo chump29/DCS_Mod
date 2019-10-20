@@ -41,7 +41,22 @@ do
 			playerName = unit:getPlayerName()
 		end
 
-		if event.id == world.event.S_EVENT_BIRTH and playerName then -- for MP clients/host
+		if event.id == world.event.S_EVENT_TOOK_CONTROL and playerName then -- for Warthog throttle sync
+
+			if unitName == "A-10C" then
+
+				function click(dev, cmd, arg)
+					GetDevice(dev):performClickableAction(cmd, arg)
+				end
+
+				click(39, 3002, 0) -- flaps up
+				click(1, 3017, 0) -- l eng start off
+				click(1, 3018, 0) -- r eng start off
+
+				if debug then skySpy.log("Warthog controls are now in sync!") end
+			end
+
+		elseif event.id == world.event.S_EVENT_BIRTH and playerName then -- for MP clients/host
 
 			skySpy.updatePlayer(playerName, unit)
 
@@ -325,11 +340,12 @@ do
 
 		--[[ Changelog
 			1.0 - Initial release
+			1.1 - Added WH sync
 		--]]
 
 		skySpy.version = {}
 		skySpy.version.major = 1
-		skySpy.version.minor = 0 -- including revision
+		skySpy.version.minor = 1 -- including revision
 
 		skySpy.log(string.format("v%i.%g is watching.", skySpy.version.major, skySpy.version.minor))
 

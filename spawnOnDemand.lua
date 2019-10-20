@@ -3898,12 +3898,12 @@ do
 			lower = 100000
 			upper = 999500
 			interval = 500
-		elseif typeName == "A-10C" then
-			-- 116 - 151.975 MHz x .25 MHz
-			lower = 116000000
-			upper = 151975000
+		elseif typeName == "A-10C" or typeName == "F-5E-3" then -- UHF
+			-- 225 - 399.975 MHz x 25 kHz
+			lower = 225000000
+			upper = 399975000
 			interval = 25000
-		else -- Ka-50 = presets only, F-5E-3 = UHF ADF
+		else -- Ka-50 has presets only, default if none specified above
 			-- 0 (100) - 999.9 kHz x 100 Hz (SA342)
 			lower = 100
 			upper = 999900

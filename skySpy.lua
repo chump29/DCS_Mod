@@ -4,7 +4,8 @@
 --]]
 
 skySpy = {
-	debug = false
+	debug = false,
+	sound = "static-short.ogg" -- NOTE: must be included in the .miz file (empty for no sound)!
 }
 
 do
@@ -274,22 +275,23 @@ do
 		local debug = skySpy.debug
 
 		local player = skySpy.players[playerName]
+		if not player then return end
+
 		local groupId = player.unit:getGroup():getID()
+
 		local unitName = string.upper(player.unit:getDesc().typeName)
 
 		if player.isConnecting then
 
 			player.isConnecting = nil
 			skySpy.say(groupId, string.format("Welcome, %s!", playerName))
-			if debug then skySpy.log(string.format("%s entered %s", playerName, unitName)) end
 
 		else
 
 			skySpy.say(groupId, string.format("Welcome back to the fight, %s!", playerName))
-			if debug then skySpy.log(string.format("%s re-entered %s", playerName, unitName)) end
-
 		end
 
+		if debug then skySpy.log(string.format("%s entered %s", playerName, unitName)) end
 	end
 
 	function skySpy.say(groupId, msg, delay, useSound)
@@ -297,7 +299,13 @@ do
 
 			delay = delay or 10
 			if useSound == nil then useSound = true end
-			local sound = "l10n/DEFAULT/static-short.ogg"
+
+			local sound
+			if skySpy.sound and string.len(skySpy.sound) > 0 then
+				sound = "l10n/DEFAULT/" .. skySpy.sound
+			else
+				useSound = false
+			end
 
 			if not groupId then
 
@@ -341,11 +349,12 @@ do
 		--[[ Changelog
 			1.0 - Initial release
 			1.1 - Added WH sync
+			1.2 - Various things
 		--]]
 
 		skySpy.version = {}
 		skySpy.version.major = 1
-		skySpy.version.minor = 1 -- including revision
+		skySpy.version.minor = 2 -- including revision
 
 		skySpy.log(string.format("v%i.%g is watching.", skySpy.version.major, skySpy.version.minor))
 

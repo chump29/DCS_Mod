@@ -49,9 +49,7 @@ do
 
 			skySpy.updatePlayer(playerName, unit)
 
-		elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT and playerName then -- for Warthog throttle sync
-
-			if unitName == "A-10C" then
+			if unitName == "A-10C" then -- for Warthog throttle sync
 
 				local function click(dev, cmd, arg)
 					GetDevice(dev):performClickableAction(cmd, arg)

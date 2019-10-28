@@ -34,5 +34,5 @@ do
 
 	-- Spawn @ Kobuleti
 	fromKobuleti("RAT_Cessna", {"D-EKVW", "Greece Army", "Muster", "N9572H", "Silver Eagle Blue", "Silver Eagle Red", "U.S.A.F Academy", "V5-BUG", "VH-JGA"})
-	fromKobuleti("RAT_I16", {"Green unmarked", "Finland, AFB Rompotti 1943", "Japan (Captured), Manchuria 1939", "Red Army Air Force Camouflage", "1 Red Army Air Force Standard", "Red Army Air Force winter", "Spain (Nationalists)", "Spain (Republicans)"})
+	fromKobuleti("RAT_A320", {"Air Moldova ER-AXP", "American Airlines N9023N", "cebu pacific  RP-C4107", "Delta Airlines N377NW", "Eurowings BVB 09 D-AIZR", "Eurowings Europa Park D-ABDQ", "easyJet BERLIN OE-IZQ", "Frontier N308FR", "jetBlue FDNY N615JB", "jetBlue New York Jets", "WOW TF-NEO"})
 end

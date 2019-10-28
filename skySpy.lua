@@ -5,7 +5,10 @@
 
 skySpy = {
 	debug = false,
-	sound = "static-short.ogg" -- NOTE: must be included in the .miz file (empty for no sound)!
+	sounds = { -- NOTE: must be included in the .miz file (empty for no sound)!
+		incoming = "incoming.ogg",
+		radio = "static-short.ogg"
+	}
 }
 
 do
@@ -42,11 +45,15 @@ do
 			playerName = unit:getPlayerName()
 		end
 
-		if event.id == world.event.S_EVENT_TOOK_CONTROL and playerName then -- for Warthog throttle sync
+		if event.id == world.event.S_EVENT_BIRTH and playerName then -- for MP clients/host
+
+			skySpy.updatePlayer(playerName, unit)
+
+		elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT and playerName then -- for Warthog throttle sync
 
 			if unitName == "A-10C" then
 
-				function click(dev, cmd, arg)
+				local function click(dev, cmd, arg)
 					GetDevice(dev):performClickableAction(cmd, arg)
 				end
 
@@ -56,10 +63,6 @@ do
 
 				if debug then skySpy.log("Warthog controls are now in sync!") end
 			end
-
-		elseif event.id == world.event.S_EVENT_BIRTH and playerName then -- for MP clients/host
-
-			skySpy.updatePlayer(playerName, unit)
 
 		elseif event.id == world.event.S_EVENT_DEAD or event.id == world.event.S_EVENT_PILOT_DEAD or event.id == world.event.S_EVENT_CRASH then -- NOTE: spawned AI can die and not trigger dead events
 
@@ -220,7 +223,10 @@ do
 					if string.len(category) > 0 or string.len(guidance) > 0 then
 						str = string.format(" (%s / %s)", category, guidance)
 					end
-					trigger.action.outSoundForGroup(groupId, "l10n/DEFAULT/incoming.ogg")
+					local incomingSound = skySpy.sounds.incoming
+					if incomingSound and string.len(incomingSound) > 0 then
+						trigger.action.outSoundForGroup(groupId, "l10n/DEFAULT/" .. incomingSound)
+					end
 					local text = string.format("[Co-Pilot] INCOMING %s%s at %i o'clock for %s!", name, str, angle, dist)
 		            skySpy.say(groupId, text, 3, false)
 
@@ -272,8 +278,6 @@ do
 	end
 
 	function skySpy.welcomePlayer(playerName)
-		local debug = skySpy.debug
-
 		local player = skySpy.players[playerName]
 		if not player then return end
 
@@ -284,14 +288,14 @@ do
 		if player.isConnecting then
 
 			player.isConnecting = nil
-			skySpy.say(groupId, string.format("Welcome, %s!", playerName))
+			skySpy.say(groupId, string.format("Welcome, %s!", playerName), 5)
 
 		else
 
-			skySpy.say(groupId, string.format("Welcome back to the fight, %s!", playerName))
+			skySpy.say(groupId, string.format("Welcome back to the fight, %s!", playerName), 5)
 		end
 
-		if debug then skySpy.log(string.format("%s entered %s", playerName, unitName)) end
+		if skySpy.debug then skySpy.log(string.format("%s entered %s", playerName, unitName)) end
 	end
 
 	function skySpy.say(groupId, msg, delay, useSound)
@@ -301,8 +305,9 @@ do
 			if useSound == nil then useSound = true end
 
 			local sound
-			if skySpy.sound and string.len(skySpy.sound) > 0 then
-				sound = "l10n/DEFAULT/" .. skySpy.sound
+			local radioSound = skySpy.sounds.radio
+			if radioSound and string.len(radioSound) > 0 then
+				sound = "l10n/DEFAULT/" .. radioSound
 			else
 				useSound = false
 			end
@@ -350,11 +355,12 @@ do
 			1.0 - Initial release
 			1.1 - Added WH sync
 			1.2 - Various things
+			1.2.1 - Refactored some things
 		--]]
 
 		skySpy.version = {}
 		skySpy.version.major = 1
-		skySpy.version.minor = 2 -- including revision
+		skySpy.version.minor = 2.1 -- including revision
 
 		skySpy.log(string.format("v%i.%g is watching.", skySpy.version.major, skySpy.version.minor))
 

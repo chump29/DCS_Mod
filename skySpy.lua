@@ -59,7 +59,10 @@ do
 				click(1, 3017, 0) -- l eng start off
 				click(1, 3018, 0) -- r eng start off
 
-				if debug then skySpy.log("Warthog controls are now in sync!") end
+				local msg = "Warthog controls are now in sync!"
+				skySpy.say(groupId, msg, 5, false)
+
+				if debug then skySpy.log(msg) end
 			end
 
 		elseif event.id == world.event.S_EVENT_DEAD or event.id == world.event.S_EVENT_PILOT_DEAD or event.id == world.event.S_EVENT_CRASH then -- NOTE: spawned AI can die and not trigger dead events
@@ -354,11 +357,12 @@ do
 			1.1 - Added WH sync
 			1.2 - Various things
 			1.2.1 - Refactored some things
+			1.2.2 - Added TMWH message
 		--]]
 
 		skySpy.version = {}
 		skySpy.version.major = 1
-		skySpy.version.minor = 2.1 -- including revision
+		skySpy.version.minor = 2.2 -- including revision
 
 		skySpy.log(string.format("v%i.%g is watching.", skySpy.version.major, skySpy.version.minor))
 

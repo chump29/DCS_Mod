@@ -4,7 +4,7 @@
 --]]
 
 skySpy = {
-	debug = false,
+	debug = true,
 	sounds = { -- NOTE: must be included in the .miz file (empty for no sound)!
 		incoming = "incoming.ogg",
 		radio = "static-short.ogg"
@@ -14,6 +14,40 @@ skySpy = {
 do
 
 	assert(mist ~= nil, "MiST must be loaded prior to this script!")
+
+	function skySpy.handleControls(unit, birthPlace)
+		local debug = skySpy.debug
+
+		local unitName = string.upper(unit:getDesc().typeName)
+		local groupId = unit:getGroup():getID()
+
+		local function get(dev, arg)
+			return GetDevice(dev):get_argument_value(arg)
+		end
+
+		local function click(dev, cmd, arg)
+			GetDevice(dev):performClickableAction(cmd, arg)
+		end
+
+		if birthPlace ~= world.BirthPlace.wsBirthPlace_Park or unit:inAir() or mist.vec.mag(unit:getVelocity()) > 1 then return end
+
+		if unitName == "A-10C" then -- for Warthog throttle sync
+
+			if debug then
+				skySpy.log(tostring(get(39, 3002)))
+				skySpy.log(tostring(get(1, 3017)))
+				skySpy.log(tostring(get(1, 3018)))
+			end
+			click(39, 3002, 0) -- flaps up
+			click(1, 3017, 0) -- l eng start off
+			click(1, 3018, 0) -- r eng start off
+
+			local msg = "Warthog controls are now in sync!"
+			skySpy.say(groupId, msg, 5, false)
+
+			if debug then skySpy.log(msg) end
+		end
+	end
 
 	function skySpy.eventHandler(event)
 		local debug = skySpy.debug
@@ -45,27 +79,16 @@ do
 			playerName = unit:getPlayerName()
 		end
 
-		if event.id == world.event.S_EVENT_BIRTH and playerName then -- for MP clients/host
+		if debug and playerName then skySpy.log(string.format("%s triggered event %i", playerName, event.id)) end
+
+		-- NOTE: does not fire for MP host!
+		if event.id == world.event.S_EVENT_BIRTH and playerName then
 
 			skySpy.updatePlayer(playerName, unit)
 
-			if unitName == "A-10C" then -- for Warthog throttle sync
+			skySpy.handleControls(unit, event.subPlace)
 
-				local function click(dev, cmd, arg)
-					GetDevice(dev):performClickableAction(cmd, arg)
-				end
-
-				click(39, 3002, 0) -- flaps up
-				click(1, 3017, 0) -- l eng start off
-				click(1, 3018, 0) -- r eng start off
-
-				local msg = "Warthog controls are now in sync!"
-				skySpy.say(groupId, msg, 5, false)
-
-				if debug then skySpy.log(msg) end
-			end
-
-		elseif event.id == world.event.S_EVENT_DEAD or event.id == world.event.S_EVENT_PILOT_DEAD or event.id == world.event.S_EVENT_CRASH then -- NOTE: spawned AI can die and not trigger dead events
+		elseif event.id == world.event.S_EVENT_DEAD or event.id == world.event.S_EVENT_PILOT_DEAD or event.id == world.event.S_EVENT_CRASH then
 
 			if playerName and groupId then
 				skySpy.say(groupId, "*** R. I. P. ***")
@@ -74,8 +97,9 @@ do
 
 			elseif unit and unit:getCategory() == Object.Category.UNIT then
 
-				if string.find(unit:getGroup():getName(), "^RAT_") ~= nil then return end -- do not handle RAT planes
-				if string.find(unit:getGroup():getName(), "^TS_") ~= nil then return end -- do not handle TargetScript targets
+				-- exceptions
+				if string.find(unit:getGroup():getName(), "^RAT_") ~= nil then return end -- RAT planes
+				if string.find(unit:getGroup():getName(), "^TS_") ~= nil then return end -- TargetScript targets
 
 				local name = ""
 				if playerName then
@@ -266,6 +290,8 @@ do
 	end
 
 	function skySpy.updatePlayer(playerName, unit)
+		if not unit then return end
+
 		local found = false
 		if skySpy.players[playerName] then found = true end
 
@@ -283,7 +309,6 @@ do
 		if not player then return end
 
 		local groupId = player.unit:getGroup():getID()
-
 		local unitName = string.upper(player.unit:getDesc().typeName)
 
 		if player.isConnecting then
@@ -347,7 +372,6 @@ do
 		end
 
 		skySpy.showVersion()
-
 	end
 
 	function skySpy.showVersion()
@@ -358,11 +382,12 @@ do
 			1.2 - Various things
 			1.2.1 - Refactored some things
 			1.2.2 - Added TMWH message
+			1.2.3 - Small refactor
 		--]]
 
 		skySpy.version = {}
 		skySpy.version.major = 1
-		skySpy.version.minor = 2.2 -- including revision
+		skySpy.version.minor = 2.3 -- including revision
 
 		skySpy.log(string.format("v%i.%g is watching.", skySpy.version.major, skySpy.version.minor))
 

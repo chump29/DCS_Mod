@@ -1,15 +1,15 @@
 do
 	assert(RAT ~= nil, "MOOSE must be loaded prior to this script!")
 
-	function fromKobuleti(name, liveries)
-		createPlane(name, "Kobuleti", "Batumi", liveries)
+	function fromKobuleti(name, liveries, num)
+		createPlane(name, "Kobuleti", "Batumi", liveries, num)
 	end
 
-	function fromBatumi(name, liveries)
-		createPlane(name, "Batumi", "Kobuleti", liveries)
+	function fromBatumi(name, liveries, num)
+		createPlane(name, "Batumi", "Kobuleti", liveries, num)
 	end
 
-	function createPlane(name, from, to, liveries)
+	function createPlane(name, from, to, liveries, num)
 		local plane = RAT:New(name)
 		plane:ATC_Messages(false)
 		plane:Commute(false)
@@ -25,14 +25,14 @@ do
 		plane:SetSpawnInterval(mist.random(30, 60))
 		plane:SetTakeoffCold()
 		plane:StatusReports(false)
-		if not plane:Spawn(3) then env.info("RAT: Failed to spawn " .. name) end
+		if not plane:Spawn(num) then env.info("RAT: Failed to spawn " .. name) end
 	end
 
 	-- Spawn @ Batumi
-	fromBatumi("RAT_Yak", {"BARE METALL", "DOSAAF_RF", "DOSAAF_USSR", "POBEDA", "The First Flight (Aerobatic team)", "The Yakovlevs"})
-	fromBatumi("RAT_CE2", {"C-FTIJ", "G-KLAW", "LV-X352", "MAG3", "N2FC", "N8EC", "N14KH", "N22XS", "N24AL", "N31PA", "N38RC", "N49AE", "N56CE", "N78JP", "N83FC", "N83TS", "N104GF", "N229HP", "N828DM", "NX110GM", "Top Gun F-14A", "Top Gun MiG-28", "TrackIR", "Virtual Air Racing Series", "Virtual Vultures", "WW1 Red Baron", "WW1 SE5a"})
+	fromBatumi("RAT_Yak", {"BARE METALL", "DOSAAF_RF", "DOSAAF_USSR", "POBEDA", "The First Flight (Aerobatic team)", "The Yakovlevs"}, 2)
+	fromBatumi("RAT_CE2", {"C-FTIJ", "G-KLAW", "LV-X352", "MAG3", "N2FC", "N8EC", "N14KH", "N22XS", "N24AL", "N31PA", "N38RC", "N49AE", "N56CE", "N78JP", "N83FC", "N83TS", "N104GF", "N229HP", "N828DM", "NX110GM", "Top Gun F-14A", "Top Gun MiG-28", "TrackIR", "Virtual Air Racing Series", "Virtual Vultures", "WW1 Red Baron", "WW1 SE5a"}, 2)
 
 	-- Spawn @ Kobuleti
-	fromKobuleti("RAT_Cessna", {"D-EKVW", "Greece Army", "Muster", "N9572H", "Silver Eagle Blue", "Silver Eagle Red", "U.S.A.F Academy", "V5-BUG", "VH-JGA"})
-	fromKobuleti("RAT_A320", {"Air Moldova ER-AXP", "American Airlines N9023N", "cebu pacific  RP-C4107", "Delta Airlines N377NW", "Eurowings BVB 09 D-AIZR", "Eurowings Europa Park D-ABDQ", "easyJet BERLIN OE-IZQ", "Frontier N308FR", "jetBlue FDNY N615JB", "jetBlue New York Jets", "WOW TF-NEO"})
+	fromKobuleti("RAT_Cessna", {"D-EKVW", "Greece Army", "Muster", "N9572H", "Silver Eagle Blue", "Silver Eagle Red", "U.S.A.F Academy", "V5-BUG", "VH-JGA"}, 3)
+	fromKobuleti("RAT_A320", {"Air Moldova ER-AXP", "American Airlines N9023N", "cebu pacific  RP-C4107", "Delta Airlines N377NW", "Eurowings BVB 09 D-AIZR", "Eurowings Europa Park D-ABDQ", "easyJet BERLIN OE-IZQ", "Frontier N308FR", "jetBlue FDNY N615JB", "jetBlue New York Jets", "WOW TF-NEO"}, 3)
 end

@@ -2238,12 +2238,18 @@ do
 		controller:setCommand(invisible)
 	end
 
-	function spawnOnDemand.doRouteLoop(controller)
+	function spawnOnDemand.doRouteLoop(controller, pattern)
+		pattern = pattern or AI.Task.OrbitPattern.RACE_TRACK -- two points
+		local from = 2
+		local to = 1
+		if pattern == AI.Task.OrbitPattern.CIRCLE then -- four waypoints
+			from = 4
+		end
 		local switchWaypoint = {
 			id = "SwitchWaypoint",
 			params = {
-				fromWaypointIndex = 2,
-				goToWaypointIndex = 1,
+				fromWaypointIndex = from,
+				goToWaypointIndex = to
 			}
 		}
 		controller:setCommand(switchWaypoint)
@@ -4630,11 +4636,12 @@ do
 			v1.5.3  - Cleaned up skins (using only defaults)
 			v1.5.4  - Added option for ground units to attack air units
 			v1.5.5  - Updated plane propeties
+			v1.5.6  - Added route patterns to doRouteLoop (not used in script yet)
 		--]]
 
 		spawnOnDemand.version = {}
 		spawnOnDemand.version.major = 1
-		spawnOnDemand.version.minor = 5.4 -- including revision
+		spawnOnDemand.version.minor = 5.6 -- including revision
 		spawnOnDemand.toLog(string.format("v%i.%g locked and loaded.", spawnOnDemand.version.major, spawnOnDemand.version.minor))
 	end
 

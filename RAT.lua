@@ -1,19 +1,24 @@
 do
-	assert(RAT ~= nil, "MOOSE must be loaded prior to this script!")
+	for k, v in ipairs({[mist] = "MiST", [RAT] = "MOOSE"}) do assert(k ~= nil, v .. " must be loaded prior to this script!") end
 
-	function fromKobuleti(name, liveries, num)
-		createPlane(name, "Kobuleti", "Batumi", liveries, num)
+	function fromKobuleti(name)
+		createPlane(name, "Kobuleti", "Batumi")
 	end
 
-	function fromBatumi(name, liveries, num)
-		createPlane(name, "Batumi", "Kobuleti", liveries, num)
+	function fromBatumi(name)
+		createPlane(name, "Batumi", "Kobuleti")
 	end
 
-	function createPlane(name, from, to, liveries, num)
-		local plane = RAT:New(name)
+	local count = 0
+	local liveries = {}
+
+	function createPlane(name, from, to)
+		count = count + 1
+
+		local plane = RAT:New(name, string.format("%s-%i", name, count))
 		plane:ATC_Messages(false)
 		plane:Commute(false)
-		plane:Livery(liveries)
+		plane:Livery(liveries[name])
 		plane:RespawnAfterCrashON()
 		plane:SetAISkill("Random")
 		plane:SetCoalitionAircraft("blue")
@@ -25,14 +30,31 @@ do
 		plane:SetSpawnInterval(mist.random(30, 60))
 		plane:SetTakeoffCold()
 		plane:StatusReports(false)
-		if not plane:Spawn(num) then env.info("RAT: Failed to spawn " .. name) end
+		if not plane:Spawn() then env.info("RAT: Failed to spawn " .. name) end
 	end
 
+	liveries["RAT_Yak"] = {"Bare_Metall", "DOSAAF_RF", "DOSAAF_USSR", "Pobeda", "The First Flight", "The Yakovlevs"}
+	liveries["RAT_CE2"] = {"C-FTIJ", "G-KLAW", "LV-X352", "MAG3", "N2FC", "N8EC", "N14KH", "N22XS", "N24AL", "N31PA", "N38RC", "N49AE", "N56CE", "N78JP", "N83FC", "N83TS", "N104GF", "N229HP", "N828DM", "NX110GM", "Top Gun F-14A", "Top Gun MiG-28", "TrackIR", "VARS", "Virtual Vultures", "WW1 Red Baron", "WW1 SE5a"}
+	liveries["RAT_Cessna"] = {"D-EKVW", "Muster", "N9572H", "SEagle blue", "SEagle red", "USAF-Academy", "V5-BUG", "VH-JGA"}
+	liveries["RAT_A320"] = {"Air Moldova", "American Airlines", "Cebu Pacific", "Delta Airlines", "Eurowings BVB09", "Eurowings Europa Park D", "Easy Jet Berlin", "Frontier", "jetBlue FDNY", "Jet Blue NY", "WOW"}
+
 	-- Spawn @ Batumi
-	fromBatumi("RAT_Yak", {"BARE METALL", "DOSAAF_RF", "DOSAAF_USSR", "POBEDA", "The First Flight (Aerobatic team)", "The Yakovlevs"}, 2)
-	fromBatumi("RAT_CE2", {"C-FTIJ", "G-KLAW", "LV-X352", "MAG3", "N2FC", "N8EC", "N14KH", "N22XS", "N24AL", "N31PA", "N38RC", "N49AE", "N56CE", "N78JP", "N83FC", "N83TS", "N104GF", "N229HP", "N828DM", "NX110GM", "Top Gun F-14A", "Top Gun MiG-28", "TrackIR", "Virtual Air Racing Series", "Virtual Vultures", "WW1 Red Baron", "WW1 SE5a"}, 2)
+	for _ = 1, 2 do
+		fromBatumi("RAT_Yak")
+		fromBatumi("RAT_CE2")
+	end
+	for _ = 1, 3 do
+		fromBatumi("RAT_Cessna")
+		fromBatumi("RAT_A320")
+	end
 
 	-- Spawn @ Kobuleti
-	fromKobuleti("RAT_Cessna", {"D-EKVW", "Greece Army", "Muster", "N9572H", "Silver Eagle Blue", "Silver Eagle Red", "U.S.A.F Academy", "V5-BUG", "VH-JGA"}, 3)
-	fromKobuleti("RAT_A320", {"Air Moldova ER-AXP", "American Airlines N9023N", "cebu pacific  RP-C4107", "Delta Airlines N377NW", "Eurowings BVB 09 D-AIZR", "Eurowings Europa Park D-ABDQ", "easyJet BERLIN OE-IZQ", "Frontier N308FR", "jetBlue FDNY N615JB", "jetBlue New York Jets", "WOW TF-NEO"}, 3)
+	for _ = 1, 2 do
+		fromKobuleti("RAT_Yak")
+		fromKobuleti("RAT_CE2")
+	end
+	for _ = 1, 3 do
+		fromKobuleti("RAT_Cessna")
+		fromKobuleti("RAT_A320")
+	end
 end

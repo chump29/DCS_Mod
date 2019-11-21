@@ -141,8 +141,7 @@ do
 	-- /SETTINGS --
 
 	-- ensure that dependencies are loaded
-	assert(mist ~= nil, "MiST must be loaded prior to this script!")
-	assert(ctld ~= nil, "CTLD must be loaded prior to this script!")
+	for k, v in ipairs({[mist] = "MiST", [ctld] = "CTLD"}) do assert(k ~= nil, v .. " must be loaded prior to this script!") end
 
 	function spawnOnDemand.showStatus()
 		local msg = "No status to show."
@@ -380,7 +379,11 @@ do
 		groupType = groupType or spawnOnDemand.settings.groupTypes.PLANES
 		isFriendly = isFriendly or false
 		isAA = isAA or false
-		local obj = {isFriendly = isFriendly, useSound = false, showText = false}
+		local noRoute = false
+		if isAA and mist.random(2) == 1 then -- 50/50
+			noRoute = true
+		end
+		local obj = {isFriendly = isFriendly, useSound = false, showText = false, noRoute = noRoute}
 		if groupType == spawnOnDemand.settings.groupTypes.PLANES then
 			spawnOnDemand.spawnPlanes(obj)
 		elseif groupType == spawnOnDemand.settings.groupTypes.VEHICLES then
@@ -4152,8 +4155,10 @@ do
 				missionCommands.addCommandForGroup(groupID, "Cargo - Friendly", path, spawnOnDemand.spawnVehicles, {isCargo = true, isFriendly = true})
 				missionCommands.addCommandForGroup(groupID, "Armor", path, spawnOnDemand.spawnVehicles)
 				missionCommands.addCommandForGroup(groupID, "Armor - Friendly", path, spawnOnDemand.spawnVehicles, {isFriendly = true})
-				missionCommands.addCommandForGroup(groupID, "AAA/SAM", path, spawnOnDemand.spawnVehicles, {isAA = true})
-				missionCommands.addCommandForGroup(groupID, "AAA/SAM - Friendly", path, spawnOnDemand.spawnVehicles, {isFriendly = true, isAA = true})
+				missionCommands.addCommandForGroup(groupID, "AAA/SAM (Stationary)", path, spawnOnDemand.spawnVehicles, {isAA = true, noRoute = true})
+				missionCommands.addCommandForGroup(groupID, "AAA/SAM (Moving)", path, spawnOnDemand.spawnVehicles, {isAA = true})
+				missionCommands.addCommandForGroup(groupID, "AAA/SAM - Friendly (Stationary)", path, spawnOnDemand.spawnVehicles, {isFriendly = true, isAA = true, noRoute = true})
+				missionCommands.addCommandForGroup(groupID, "AAA/SAM - Friendly (Moving)", path, spawnOnDemand.spawnVehicles, {isFriendly = true, isAA = true})
 			end
 
 			-- add troops
@@ -4637,11 +4642,12 @@ do
 			v1.5.4  - Added option for ground units to attack air units
 			v1.5.5  - Updated plane propeties
 			v1.5.6  - Added route patterns to doRouteLoop (not used in script yet)
+			v1.5.7  - AA groups can be stationary, 50/50 in war
 		--]]
 
 		spawnOnDemand.version = {}
 		spawnOnDemand.version.major = 1
-		spawnOnDemand.version.minor = 5.6 -- including revision
+		spawnOnDemand.version.minor = 5.7 -- including revision
 		spawnOnDemand.toLog(string.format("v%i.%g locked and loaded.", spawnOnDemand.version.major, spawnOnDemand.version.minor))
 	end
 

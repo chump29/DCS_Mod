@@ -1,3 +1,6 @@
+-- TODO: on/off menu
+-- RAT:_Destroy(group)
+
 do
 	for k, v in ipairs({[mist] = "MiST", [RAT] = "MOOSE"}) do assert(k ~= nil, v .. " must be loaded prior to this script!") end
 

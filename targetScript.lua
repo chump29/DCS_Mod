@@ -1,30 +1,47 @@
 -- TargetScript by Chump
 
 targetScript = {
+	jtac = {"TS_JTAC", 1688},
 	groupNames = {"TS_BRDM", "TS_BTR", "TS_Infantry", "TS_MTLB", "TS_AAA"},
-	jtac = {"JTAC", 1688}
+	rareGroupNames = {"TS_A2A"} -- blank if none
 }
 
 do
-
 	for k, v in ipairs({[mist] = "MiST", [ctld] = "CTLD"}) do assert(k ~= nil, v .. " must be loaded prior to this script!") end
 
 	function targetScript.handleGroup(group)
 		if group:isExist() then
-			mist.respawnGroup(group:getName())
+			local groupName = group:getName()
+			mist.respawnGroup(groupName)
 			trigger.action.activateGroup(group)
-			targetScript.say(string.format("%ss spotted!", group:getUnits()[1]:getDesc().typeName))
-			targetScript.activeGroup = group:getName()
+			local typeName = group:getUnits()[1]:getDesc().typeName
+			local msg = " spotted!"
+			if targetScript.countUnitsInGroup(group) > 1 then
+				msg = "s" .. msg
+			end
+			targetScript.say(typeName .. msg)
+			targetScript.activeGroup = groupName
 		end
 	end
 
 	function targetScript.activateGroup()
 		local groupName = targetScript.groupNames[mist.random(#targetScript.groupNames)]
+
+		if #targetScript.rareGroupNames > 0 then
+			if mist.random(4) == 1 then -- 25%
+				if mist.random(3) == 1 then -- 33%
+					if mist.random(2) == 1 then -- 50%
+						groupName = targetScript.rareGroupNames[mist.random(#targetScript.rareGroupNames)]
+					end
+				end
+			end
+		end
+
 		local group = Group.getByName(groupName)
 		if group then
 			mist.scheduleFunction(targetScript.handleGroup, {group}, timer.getTime() + mist.random(30))
 		else
-			env.error(string.format("TargetScript [activateGroup]: Group (%s) not found!", groupName))
+			targetScript.log(string.format("[activateGroup]: Group (%s) not found!", groupName), true)
 		end
 	end
 
@@ -42,11 +59,12 @@ do
 		silent = silent or false
 		if not targetScript.eventId then
 			targetScript.init()
+
+			local msg = "started."
 			if not silent then
-				local msg = "TargetScript started."
-				targetScript.say(msg)
-				env.info(msg)
+				targetScript.say("TargetScript " .. msg)
 			end
+			targetScript.log(msg)
 		else
 			targetScript.say("TargetScript already running!")
 			targetScript.generateMenu()
@@ -58,9 +76,9 @@ do
 			mist.removeEventHandler(targetScript.eventId)
 			targetScript.eventId = nil
 			targetScript.deactivateGroups()
-			local msg = "TargetScript stopped."
-			targetScript.say(msg)
-			env.info(msg)
+			local msg = "stopped."
+			targetScript.say("TargetScript " .. msg)
+			targetScript.log(msg)
 			targetScript.generateMenu()
 		else
 			targetScript.say("TargetScript is not running!")
@@ -82,7 +100,7 @@ do
 			targetScript.say("JTAC disabled.")
 			targetScript.generateMenu()
 		else
-			env.error("TargetScript: JTAC error!")
+			targetScript.log("JTAC error!", true)
 		end
 	end
 
@@ -123,7 +141,20 @@ do
 		end
 	end
 
-	local function countUnitsInGroup(group)
+	function targetScript.log(msg, isError)
+		isError = isError or false
+		local str = "TargetScript: "
+		if msg and string.len(msg) > 0 then
+			msg = str .. msg
+			if isError then
+				env.error(msg)
+			else
+				env.info(msg)
+			end
+		end
+	end
+
+	function targetScript.countUnitsInGroup(group)
 		local count = 0
 		if group then
 			local units = group:getUnits()
@@ -134,15 +165,15 @@ do
 					end
 				end
 			else
-				env.error("TargetScript [countUnitsInGroup]: No units found!")
+				targetScript.log("[countUnitsInGroup]: No units found!", true)
 			end
 		else
-			env.error("TargetScript [countUnitsInGroup]: Cannot find group!")
+			targetScript.log("[countUnitsInGroup]: Cannot find group!", true)
 		end
 		return count
 	end
 
-	local function contains(val, tbl)
+	function targetScript.contains(val, tbl)
 		for _, v in ipairs(tbl) do
 			if v == val then return true end
 		end
@@ -154,10 +185,10 @@ do
 		local t = e.target
 		local w = e.weapon
 
-		if e.id == world.event.S_EVENT_DEAD then -- dead
-			if i and  i:getCategory() == Object.Category.UNIT and not i:getPlayerName() and i:getGroup() and not w and contains(i:getGroup():getName(), targetScript.groupNames) then
+		if e.id == world.event.S_EVENT_DEAD then
+			if i and  i:getCategory() == Object.Category.UNIT and not i:getPlayerName() and i:getGroup() and not w and targetScript.contains(i:getGroup():getName(), targetScript.groupNames) then
 				local msg
-				local unitsAlive = countUnitsInGroup(i:getGroup())
+				local unitsAlive = targetScript.countUnitsInGroup(i:getGroup())
 				if unitsAlive > 0 then
 					msg = string.format("%i targets left.", unitsAlive)
 				elseif unitsAlive == 0 and targetScript.activeGroup then
@@ -169,12 +200,10 @@ do
 					targetScript.say(msg)
 				end
 			end
-
 		end
 	end
 
 	targetScript.start(true)
 
-	env.info("TargetScript: targets loaded.")
-
+	targetScript.log("targets loaded.")
 end

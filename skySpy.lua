@@ -4,7 +4,7 @@
 --]]
 
 skySpy = {
-	debug = true,
+	debug = false,
 	sounds = { -- NOTE: must be included in the .miz file (empty for no sound)!
 		incoming = "incoming.ogg",
 		radio = "static-short.ogg"
@@ -70,7 +70,10 @@ do
 		if unit then
 			local category = unit:getCategory()
 			if category ~= Object.Category.SCENERY and category ~= Object.Category.BASE then
-				groupId = unit:getGroup():getID()
+				local group = unit:getGroup()
+				if group then
+					groupId = group:getID()
+				end
 			end
 		end
 
@@ -383,11 +386,12 @@ do
 			1.2.1 - Refactored some things
 			1.2.2 - Added TMWH message
 			1.2.3 - Small refactor
+			1.2.4 - Bug fix
 		--]]
 
 		skySpy.version = {}
 		skySpy.version.major = 1
-		skySpy.version.minor = 2.3 -- including revision
+		skySpy.version.minor = 2.4 -- including revision
 
 		skySpy.log(string.format("v%i.%g is watching.", skySpy.version.major, skySpy.version.minor))
 

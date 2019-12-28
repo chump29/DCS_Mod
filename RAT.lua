@@ -26,6 +26,7 @@ do
 			plane:Commute(false)
 			plane:Livery(liveries[name])
 			plane:RespawnAfterCrashON()
+			plane:RespawnInAirNotAllowed()
 			plane:SetAISkill("Random")
 			plane:SetCoalitionAircraft("blue")
 			plane:SetDeparture(from)
@@ -36,6 +37,7 @@ do
 			plane:SetSpawnInterval(mist.random(30, 60))
 			plane:SetTakeoffCold()
 			plane:StatusReports(false)
+			plane:TimeDestroyInactive(60)
 			if not plane:Spawn() then
 				env.info("RAT: Failed to spawn " .. name)
 				return

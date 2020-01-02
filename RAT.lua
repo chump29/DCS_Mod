@@ -1,30 +1,71 @@
 -- TODO: on/off menu
 
---RATPlanes = {}
+RATPlanes = {
+	debug = false,
+	paths = { -- NOTE: path MUST end in slash
+		lfs.currentdir() .. "Bazar\\Liveries\\",
+		lfs.writedir() .. "Mods\\aircraft\\Civil Aircraft Mod\\Liveries\\",
+		"D:\\DCS.Liveries\\",
+		lfs.currentdir() .. "CoreMods\\aircraft\\Christen Eagle II\\Liveries\\",
+		lfs.currentdir() .. "CoreMods\\aircraft\\Yak-52\\Liveries\\",
+		lfs.currentdir() .. "CoreMods\\aircraft\\C-101\\Liveries\\"
+	},
+	planes = {
+		{"Yak-52", "RAT_Yak"},
+		{"Christen Eagle II", "RAT_CE2"},
+		{"Cessna_210N", "RAT_Cessna"}, -- Civil Aircraft Mod
+		{"A_320", "RAT_A320"}, -- Civil Aircraft Mod
+		{"C-101EB", "RAT_C101EB"},
+		{"P-51D", "RAT_P51"}
+	}
+}
 
 do
 	for k, v in ipairs({[mist] = "MiST", [RAT] = "MOOSE"}) do assert(k ~= nil, v .. " must be loaded prior to this script!") end
+	local lfs = require("lfs")
 
-	function fromKobuleti(name)
-		createPlane(name, "Kobuleti", "Batumi")
+	function RATPlanes.getLiveries(path)
+		if RATPlanes.debug then env.info("RAT: Scanning " .. path) end
+		if not RATPlanes.liveries then RATPlanes.liveries = {} end
+		local function invalid(obj) return obj == nil or obj == "." or obj == ".." end
+		for airframe in lfs.dir(path) do
+			if not invalid(airframe) and lfs.attributes(path .. airframe, "mode") == "directory" then
+				for livery in lfs.dir(path .. airframe) do
+					if not invalid(livery) and lfs.attributes(path .. airframe .. "\\" .. livery, "mode") == "directory" then
+						if not RATPlanes.liveries[airframe] then RATPlanes.liveries[airframe] = {} end
+						table.insert(RATPlanes.liveries[airframe], livery)
+						if RATPlanes.debug then env.info("RAT: Inserted " .. livery .. " for " .. airframe) end
+					end
+				end
+			end
+		end
 	end
 
-	function fromBatumi(name)
-		createPlane(name, "Batumi", "Kobuleti")
+	function fromKobuleti(obj)
+		createPlane(obj, "Kobuleti", "Batumi")
+	end
+
+	function fromBatumi(obj)
+		createPlane(obj, "Batumi", "Kobuleti")
 	end
 
 	local count = 0
-	local liveries = {}
 
-	function createPlane(name, from, to)
+	function createPlane(obj, from, to)
 		count = count + 1
 
 		for num = 1, mist.random(3) do
-			local alias = string.format("%s-%i-%i", name, count, num)
-			local plane = RAT:New(name, alias)
+			local alias = string.format("%s-%i-%i", obj[2], count, num)
+			local plane = RAT:New(obj[2], alias)
 			plane:ATC_Messages(false)
 			plane:Commute(false)
-			plane:Livery(liveries[name])
+
+			if RATPlanes.liveries[obj[1]] and #RATPlanes.liveries[obj[1]] > 0 then
+				local livery = RATPlanes.liveries[obj[1]][mist.random(#RATPlanes.liveries[obj[1]])]
+				if RATPlanes.debug then env.info("RAT: " .. alias .. " using livery " .. livery) end
+				plane:Livery(livery)
+			end
+
 			plane:RespawnAfterCrashON()
 			plane:RespawnInAirNotAllowed()
 			plane:SetAISkill("Random")
@@ -37,36 +78,51 @@ do
 			plane:SetSpawnInterval(mist.random(30, 60))
 			plane:SetTakeoffCold()
 			plane:StatusReports(false)
-			plane:TimeDestroyInactive(60)
+			plane:TimeDestroyInactive(300)
 			if not plane:Spawn() then
-				env.info("RAT: Failed to spawn " .. name)
+				env.info("RAT: Failed to spawn " .. alias)
 				return
 			end
 
---			table.insert(RATPlanes, {[alias] = plane})
+			if not RATPlanes.spawned then RATPlanes.spawned = {} end
+			table.insert(RATPlanes.spawned, {[alias] = plane})
+
+			if RATPlanes.debug then env.info("RAT: Spawning " .. alias) end
 		end
 	end
 
 --[[
 	function destroyPlanes()
-		for _, plane in RATPlanes do RAT:_Destroy(plane) end
+		for _, plane in RATPlanes.spawned do RAT:_Destroy(plane) end
 	end
 --]]
 
-	liveries["RAT_Yak"] = {"Bare_Metall", "DOSAAF_RF", "DOSAAF_USSR", "Pobeda", "The First Flight", "The Yakovlevs"}
-	liveries["RAT_CE2"] = {"C-FTIJ", "G-KLAW", "LV-X352", "MAG3", "N2FC", "N8EC", "N14KH", "N22XS", "N24AL", "N31PA", "N38RC", "N49AE", "N56CE", "N78JP", "N83FC", "N83TS", "N104GF", "N229HP", "N828DM", "NX110GM", "Top Gun F-14A", "Top Gun MiG-28", "TrackIR", "VARS", "Virtual Vultures", "WW1 Red Baron", "WW1 SE5a"}
-	liveries["RAT_Cessna"] = {"D-EKVW", "Muster", "N9572H", "SEagle blue", "SEagle red", "USAF-Academy", "V5-BUG", "VH-JGA"}
-	liveries["RAT_A320"] = {"Air Moldova", "American Airlines", "Cebu Pacific", "Delta Airlines", "Eurowings BVB09", "Eurowings Europa Park D", "Easy Jet Berlin", "Frontier", "jetBlue FDNY", "Jet Blue NY", "WOW"}
+	function RATPlanes.init()
+		if not RATPlanes.planes or #RATPlanes.planes == 0 then return end
 
-	fromBatumi("RAT_Yak")
-	fromBatumi("RAT_CE2")
-	fromBatumi("RAT_Cessna")
-	fromBatumi("RAT_A320")
+		for _, path in ipairs(RATPlanes.paths) do
+			RATPlanes.getLiveries(path)
+		end
 
-	fromKobuleti("RAT_Yak")
-	fromKobuleti("RAT_CE2")
-	fromKobuleti("RAT_Cessna")
-	fromKobuleti("RAT_A320")
+		for _, plane in ipairs(RATPlanes.planes) do
+			fromBatumi(plane)
+			fromKobuleti(plane)
+		end
 
-	env.info("RAT: running!")
+		RATPlanes.showVersion()
+	end
+
+	function RATPlanes.showVersion()
+
+		--[[ Changelog
+			1.0 - Initial release
+		--]]
+
+		RATPlanes.version = {}
+		RATPlanes.version.major = 1
+		RATPlanes.version.minor = 0 -- including revision
+		env.info(string.format("RAT: v%i.%g is running.", RATPlanes.version.major, RATPlanes.version.minor))
+	end
+
+	RATPlanes.init()
 end

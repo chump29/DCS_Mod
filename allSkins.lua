@@ -63,4 +63,5 @@ do
 		allSkins.getLiveries(path)
 	end
 
+	env.info("allSkins: scanned.")
 end

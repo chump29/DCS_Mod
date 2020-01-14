@@ -1,3 +1,5 @@
+-- seaEagle by Chump
+
 seaEagle = {
 	task = {
 		id = "ComboTask",

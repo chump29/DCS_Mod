@@ -39,8 +39,6 @@ do
 	function seaEagle.eventHandler(event)
 		if not event.id or not event.initiator or not event.pos then return end
 
-		env.info(mist.utils.serialize("event", event))
-
 		if not event.text or string.len(event.text) == 0 or not string.find(string.lower(event.text), "seaeagle") then return end
 
 		local group = event.initiator:getGroup()
@@ -123,7 +121,7 @@ do
 				seaEagle.say(groupId, "Sea Eagle target identified as: " .. targetGroupName)
 			else
 				seaEagle.say(groupId, "New tasking! Sea Eagle target now identified as: " .. targetGroupName)
-				seaEagle.removeSilent = true
+				seaEagle.newTask = true
 				trigger.action.removeMark(seaEagle.markId)
 			end
 
@@ -138,16 +136,14 @@ do
 
 		elseif event.id == 27 then -- S_EVENT_MARK_REMOVE or S_EVENT_MARK_REMOVED? Neither seem to work...
 
-			env.info(tostring(seaEagle.markId).."-"..tostring(event.idx))
-
 			if seaEagle.markId == event.idx then
 
 				seaEagle.task.params.tasks[2].params.groupId = -1
 
-				if not seaEagle.removeSilent then
+				if not seaEagle.newTask then
 					seaEagle.say(groupId, "Sea Eagle target cleared!")
 				end
-				seaEagle.removeSilent = nil
+				seaEagle.newTask = nil
 
 				seaEagle.log("Target cleared")
 			end
@@ -155,7 +151,9 @@ do
 	end
 
 	function seaEagle.log(msg)
-		env.info("seaEagle: " .. msg)
+		if seaEagle.debug then
+			env.info("seaEagle: " .. msg)
+		end
 	end
 
 	function seaEagle.say(groupId, msg)
@@ -172,7 +170,7 @@ do
 		seaEagle.version.major = 1
 		seaEagle.version.minor = 0 -- including revision
 
-		seaEagle.log(string.format("v%i.%g is waiting for a target.", seaEagle.version.major, seaEagle.version.minor))
+		env.info(string.format("v%i.%g is waiting for a target.", seaEagle.version.major, seaEagle.version.minor))
 
 	end
 

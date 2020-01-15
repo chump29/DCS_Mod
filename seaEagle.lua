@@ -1,6 +1,11 @@
--- seaEagle by Chump
+--[[
+-- Sea Eagle
+-- by Chump
+--]]
 
 seaEagle = {
+	debug = false,
+	markId = -1,
 	task = {
 		id = "ComboTask",
 		params = {
@@ -33,6 +38,8 @@ do
 
 	function seaEagle.eventHandler(event)
 		if not event.id or not event.initiator or not event.pos then return end
+
+		env.info(mist.utils.serialize("event", event))
 
 		if not event.text or string.len(event.text) == 0 or not string.find(string.lower(event.text), "seaeagle") then return end
 
@@ -84,6 +91,7 @@ do
 
 			if #unitsInRange == 0 then
 				seaEagle.say(groupId, "No ships detected within range!")
+				trigger.action.removeMark(event.idx)
 				return
 			end
 
@@ -105,14 +113,21 @@ do
 				return
 			end
 
-			seaEagle.say(groupId, "Sea Eagle target identified as: " .. targetGroupName)
-
 			local controller = group:getController()
 			if not controller then
 				seaEagle.log("Controller not found for group")
 				return
 			end
 
+			if seaEagle.task.params.tasks[2].params.groupId == -1 then
+				seaEagle.say(groupId, "Sea Eagle target identified as: " .. targetGroupName)
+			else
+				seaEagle.say(groupId, "New tasking! Sea Eagle target now identified as: " .. targetGroupName)
+				seaEagle.removeSilent = true
+				trigger.action.removeMark(seaEagle.markId)
+			end
+
+			seaEagle.markId = event.idx
 			seaEagle.task.params.tasks[2].params.groupId = targetGroupId
 
 			controller:setTask(seaEagle.task)
@@ -121,13 +136,21 @@ do
 
 			seaEagle.log("Target found: " .. targetGroupName)
 
-		elseif event.id == world.event.S_EVENT_MARK_REMOVE then
+		elseif event.id == 27 then -- S_EVENT_MARK_REMOVE or S_EVENT_MARK_REMOVED? Neither seem to work...
 
-			seaEagle.task.params.tasks[2].params.groupId = -1
+			env.info(tostring(seaEagle.markId).."-"..tostring(event.idx))
 
-			seaEagle.say(groupId, "Sea Eagle target cleared!")
+			if seaEagle.markId == event.idx then
 
-			seaEagle.log("Target cleared")
+				seaEagle.task.params.tasks[2].params.groupId = -1
+
+				if not seaEagle.removeSilent then
+					seaEagle.say(groupId, "Sea Eagle target cleared!")
+				end
+				seaEagle.removeSilent = nil
+
+				seaEagle.log("Target cleared")
+			end
 		end
 	end
 
@@ -139,7 +162,21 @@ do
 		trigger.action.outTextForGroup(groupId, msg, 5)
 	end
 
+	function seaEagle.showVersion()
+
+		--[[ Changelog
+			1.0 - Initial release
+		--]]
+
+		seaEagle.version = {}
+		seaEagle.version.major = 1
+		seaEagle.version.minor = 0 -- including revision
+
+		seaEagle.log(string.format("v%i.%g is waiting for a target.", seaEagle.version.major, seaEagle.version.minor))
+
+	end
+
 	mist.addEventHandler(seaEagle.eventHandler)
 
-	seaEagle.log("waiting for target")
+	seaEagle.showVersion()
 end

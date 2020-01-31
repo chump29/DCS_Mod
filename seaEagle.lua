@@ -71,7 +71,7 @@ do
 				end
 			end
 			if #units == 0 then
-				seaEagle.log("No units found for ships")
+				seaEagle.log("No units found for ship group")
 				return
 			end
 
@@ -130,8 +130,6 @@ do
 
 			controller:setTask(seaEagle.task)
 
-			seaEagle.say(groupId, "Fire when ready!")
-
 			seaEagle.log("Target found: " .. targetGroupName)
 
 		elseif event.id == 27 then -- S_EVENT_MARK_REMOVE or S_EVENT_MARK_REMOVED? Neither seem to work...
@@ -142,8 +140,9 @@ do
 
 				if not seaEagle.newTask then
 					seaEagle.say(groupId, "Sea Eagle target cleared!")
+				else
+					seaEagle.newTask = nil
 				end
-				seaEagle.newTask = nil
 
 				seaEagle.log("Target cleared")
 			end

@@ -16,8 +16,10 @@ local string        = base.string
 local clock         = base.os.clock
 
 local gettext       = require('i_18n')
-local dllWeather 	= require('Weather')
+local dllWeather  = require('Weather')
 local minizip       = require('minizip')
+
+local MissionModule = require('me_mission')
 
 function toDegrees(radians, raw)
   local degrees = radians * 180 / math.pi
@@ -44,7 +46,7 @@ function getMagneticDeclination(dir)
   --NTTR +12 (East), year ~ 2011
   --Normandy -10 (West), year ~ 1944
   --Persian Gulf +2 (East), year ~ 2011
-  local theatre = env.mission.theatre
+  local theatre = MissionModule.mission.theatre
   local dec = 0
   if theatre == "Caucasus" then
     dec = -6
@@ -54,20 +56,21 @@ function getMagneticDeclination(dir)
     dec = 10
   elseif theatre == "PersianGulf" then
     dec = -2
-  else
-    env.info("Magnetic declination for '" .. theatre .. "' not found!")
   end
   return dir + dec
 end
 
 function cduWindToStr(wind, temperature)
-	local speed = math.floor(wind.speed*1.94384 + 0.5)
+  local speed = math.floor(wind.speed*1.94384 + 0.5)
 
   local angle = getMagneticDeclination(wind.dir)
 
   if angle >= 360 then
-		angle = angle - 360
-	end
+    angle = angle - 360
+  end
+
+  if angle < 0 then angle = angle + 360 end
+
     local str = string.format("%.3d/%.2d  %+.2d", angle, speed, temperature)
     return str
 end
@@ -78,10 +81,10 @@ function cduWindString(a_weather, a_humanPosition, temperature)
         local w = a_weather.wind
         wind[1] = '00  ' .. cduWindToStr(w.atGround, temperature)
 
-        if w.atGround.speed + w.at2000.speed + w.at8000.speed == 0 then return wind end
+        --if w.atGround.speed + w.at2000.speed + w.at8000.speed == 0 then return wind end
 
         local interpolatedWind = {speed = w.atGround.speed*2, dir = w.atGround.dir}
-		    wind[2] = '02  ' .. cduWindToStr(interpolatedWind, temperature-4)
+        wind[2] = '02  ' .. cduWindToStr(interpolatedWind, temperature-4)
         wind[3] = '07  ' .. cduWindToStr(w.at2000, temperature-14)
         wind[4] = '26  ' .. cduWindToStr(w.at8000, temperature-52)
     else

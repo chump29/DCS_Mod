@@ -41,29 +41,39 @@ function toPositiveDegrees(radians, raw)
   return degrees
 end
 
-function getMagneticDeclination(dir)
+function getMagneticDeclination(toStr)
+  toStr = toStr or false
+
   --Caucasus +6 (East), year ~ 2011
   --NTTR +12 (East), year ~ 2011
   --Normandy -10 (West), year ~ 1944
   --Persian Gulf +2 (East), year ~ 2011
+
   local theatre = MissionModule.mission.theatre
   local dec = 0
   if theatre == "Caucasus" then
-    dec = -6
+    dec = 6
   elseif theatre == "Nevada" then
-    dec = -12
+    dec = 12
   elseif theatre == "Normandy" then
-    dec = 10
+    dec = -10
   elseif theatre == "PersianGulf" then
-    dec = -2
+    dec = 2
   end
-  return dir + dec
+
+  if toStr then
+    local dir = "East"
+    if dec < 0 then dir = "West" end
+    dec = string.format("%i° %s", dec, dir)
+  end
+
+  return dec
 end
 
 function cduWindToStr(wind, temperature)
   local speed = math.floor(wind.speed*1.94384 + 0.5)
 
-  local angle = getMagneticDeclination(wind.dir)
+  local angle = wind.dir - getMagneticDeclination()
 
   if angle >= 360 then
     angle = angle - 360

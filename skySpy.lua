@@ -3,6 +3,13 @@
 -- by Chump
 --]]
 
+local base = _G
+local assert = base.assert
+local math = base.math
+local pairs = base.pairs
+local string = base.string
+local tostring = base.tostring
+
 skySpy = {
 	debug = false,
 	sounds = { -- NOTE: must be included in the .miz file (empty for no sound)!

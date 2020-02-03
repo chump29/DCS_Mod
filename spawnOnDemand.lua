@@ -3,6 +3,18 @@
 
 -- SpawnOnDemand by Chump
 
+local base = _G
+local assert = base.assert
+local dofile = base.dofile
+local ipairs = base.ipairs
+local math = base.math
+local pairs = base.pairs
+local string = base.string
+local table = base.table
+local tonumber = base.tonumber
+local tostring = base.tostring
+local type = base.type
+
 spawnOnDemand = {}
 
 do
@@ -141,7 +153,9 @@ do
 	-- /SETTINGS --
 
 	-- ensure that dependencies are loaded
-	for k, v in ipairs({[mist] = "MiST", [ctld] = "CTLD"}) do assert(k ~= nil, v .. " must be loaded prior to this script!") end
+	local failMsg = " must be loaded prior to this script!"
+	assert(mist ~= nil, "MiST" .. failMsg)
+	assert(ctld ~= nil, "CTLD" .. failMsg)
 
 	function spawnOnDemand.showStatus()
 		local msg = "No status to show."

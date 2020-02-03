@@ -1,5 +1,11 @@
 -- TODO: on/off menu
 
+local base = _G
+local assert = base.assert
+local ipairs = base.ipairs
+local string = base.string
+local table = base.table
+
 RATPlanes = {
 	debug = false,
 	planes = {
@@ -13,7 +19,10 @@ RATPlanes = {
 }
 
 do
-	for k, v in ipairs({[mist] = "MiST", [RAT] = "MOOSE", [allSkins] = "allSkins"}) do assert(k ~= nil, v .. " must be loaded prior to this script!") end
+	local failMsg = " must be loaded prior to this script!"
+	assert(mist ~= nil, "MiST" .. failMsg)
+	assert(RAT ~= nil, "MOOSE" .. failMsg)
+	assert(allSkins ~= nil, "allSkins" .. failMsg)
 
 	function fromKobuleti(obj)
 		createPlane(obj, "Kobuleti", "Batumi")

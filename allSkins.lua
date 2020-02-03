@@ -1,3 +1,8 @@
+local base = _G
+local ipairs = base.ipairs
+local require = base.require
+local table = base.table
+
 allSkins = {
 	debug = false,
 	paths = { -- NOTE: path MUST end in slash

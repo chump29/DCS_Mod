@@ -1,5 +1,10 @@
 -- TargetScript by Chump
 
+local base = _G
+local assert = base.assert
+local ipairs = base.ipairs
+local string = base.string
+
 targetScript = {
 	jtac = {"TS_JTAC", 1688},
 	groupNames = {"TS_BRDM", "TS_BTR", "TS_Infantry", "TS_MTLB", "TS_AAA"},
@@ -7,7 +12,9 @@ targetScript = {
 }
 
 do
-	for k, v in ipairs({[mist] = "MiST", [ctld] = "CTLD"}) do assert(k ~= nil, v .. " must be loaded prior to this script!") end
+	local failMsg = " must be loaded prior to this script!"
+	assert(mist ~= nil, "MiST" .. failMsg)
+	assert(ctld ~= nil, "CTLD" .. failMsg)
 
 	function targetScript.handleGroup(group)
 		if group:isExist() then

@@ -3,6 +3,11 @@
 -- by Chump
 --]]
 
+local base = _G
+local assert = base.assert
+local string = base.string
+local table = base.table
+
 seaEagle = {
 	debug = false,
 	markId = -1,

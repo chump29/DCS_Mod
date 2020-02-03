@@ -1,4 +1,7 @@
--- TargetScript by Chump
+--[[
+-- Target Script
+-- by Chump
+--]]
 
 local base = _G
 local assert = base.assert

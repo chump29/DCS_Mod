@@ -1,3 +1,8 @@
+--[[
+-- All Skins
+-- by Chump
+--]]
+
 local base = _G
 local ipairs = base.ipairs
 local require = base.require

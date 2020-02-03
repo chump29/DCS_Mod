@@ -1,7 +1,10 @@
+--[[
+-- Spawn On Demand
+-- by Chump
+--]]
+
 -- TODO: add light/heavy vehicle categories
 -- TODO: add location/spawnNum/noRoute to all spawners
-
--- SpawnOnDemand by Chump
 
 local base = _G
 local assert = base.assert

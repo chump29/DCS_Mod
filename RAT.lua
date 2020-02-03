@@ -1,3 +1,8 @@
+--[[
+-- Random Air Traffic
+-- by Chump
+--]]
+
 -- TODO: on/off menu
 
 local base = _G

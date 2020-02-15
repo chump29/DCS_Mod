@@ -124,7 +124,7 @@ local function create_()
         cdata.rightBtn = _("START LOFAC", "START")
     end
 
-    window = DialogLoader.spawnDialogFromFile(base.dialogsDir .. "briefing_dialog.dlg", cdata)
+    window = DialogLoader.spawnDialogFromFile('MissionEditor/modules/dialogs/briefing_dialog.dlg', cdata)
 
     containerMain = window.containerMain
     panelBottom = containerMain.panelBottom

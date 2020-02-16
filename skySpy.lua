@@ -22,40 +22,6 @@ do
 
 	assert(mist ~= nil, "MiST must be loaded prior to this script!")
 
-	function skySpy.handleControls(unit, birthPlace)
-		local debug = skySpy.debug
-
-		local unitName = string.upper(unit:getDesc().typeName)
-		local groupId = unit:getGroup():getID()
-
-		local function get(dev, arg)
-			return GetDevice(dev):get_argument_value(arg)
-		end
-
-		local function click(dev, cmd, arg)
-			GetDevice(dev):performClickableAction(cmd, arg)
-		end
-
-		if birthPlace ~= world.BirthPlace.wsBirthPlace_Park or unit:inAir() or mist.vec.mag(unit:getVelocity()) > 1 then return end
-
-		if unitName == "A-10C" then -- for Warthog throttle sync
-
-			if debug then
-				skySpy.log(tostring(get(39, 3002)))
-				skySpy.log(tostring(get(1, 3017)))
-				skySpy.log(tostring(get(1, 3018)))
-			end
-			click(39, 3002, 0) -- flaps up
-			click(1, 3017, 0) -- l eng start off
-			click(1, 3018, 0) -- r eng start off
-
-			local msg = "Warthog controls are now in sync!"
-			skySpy.say(groupId, msg, 5, false)
-
-			if debug then skySpy.log(msg) end
-		end
-	end
-
 	function skySpy.eventHandler(event)
 		local debug = skySpy.debug
 
@@ -96,11 +62,9 @@ do
 
 			skySpy.updatePlayer(playerName, unit)
 
-			skySpy.handleControls(unit, event.subPlace)
-
 		elseif event.id == world.event.S_EVENT_DEAD or event.id == world.event.S_EVENT_PILOT_DEAD or event.id == world.event.S_EVENT_CRASH then
 
-			if playerName and groupId then
+			if playerName then
 				skySpy.say(groupId, "*** R. I. P. ***")
 
 				if debug then skySpy.log(string.format("%s is dead", playerName)) end
@@ -394,11 +358,12 @@ do
 			1.2.2 - Added TMWH message
 			1.2.3 - Small refactor
 			1.2.4 - Bug fix
+			1.2.5 - Removed TMWH code
 		--]]
 
 		skySpy.version = {}
 		skySpy.version.major = 1
-		skySpy.version.minor = 2.4 -- including revision
+		skySpy.version.minor = 2.5 -- including revision
 
 		skySpy.log(string.format("v%i.%g is watching.", skySpy.version.major, skySpy.version.minor))
 

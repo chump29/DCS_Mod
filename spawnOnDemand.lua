@@ -5,6 +5,8 @@
 
 -- TODO: add light/heavy vehicle categories
 -- TODO: add location/spawnNum/noRoute to all spawners
+-- TODO: fix scenarios (vehicles)
+-- TODO: finish crash crew/find models
 
 local base = _G
 local assert = base.assert
@@ -95,7 +97,15 @@ do
 		awacsBeacon = false,					-- Determines if enemy AWACS have beacons transmitting on random frequencies [default: false]
 		awacsInvisible = true,					-- Determines if AWACS is invisible to AI [default: true]
 
-		-- Player warnings
+		-- Tankers
+		tankerMinDist = 1,						-- Minimum distance tankers will spawn away from player (in nautical miles) [default: 1]
+		tankerMaxDist = 5,						-- Maximum distance tankers will spawn away from player (in nautical miles) [default: 5]
+		tankerSkill = "Excellent",				-- Skill of AI tankers (Average, Good, High, Excellent, Random) [default: Excellent]
+		tankerFrequency = 251,					-- Frequency of friendly tanker (in MHz) [default 251]
+		tankerBeacon = true,					-- Determines if tankers have TACAN transmitting on random frequencies [default: true]
+		tankerInvisible = true,					-- Determines if tanker is invisible to AI [default: true]
+
+		-- Player Warnings
 		showLowFuel = true,						-- Determines if low fuel warning is shown to player [default: true]
 		lowFuelPercent = 10,					-- Number (in percentage) that determines if low fuel warning is shown to player [default: 10]
 
@@ -111,6 +121,7 @@ do
 		warTeams = 2,							-- Spawn group teams (0 = friendly, 1 = enemy, 2 = both) [default: 2]
 		warFlag = 1234,							-- Flag number set when war has been won [default: 1234]
 		warAWACS = true,						-- Spawn AWACS during war [default: true]
+		warTankers = true,						-- Spawn tankers during war [default: true]
 		warFriendlyMinDist = 1,					-- Minimum distance friendly ground groups will spawn away from player during war (in nautical miles) [default: 1]  \
 		warFriendlyMaxDist = 5,					-- Maximum distance friendly ground groups will spawn away from player during war (in nautical miles) [default: 5]  / Front
 		warEnemyMinDist = 5,					-- Minimum distance enemy ground groups will spawn away from player during war (in nautical miles) [default: 5]     \ Lines
@@ -148,6 +159,11 @@ do
 		airbaseFriendlyMaxDist = 20,			-- Maximum distance to search for friendly airbases to use (in nautical miles) [default: 20]
 		airbaseSpawnNum = 2,					-- Maximum number of groups to spawn at airbases [default: 2]
 
+		-- Crash Crew
+		crashCrewLand = true,					-- Determines if crash crew is dispatched for crashes on land [default: true]
+		crashCrewWater = true,					-- Determines if crash crew is dispatched for crashes on water [default: true]
+		crashCrewBeacon = false,				-- Determines if SAR beacon is turned on to a random frequency [default: false]
+
 		-- Debug
 		showF10Debug = false,					-- Show F10 debug menu [default: false]
 		debug = false							-- Turn debug logging on/off [default: false]
@@ -159,6 +175,7 @@ do
 	local failMsg = " must be loaded prior to this script!"
 	assert(mist ~= nil, "MiST" .. failMsg)
 	assert(ctld ~= nil, "CTLD" .. failMsg)
+	assert(allSkins ~= nil, "AllSkins" .. failMsg)
 
 	function spawnOnDemand.showStatus()
 		local msg = "No status to show."
@@ -169,7 +186,7 @@ do
 		if spawnedGroupsCount > 0 then
 
 			-- generate status lines
-			msg = {string.format("Status:%s* = Friendly", string.rep("\t", 6))} -- horizontal spacing
+			msg = {string.format("Status:%s* = Friendly", string.rep("    ", 6))} -- horizontal spacing
 			local footer = ""
 			local groups = {}
 			for index, spawnedGroup in pairs(spawnedGroups) do
@@ -248,12 +265,12 @@ do
 	function spawnOnDemand.startWar(obj)
 		obj = obj or {}
 		local warType = obj.warType or spawnOnDemand.settings.warTypes.USER
-		local spawnGroupTypes = spawnOnDemand.tableLength(spawnOnDemand.settings.groupTypes) - 1
+		local spawnGroupTypes = spawnOnDemand.tableLength(spawnOnDemand.settings.groupTypes) - 2 -- exclude AWACS & Tankers
 
 		-- check for existing war
 		if spawnOnDemand.isWar() then
 			spawnOnDemand.toPlayer("The current war is not over!")
-			return
+			return nil
 		end
 
 		-- get player coalition
@@ -285,7 +302,7 @@ do
 		-- check that we have groups to spawn
 		if index == 1 then
 			spawnOnDemand.toPlayer("No groups to spawn!")
-			return
+			return nil
 		end
 
 		-- spawn AWACS
@@ -301,6 +318,23 @@ do
 			if spawnOnDemand.settings.warTeams == 1 or spawnOnDemand.settings.warTeams == 2 then
 				spawnOnDemand.counts.enemy = spawnOnDemand.counts.enemy + 1
 				mist.scheduleFunction(spawnOnDemand.spawnWar, {spawnOnDemand.settings.groupTypes.AWACS}, timer.getTime() + mist.random(10)) -- try to spread out a bit over ~10s
+			end
+
+		end
+
+		-- spawn tankers
+		if spawnOnDemand.settings.warTankers then
+
+			-- friendly
+			if spawnOnDemand.settings.warTeams == 0 or spawnOnDemand.settings.warTeams == 2 then
+				spawnOnDemand.counts.friendly = spawnOnDemand.counts.friendly + 1
+				mist.scheduleFunction(spawnOnDemand.spawnWar, {spawnOnDemand.settings.groupTypes.TANKER, true}, timer.getTime() + mist.random(10)) -- try to spread out a bit over ~10s
+			end
+
+			-- enemy
+			if spawnOnDemand.settings.warTeams == 1 or spawnOnDemand.settings.warTeams == 2 then
+				spawnOnDemand.counts.enemy = spawnOnDemand.counts.enemy + 1
+				mist.scheduleFunction(spawnOnDemand.spawnWar, {spawnOnDemand.settings.groupTypes.TANKER}, timer.getTime() + mist.random(10)) -- try to spread out a bit over ~10s
 			end
 
 		end
@@ -412,8 +446,13 @@ do
 			spawnOnDemand.spawnHelos(obj)
 		elseif groupType == spawnOnDemand.settings.groupTypes.SHIPS then
 			spawnOnDemand.spawnShips(obj)
-		else -- spawnOnDemand.settings.groupTypes.AWACS
+		elseif spawnOnDemand.settings.groupTypes.AWACS then
 			spawnOnDemand.spawnAWACS(obj)
+		elseif spawnOnDemand.settings.groupTypes.TANKER then
+			spawnOnDemand.spawnTanker(obj)
+		else
+			-- should never happen
+			spawnOnDemand.toLog("ERROR: GroupType not found to spawn in war!")
 		end
 	end
 
@@ -464,13 +503,13 @@ do
 
 		else
 
-			-- check if only AWACS are left and invisibility is on
-			if spawnOnDemand.settings.awacsInvisible then
+			-- check if only AWACS/Tankers are left and invisibility is on
+			if spawnOnDemand.settings.awacsInvisible or spawnOnDemand.settings.tankerInvisible then
 				local groups = {}
 				local groupNum = 0
 				local other = 0
 				for _, spawnedGroup in ipairs(spawnOnDemand.spawnedGroups) do
-					if spawnedGroup.groupType == spawnOnDemand.settings.groupTypes.AWACS then
+					if spawnedGroup.groupType == spawnOnDemand.settings.groupTypes.AWACS or spawnedGroup.groupType == spawnOnDemand.settings.groupTypes.TANKER then
 						table.insert(groups, spawnedGroup.groupName)
 						groupNum = groupNum + 1 -- instead of iterating over table to get size
 					else
@@ -484,11 +523,11 @@ do
 							local controller = group:getController()
 							spawnOnDemand.setInvisible(controller, false)
 						else
-							spawnOnDemand.toLog(string.format("AWACS controller for %s not found!", groupName))
+							spawnOnDemand.toLog(string.format("AWACS/Tanker controller for %s not found!", groupName))
 						end
 					end
 					if spawnOnDemand.settings.debug then
-						spawnOnDemand.toLog("AWACS is the only unit left on the team. Turning off invisibility for AWACS.")
+						spawnOnDemand.toLog("AWACS/Tankers are the only units left on the team. Turning off invisibility for AWACS/Tankers.")
 					end
 				end
 			end
@@ -529,7 +568,7 @@ do
 		local groupName = string.format("Spawned plane group #%i", spawnOnDemand.spawnedGroupID)
 		local planeData = spawnOnDemand.getRandomPlanes(isCargo, isFriendly)
 		local newGroupData = mist.utils.deepCopy(spawnOnDemand.templates.group.plane)
-		newGroupData.task = planeData.task
+		newGroupData.task = mist.utils.deepCopy(planeData.task)
 		newGroupData.name = groupName
 		if isFriendly then
 			newGroupData.frequency = spawnOnDemand.settings.planeFrequency
@@ -548,6 +587,7 @@ do
 
 		-- create units
 		for index, plane in ipairs(planeData.planes) do
+			plane = mist.utils.deepCopy(plane)
 			spawnOnDemand.spawnedUnitID = spawnOnDemand.spawnedUnitID + 1
 			local pylons = plane.pylons or {}
 			local flare = plane.flare or 0
@@ -560,11 +600,14 @@ do
 				pylons = nil -- clear
 				unit.hardpoint_racks = nil -- clear
 			end
-			unit.livery_id = plane.livery[mist.random(#plane.livery)]
+			local type = plane.type
+			local skins = allSkins.liveries[type]
+			if skins then
+				unit.livery_id = skins[mist.random(#skins)]
+			end
 			local skills = spawnOnDemand.settings.skills
 			unit.skill = skill or skills[mist.random(#skills)]
 			unit.speed = mist.random(93, 257) -- 180kts to 500kts (in mps)
-			local type = plane.type
 			unit.AddPropAircraft = spawnOnDemand.getAircraftProps(type)
 			unit.type = type
 			unit.x = point.x
@@ -615,7 +658,7 @@ do
 			local msg = "Error spawning plane(s)!"
 			spawnOnDemand.toPlayer(msg)
 			spawnOnDemand.toLog(msg)
-			return
+			return nil
 		end
 
 		-- set options
@@ -718,7 +761,7 @@ do
 				local msg = "Unable to find valid vehicle spawn location!"
 				spawnOnDemand.toPlayer(msg, nil, useSound, showText)
 				spawnOnDemand.toLog(msg)
-				return
+				return nil
 			end
 		end
 
@@ -767,6 +810,7 @@ do
 			skill = vehicleSkill
 		end
 		for index, vehicle in ipairs(vehicleData.vehicles) do
+			vehicle = mist.utils.deepCopy(vehicle)
 			spawnOnDemand.spawnedUnitID = spawnOnDemand.spawnedUnitID + 1
 			local unit = mist.utils.deepCopy(spawnOnDemand.templates.unit.vehicle)
 			unit.type = vehicle
@@ -788,7 +832,7 @@ do
 			local msg = "Error spawning vehicle(s)!"
 			spawnOnDemand.toPlayer(msg)
 			spawnOnDemand.toLog(msg)
-			return
+			return nil
 		end
 
 		-- create route
@@ -922,7 +966,7 @@ do
 			local msg = "Unable to find valid troop spawn location!"
 			spawnOnDemand.toPlayer(msg, nil, useSound, showText)
 			spawnOnDemand.toLog(msg)
-			return
+			return nil
 		end
 
 		-- create group
@@ -940,6 +984,7 @@ do
 			skill = troopSkill
 		end
 		for index, troop in ipairs(troopData.troops) do
+			troop = mist.utils.deepCopy(troop)
 
 			-- spawn around first person (borrowed without permission from CTLD)
 			local _angle = math.pi * 2 * (index - 1) / #troopData.troops
@@ -967,7 +1012,7 @@ do
 			local msg = "Error spawning troop(s)!"
 			spawnOnDemand.toPlayer(msg)
 			spawnOnDemand.toLog(msg)
-			return
+			return nil
 		end
 
 		-- create route
@@ -1056,7 +1101,7 @@ do
 		local groupName = string.format("Spawned helo group #%i", spawnOnDemand.spawnedGroupID)
 		local heloData = spawnOnDemand.getRandomHelos(isCargo, isFriendly)
 		local newGroupData = mist.utils.deepCopy(spawnOnDemand.templates.group.plane) -- same
-		newGroupData.task = heloData.task
+		newGroupData.task = mist.utils.deepCopy(heloData.task)
 		newGroupData.name = groupName
 		if isFriendly then
 			newGroupData.frequency = spawnOnDemand.settings.heloFrequency
@@ -1073,6 +1118,7 @@ do
 			skill = heloSkill
 		end
 		for index, helo in ipairs(heloData.helos) do
+			helo = mist.utils.deepCopy(helo)
 			spawnOnDemand.spawnedUnitID = spawnOnDemand.spawnedUnitID + 1
 			local pylons = helo.pylons or nil
 			local flare = helo.flare or 0
@@ -1084,12 +1130,15 @@ do
 			end
 			local unit = mist.utils.deepCopy(spawnOnDemand.templates.unit.plane) -- same
 			unit.alt = land.getHeight(point) + mist.random(15, 305) -- 50ft to 1,000ft (in m)
-			unit.livery_id = helo.livery[mist.random(#helo.livery)]
+			local type = helo.type
+			local skins = allSkins.liveries[type]
+			if skins then
+				unit.livery_id = skins[mist.random(#skins)]
+			end
 			local skills = spawnOnDemand.settings.skills
 			unit.skill = skill or skills[mist.random(#skills)]
 			unit.ropeLength = 5 -- in m
 			unit.speed = mist.random(31, 62) -- 60kts to 120kts (in mps)
-			local type = helo.type
 			unit.AddPropAircraft = spawnOnDemand.getAircraftProps(type)
 			unit.type = type
 			unit.x = point.x
@@ -1140,7 +1189,7 @@ do
 			local msg = "Error spawning helicopter(s)!"
 			spawnOnDemand.toPlayer(msg)
 			spawnOnDemand.toLog(msg)
-			return
+			return nil
 		end
 
 		-- set options
@@ -1237,7 +1286,7 @@ do
 			local msg = "Unable to find valid ship spawn location!"
 			spawnOnDemand.toPlayer(msg, nil, useSound, showText)
 			spawnOnDemand.toLog(msg)
-			return
+			return nil
 		end
 
 		-- create group
@@ -1263,6 +1312,7 @@ do
 			skill = shipSkill
 		end
 		for index, ship in ipairs(shipData.ships) do
+			ship = mist.utils.deepCopy(ship)
 			spawnOnDemand.spawnedUnitID = spawnOnDemand.spawnedUnitID + 1
 			local unit = mist.utils.deepCopy(spawnOnDemand.templates.unit.ship)
 			unit.type = ship
@@ -1281,7 +1331,7 @@ do
 			local msg = "Error spawning ship(s)!"
 			spawnOnDemand.toPlayer(msg)
 			spawnOnDemand.toLog(msg)
-			return
+			return nil
 		end
 
 		-- create route
@@ -1358,7 +1408,7 @@ do
 		local groupName = string.format("Spawned AWACS #%i", spawnOnDemand.spawnedGroupID)
 		local planeData = spawnOnDemand.getAWACS(isFriendly)
 		local newGroupData = mist.utils.deepCopy(spawnOnDemand.templates.group.plane)
-		newGroupData.task = planeData.task
+		newGroupData.task = mist.utils.deepCopy(planeData.task)
 		newGroupData.name = groupName
 		if isFriendly then
 			newGroupData.frequency = spawnOnDemand.settings.awacsFrequency
@@ -1376,7 +1426,7 @@ do
 		local point = mist.getRandPointInCircle(spawnOnDemand.unit:getPosition().p, mist.utils.NMToMeters(spawnOnDemand.settings.awacsMaxDist), mist.utils.NMToMeters(spawnOnDemand.settings.awacsMinDist))
 
 		-- create units
-		local plane = planeData.plane
+		local plane = mist.utils.deepCopy(planeData.plane)
 		spawnOnDemand.spawnedUnitID = spawnOnDemand.spawnedUnitID + 1
 		local flare = plane.flare or 0
 		local ammoType = plane.ammoType or 0
@@ -1386,7 +1436,10 @@ do
 		local alt = land.getHeight(point) + mist.random(4572, 9144) -- 15,000ft to 30,000ft (in m)
 		unit.alt = alt
 		unit.hardpoint_racks = nil -- clear
-		unit.livery_id = plane.livery[mist.random(#plane.livery)]
+		local skins = allSkins.liveries[plane.type]
+		if skins then
+			unit.livery_id = skins[mist.random(#skins)]
+		end
 		local skills = spawnOnDemand.settings.skills
 		unit.skill = skill or skills[mist.random(#skills)]
 		local speed = mist.random(103, 154) -- 200kts to 300kts (in mps)
@@ -1432,7 +1485,7 @@ do
 			local msg = "Error spawning plane(s)!"
 			spawnOnDemand.toPlayer(msg)
 			spawnOnDemand.toLog(msg)
-			return
+			return nil
 		end
 
 		-- set options
@@ -1486,19 +1539,221 @@ do
 
 	end
 
+	function spawnOnDemand.spawnTanker(obj)
+		local debug = spawnOnDemand.settings.debug
+
+		for _, group in ipairs(spawnOnDemand.spawnedGroups) do
+			if group.tacan then
+				spawnOnDemand.toPlayer("Only one Tanker can be in the air at a time!", 5, useSound, showText)
+				return nil
+			end
+		end
+
+		obj = obj or {}
+		local isFriendly = obj.isFriendly or false
+		local useSound = obj.useSound
+		if useSound == nil then useSound = true end
+		local showText = obj.showText
+		if showText == nil then showText = true end
+
+		-- create group
+		spawnOnDemand.spawnedGroupID = spawnOnDemand.spawnedGroupID + 1
+		local groupName = string.format("Spawned Tanker #%i", spawnOnDemand.spawnedGroupID)
+		local planeData = spawnOnDemand.getTanker(isFriendly)
+		local newGroupData = mist.utils.deepCopy(spawnOnDemand.templates.group.plane)
+		newGroupData.task = mist.utils.deepCopy(planeData.task)
+		newGroupData.name = groupName
+		if isFriendly then
+			newGroupData.frequency = spawnOnDemand.settings.tankerFrequency
+		end
+
+		-- set units
+		local units = {}
+		local skill -- default to Random
+		local planeSkill = spawnOnDemand.settings.tankerSkill
+		if planeSkill ~= "Random" then
+			skill = planeSkill
+		end
+
+		-- get random distance
+		local point = mist.getRandPointInCircle(spawnOnDemand.unit:getPosition().p, mist.utils.NMToMeters(spawnOnDemand.settings.tankerMaxDist), mist.utils.NMToMeters(spawnOnDemand.settings.tankerMinDist)) --vec2
+
+		-- create units
+		local plane = mist.utils.deepCopy(planeData.plane)
+		spawnOnDemand.spawnedUnitID = spawnOnDemand.spawnedUnitID + 1
+		local flare = plane.flare or 0
+		local ammoType = plane.ammoType or 0
+		local chaff = plane.chaff or 0
+		local gun = plane.gun or 100
+		local unit = mist.utils.deepCopy(spawnOnDemand.templates.unit.plane)
+		local alt = land.getHeight(point) + mist.random(4572, 7620) -- 15,000ft to 25,000ft (in m)
+		unit.alt = alt
+		unit.hardpoint_racks = nil -- clear
+		local skins = allSkins.liveries[plane.type]
+		if skins then
+			unit.livery_id = skins[mist.random(#skins)]
+		end
+		local skills = spawnOnDemand.settings.skills
+		unit.skill = skill or skills[mist.random(#skills)]
+		local altInFt = mist.utils.metersToFeet(alt)
+		local speed = (220 * 0.018 * ((altInFt - altInFt % 1000) / 1000)) + 220 -- wanting steady 220kts IAS (every 1,000ft IAS increases TAS by 1.8%)
+		unit.speed = mist.utils.knotsToMps(speed) -- in mps (TAS)
+		unit.AddPropAircraft = nil -- clear
+		unit.type = plane.type
+		unit.x = point.x
+		unit.name = string.format("%s (#%i)", plane.type, spawnOnDemand.spawnedUnitID)
+		unit.payload = {
+			pylons = nil, -- clear
+			fuel = plane.fuel,
+			flare = flare,
+			chaff = chaff,
+			gun = gun
+		}
+		unit.y = point.y
+
+		local heading = {
+			[1] = 0, -- n
+			[2] = 90, -- e
+			[3] = 180, -- s
+			[4] = 270 -- w
+		}
+		local chosenHeading = heading[mist.random(#heading)]
+		unit.heading = mist.utils.toRadian(chosenHeading) -- in radians
+
+		table.insert(newGroupData.units, unit)
+		table.insert(units, unit.name)
+
+		-- create route
+		local points = {}
+		local start = mist.fixedWing.buildWP(point) -- starting point
+		local spawnType = planeData.spawn
+		start.type = spawnType.type
+		start.action = spawnType.action
+		local tasks = planeData.tasks
+
+		-- create tacan (blue only)
+		if spawnOnDemand.group:getCoalition() == coalition.side.RED and isFriendly then
+			tasks[3] = nil -- clear
+		end
+		local tacan
+		local freq = ""
+		if tasks[3] and spawnOnDemand.settings.tankerBeacon then
+			tacan = spawnOnDemand.createTacanBeacon()
+			if tacan then
+				freq = " [" .. tacan.channel .. "Y]"
+				local params = tasks[3].params.action.params
+				params.frequency = tacan.frequency
+				params.callsign = tacan.callsign
+				params.channel = tacan.channel
+			end
+		end
+
+		tasks[2].params.altitude = alt
+		tasks[2].params.speed = speed
+		start.task = {
+			id = "ComboTask",
+			params = {
+				tasks = tasks
+			},
+			x = point.x,
+			y = point.y,
+			speed_locked = true,
+			ETA = 0,
+			ETA_locked = true
+		}
+		table.insert(points, start)
+
+		local len = mist.utils.NMToMeters(20) -- in m
+		local newPoint = { -- vec3
+			x = point.x,
+			y = alt,
+			z = point.y
+		}
+		if chosenHeading == 0 then
+			newPoint.x = point.x + len -- south to north
+		elseif chosenHeading == 90 then
+			newPoint.z = point.y + len -- west to east
+		elseif chosenHeading == 180 then
+			newPoint.x = point.x - len -- north to south
+		elseif chosenHeading == 270 then
+			newPoint.z = point.y - len -- east to west
+		else
+			-- should never happen
+			spawnOnDemand.toLog("ERROR: Cannot find initial heading!")
+		end
+
+		if debug then
+			trigger.action.markToAll(spawnOnDemand.spawnedUnitID, "WP1", mist.utils.makeVec3(point, alt))
+			trigger.action.markToAll(spawnOnDemand.spawnedUnitID + 1000, "WP2", newPoint)
+		end
+
+		table.insert(points, mist.fixedWing.buildWP(newPoint, "turning_point", speed, alt, "radio"))
+		newGroupData.route.points = points
+
+		-- spawn group
+		local group = coalition.addGroup(planeData.countryID, Group.Category.AIRPLANE, newGroupData)
+		group = Group.getByName(groupName) -- coalition.addGroup() doesn't like to return a real object here for some reason, fetch again
+		if not group then
+			local msg = "Error spawning plane(s)!"
+			spawnOnDemand.toPlayer(msg)
+			spawnOnDemand.toLog(msg)
+			return nil
+		end
+
+		-- set options
+		local controller = group:getController()
+		controller:setOption(AI.Option.Air.id.REACTION_ON_THREAT, AI.Option.Air.val.REACTION_ON_THREAT.EVADE_FIRE)
+		controller:setOption(AI.Option.Air.id.PROHIBIT_WP_PASS_REPORT, true)
+		if spawnOnDemand.settings.tankerInvisible then
+			spawnOnDemand.setInvisible(controller, true)
+		end
+
+		-- define plane type
+		local planeType = "Tanker"
+
+		local firstUnit = newGroupData.units[1]
+
+		-- create spawned group object
+		local spawnedGroup = {
+			groupName = groupName,
+			friendlyName = string.format("%s%s", spawnOnDemand.showFriendly(planeType, isFriendly), freq),
+			display = spawnOnDemand.showFriendly(firstUnit.type, isFriendly),
+			units = units,
+			isFriendly = isFriendly,
+			tacan = tacan,
+			groupType = spawnOnDemand.settings.groupTypes.TANKER,
+			spawnType = spawnType.type,
+			type = planeType
+		}
+		table.insert(spawnOnDemand.spawnedGroups, spawnedGroup)
+
+		-- notify player
+		local msg = string.format("#%i: %s spawned %s away!", spawnOnDemand.spawnedGroupID, spawnedGroup.friendlyName, spawnOnDemand.getDistanceFromPlayer(firstUnit.name))
+		spawnOnDemand.toPlayer(msg, 5, useSound, showText)
+
+		-- for debug
+		if debug then
+			spawnOnDemand.toLog(msg)
+		end
+
+		-- return object
+		return spawnOnDemand.convertForMistDB(newGroupData, planeData.countryID)
+
+	end
+
 	function spawnOnDemand.spawnCAS()
 
 		-- check if CAS is on hold
 		if spawnOnDemand.settings.CASholdTimer > 0 then
 			local secs = math.ceil(spawnOnDemand.settings.casWaitTime - (timer.getTime() - spawnOnDemand.settings.CASholdTimer))
 			spawnOnDemand.toPlayer(string.format("CAS is unavailable at this time. %i seconds left...", secs))
-			return
+			return nil
 		end
 
 		-- check if CAS already spawned
 		if spawnOnDemand.settings.CAStimer > 0 then
 			spawnOnDemand.toPlayer("CAS mission already active...")
-			return
+			return nil
 		end
 
 		-- create group
@@ -1506,7 +1761,7 @@ do
 		local groupName = string.format("Spawned CAS group #%i", spawnOnDemand.spawnedGroupID)
 		local planeData = spawnOnDemand.getRandomCAS()
 		local newGroupData = mist.utils.deepCopy(spawnOnDemand.templates.group.plane)
-		newGroupData.task = planeData.task
+		newGroupData.task = mist.utils.deepCopy(planeData.task)
 		newGroupData.name = groupName
 		newGroupData.frequency = spawnOnDemand.settings.planeFrequency
 
@@ -1514,7 +1769,7 @@ do
 		local point = mist.getRandPointInCircle(spawnOnDemand.unit:getPosition().p, mist.utils.NMToMeters(1))
 
 		-- create unit
-		local plane = planeData.planes[1]
+		local plane = mist.utils.deepCopy(planeData.planes[1])
 		spawnOnDemand.spawnedUnitID = spawnOnDemand.spawnedUnitID + 1
 		local flare = plane.flare or 0
 		local ammoType = plane.ammoType or 0
@@ -1523,7 +1778,10 @@ do
 		local alt = land.getHeight(point) + mist.random(153, 3048) -- 500ft to 10,000ft (in m)
 		local speed = mist.random(93, 257) -- 180kts to 500kts (in mps)
 		unit.alt = alt
-		unit.livery_id = plane.livery[mist.random(#plane.livery)]
+		local skins = allSkins.liveries[plane.type]
+		if skins then
+			unit.livery_id = skins[mist.random(#skins)]
+		end
 		unit.skill = spawnOnDemand.settings.skills[4] -- Excellent
 		unit.speed = speed
 		unit.type = plane.type
@@ -1568,7 +1826,7 @@ do
 			local msg = "Error spawning CAS plane!"
 			spawnOnDemand.toPlayer(msg)
 			spawnOnDemand.toLog(msg)
-			return
+			return nil
 		end
 
 		-- get unit
@@ -1637,13 +1895,13 @@ do
 		if spawnOnDemand.settings.artyHoldTimer > 0 then
 			local secs = math.ceil(spawnOnDemand.settings.artyWaitTime - (timer.getTime() - spawnOnDemand.settings.artyHoldTimer))
 			spawnOnDemand.toPlayer(string.format("Artillery is reloading. %i seconds left...", secs))
-			return
+			return nil
 		end
 
 		-- check if arty is already active
 		if spawnOnDemand.settings.artyTimer > 0 then
 			spawnOnDemand.toPlayer("Artillery is already firing...")
-			return
+			return nil
 		end
 
 		-- get closest enemy unit
@@ -1804,13 +2062,13 @@ do
 		if spawnOnDemand.settings.AFACholdTimer > 0 then
 			local secs = math.ceil(spawnOnDemand.settings.afacWaitTime - (timer.getTime() - spawnOnDemand.settings.AFACholdTimer))
 			spawnOnDemand.toPlayer(string.format("AFAC is unavailable at this time. %i seconds left...", secs))
-			return
+			return nil
 		end
 
 		-- check if AFAC already spawned
 		if spawnOnDemand.settings.AFACtimer > 0 then
 			spawnOnDemand.toPlayer("AFAC mission already active...")
-			return
+			return nil
 		end
 
 		-- create group
@@ -1818,7 +2076,7 @@ do
 		local groupName = string.format("Spawned AFAC group #%i", spawnOnDemand.spawnedGroupID)
 		local planeData = spawnOnDemand.getRandomAFAC()
 		local newGroupData = mist.utils.deepCopy(spawnOnDemand.templates.group.plane)
-		newGroupData.task = planeData.task
+		newGroupData.task = mist.utils.deepCopy(planeData.task)
 		newGroupData.name = groupName
 		newGroupData.frequency = 123000000
 
@@ -1826,7 +2084,7 @@ do
 		local point = mist.getRandPointInCircle(spawnOnDemand.unit:getPosition().p, mist.utils.NMToMeters(1))
 
 		-- create unit
-		local plane = planeData.planes[1]
+		local plane = mist.utils.deepCopy(planeData.planes[1])
 		spawnOnDemand.spawnedUnitID = spawnOnDemand.spawnedUnitID + 1
 		local flare = plane.flare or 0
 		local chaff = plane.chaff or 0
@@ -1835,7 +2093,10 @@ do
 		local speed = mist.random(29, 60) -- 56kts - 117kts (in mps)
 		unit.alt = alt
 		unit.hardpoint_racks = nil
-		unit.livery_id = plane.livery[mist.random(#plane.livery)]
+		local skins = allSkins.liveries[plane.type]
+		if skins then
+			unit.livery_id = skins[mist.random(#skins)]
+		end
 		unit.skill = spawnOnDemand.settings.skills[4] -- Excellent
 		unit.speed = speed
 		unit.AddPropAircraft = nil
@@ -1880,7 +2141,7 @@ do
 			local msg = "Error spawning AFAC plane!"
 			spawnOnDemand.toPlayer(msg)
 			spawnOnDemand.toLog(msg)
-			return
+			return nil
 		end
 
 		-- get unit
@@ -1955,7 +2216,7 @@ do
 		-- check if car bomb has already been spawned
 		if spawnOnDemand.settings.carBombTimer > 0 then
 			spawnOnDemand.toPlayer("Car bomb scenario is already active...")
-			return
+			return nil
 		end
 
 		-- spawn car bomb
@@ -2063,7 +2324,7 @@ do
 		-- check if car VIP has already been spawned
 		if spawnOnDemand.settings.vip then
 			spawnOnDemand.toPlayer("VIP scenario is already active...")
-			return
+			return nil
 		end
 
 		-- spawn VIP
@@ -2076,7 +2337,7 @@ do
 		-- check if boats have already been spawned
 		if spawnOnDemand.settings.boats then
 			spawnOnDemand.toPlayer("Boat scenario is already active...")
-			return
+			return nil
 		end
 
 		-- spawn boats
@@ -2729,6 +2990,44 @@ do
 		return data
 	end
 
+	function spawnOnDemand.getTanker(isFriendly)
+		local data = {}
+
+		-- determine side
+		local planes
+		if spawnOnDemand.group:getCoalition() == coalition.side.BLUE then
+			if isFriendly then
+				planes = spawnOnDemand.tankers.blue
+			else
+				planes = spawnOnDemand.tankers.red
+			end
+		else
+			if isFriendly then
+				planes = spawnOnDemand.tankers.red
+			else
+				planes = spawnOnDemand.tankers.blue
+			end
+		end
+
+		-- get random countryID
+		data.countryID = spawnOnDemand.getRandomCountryID(isFriendly)
+
+		-- get random plane
+		data.plane = planes[mist.random(#planes)]
+
+		-- set tasking
+		data.task = "Refueling"
+		data.tasks = spawnOnDemand.templates.tasks.tanker
+
+		-- set spawn type
+		local obj = spawnOnDemand.settings.spawnTypes[4] -- Air
+		data.spawn = {}
+		data.spawn.type = obj[2]
+		data.spawn.action = obj[3]
+
+		return data
+	end
+
 	function spawnOnDemand.getRandomCAS()
 		local data = {}
 		data.planes = {}
@@ -2947,7 +3246,8 @@ do
 			["TROOPS"] = 3,
 			["HELOS"] = 4,
 			["SHIPS"] = 5,
-			["AWACS"] = 6 -- does not get included when determining spawn group type during war
+			["AWACS"] = 6, -- does not get included when determining spawn group type during war
+			["TANKER"] = 7 -- does not get included when determining spawn group type during war
 		}
 
 		-- smoke color
@@ -2976,7 +3276,8 @@ do
 			name = "",
 			communication = true,
 			start_time = 0,
-			frequency = 0
+			frequency = 0,
+			taskSelected = true
 		}
 		spawnOnDemand.templates.group.vehicle = {
 			visible = false,
@@ -3104,6 +3405,47 @@ do
 				}
 			}
 		}
+		spawnOnDemand.templates.tasks.tanker = {
+			[1] = {
+				number = 1,
+				auto = true,
+				id = "Tanker",
+				enabled = true
+			},
+			[2] = {
+				number = 2,
+				auto = false,
+				id = "Orbit",
+				enabled = true,
+				params = {
+					altitude = 0,
+					altitudeEdited = true,
+					pattern = "Race-Track",
+					speed = 0,
+					speedEdited = true
+				}
+			},
+			[3] = {
+				number = 3,
+				auto = true,
+				id = "WrappedAction",
+				enabled = true,
+				params = {
+					action = {
+						id = "ActivateBeacon",
+						params = {
+							type = 4,
+							frequency = 0,
+							callsign = "",
+							channel = 0,
+							modeChannel = "Y",
+							bearing = true,
+							system = 4
+						}
+					}
+				}
+			}
+		}
 		spawnOnDemand.templates.tasks.AFAC = {
             [1] = {
                 number = 1,
@@ -3167,43 +3509,25 @@ do
 		-- planes
 		spawnOnDemand.planes = {}
 		spawnOnDemand.planes.cargo = {}
-		table.insert(spawnOnDemand.planes.cargo, {type = "An-26B", livery = {"Aeroflot"}, fuel = 5500, flare = 384, chaff = 384})
-		table.insert(spawnOnDemand.planes.cargo, {type = "An-30M", livery = {"RF Air Force"}, fuel = 8300, flare = 192, chaff = 192})
-		table.insert(spawnOnDemand.planes.cargo, {type = "C-130", livery = {"US Air Force"}, fuel = 20830, flare = 60, chaff = 120})
-		table.insert(spawnOnDemand.planes.cargo, {type = "C-17A", livery = {"usaf standard"}, fuel = 132405, flare = 60, chaff = 120})
-		--table.insert(spawnOnDemand.planes.cargo, {type = "DC3", livery = {"DC3 Buffalo", "DC3 PanAm", "Metal No Markings", "USAF DO IT"}, fuel = 1094}) -- mod
-		table.insert(spawnOnDemand.planes.cargo, {type = "IL-76MD", livery = {"RF Air Force"}, fuel = 80000, flare = 96, chaff = 96})
-		table.insert(spawnOnDemand.planes.cargo, {type = "Yak-40", livery = {"Aeroflot", "Olympic Airways (Vintage)"}, fuel = 3080})
+		table.insert(spawnOnDemand.planes.cargo, {type = "An-26B", fuel = 5500, flare = 384, chaff = 384})
+		table.insert(spawnOnDemand.planes.cargo, {type = "An-30M", fuel = 8300, flare = 192, chaff = 192})
+		table.insert(spawnOnDemand.planes.cargo, {type = "C-130", fuel = 20830, flare = 60, chaff = 120})
+		table.insert(spawnOnDemand.planes.cargo, {type = "C-17A", fuel = 132405, flare = 60, chaff = 120})
+		--table.insert(spawnOnDemand.planes.cargo, {type = "DC3", fuel = 1094}) -- mod
+		table.insert(spawnOnDemand.planes.cargo, {type = "IL-76MD", fuel = 80000, flare = 96, chaff = 96})
+		table.insert(spawnOnDemand.planes.cargo, {type = "Yak-40", fuel = 3080})
 
 		-- Civil Aircraft Mod
-		table.insert(spawnOnDemand.planes.cargo, {type = "A_380",
-			livery = {"Air France", "British Airways", "China Southern", "_Clean", "Emirates", "Korean Air", "Lufthansa", "Lufthansa Test", "Qantas Airways", "Qatar Airways", "Singapore Airlines", "Thai Airways"},
-			fuel = 90700})
-		table.insert(spawnOnDemand.planes.cargo, {type = "B_727",
-			livery = {"AEROFLOT", "Air France", "Alaska Airlines", "Alitalia", "American Airlines", "Basic", "Delta Airlines", "Delta Airlines old", "FedEx", "Hapag Lloyd", "Lufthansa", "Lufthansa Oberhausen Old", "NORTHWEST", "Pan Am",
-				"Singapore Airlines", "SOUTHWEST", "UNITED", "UNITED OLD", "ZERO G"},
-			fuel = 90700})
-		table.insert(spawnOnDemand.planes.cargo, {type = "B_737",
-			livery = {"Air Algerie", "Air Berlin", "Air France", "airBaltic", "Airzena", "Aero Mexico", "American Airlines Retro", "British Airways", "C40s", "Clean", "Disney", "EGYPTAIR", "easyJet", "FINNAIR", "TUI fly", "Janet",
-				"Jet2.com", "kulula", "Lufthansa", "Lufthansa BA", "Lufthansa KR", "Old British Airways", "OMAN AIR", "PAN AM", "Polskie Linie Lotnicze LOT", "QANTAS", "RYANAIR", "SouthWest Lone Star", "ThomsonFly", "TNT",
-				"Ukraine Airlines", "UPS"},
-			fuel = 90700})
-		table.insert(spawnOnDemand.planes.cargo, {type = "B_747",
-			livery = {"Air France", "Air Force One", "Air India", "Cathay Pacific Hong Kong", "Iron Maiden World Tour 2016", "Royal Dutch Airlines KLM", "Lufthansa", "Northwest (old Colors)", "Pan Am (old Colors)",
-				"Qantas Airlines (1984 Colors)", "Turkish Airlines"},
-			fuel = 90700})
-		table.insert(spawnOnDemand.planes.cargo, {type = "B_757",
-			livery = {"American Airways", "British Airways", "USAir Force C-32", "Delta Airlines", "DHL Cargo", "easyJet", "Swiss", "Thomson TUI"},
-			fuel = 90700})
-		table.insert(spawnOnDemand.planes.cargo, {type = "Cessna_210N",
-			livery = {"Blank", "D-EKVW", "Greece Army", "Muster", "N9572H", "Silver Eagle Blue", "Silver Eagle Red", "U.S.A.F Academy", "V5-BUG", "VH-JGA"},
-			fuel = 5500})
+		table.insert(spawnOnDemand.planes.cargo, {type = "A_380", fuel = 90700})
+		table.insert(spawnOnDemand.planes.cargo, {type = "B_727", fuel = 90700})
+		table.insert(spawnOnDemand.planes.cargo, {type = "B_737", fuel = 90700})
+		table.insert(spawnOnDemand.planes.cargo, {type = "B_747", fuel = 90700})
+		table.insert(spawnOnDemand.planes.cargo, {type = "B_757", fuel = 90700})
+		table.insert(spawnOnDemand.planes.cargo, {type = "Cessna_210N", fuel = 5500})
 
 		-- attack
 		spawnOnDemand.planes.other = {}
-		table.insert(spawnOnDemand.planes.other, {type = "A-10C",
-			livery = {"A-10 Grey"},
-			fuel = 5029, flare = 120, chaff = 240, ammoType = 1, pylons = { -- ammoType 1 = Combat Mix
+		table.insert(spawnOnDemand.planes.other, {type = "A-10C", fuel = 5029, flare = 120, chaff = 240, ammoType = 1, pylons = { -- ammoType 1 = Combat Mix
 				[1] = {["CLSID"] = "ALQ_184"},
 				[2] = {["CLSID"] = "{69926055-0DA8-4530-9F2F-C86B157EA9F6}"}, -- LAU-131 M151 HE
 				[3] = {["CLSID"] = "{E6A6262A-CA08-4B3D-B030-E1A993B98452}"}, -- AGM-65D
@@ -3213,143 +3537,103 @@ do
 				[10] = {["CLSID"] = "{A111396E-D3E8-4b9c-8AC9-2432489304D5}"}, -- AAQ-28
 				[11] = {["CLSID"] = "{DB434044-F5D0-4F1F-9BA9-B73027E18DD3}"} -- LAU-105 AIM9M [NEGATIVE WEIGHT OF PAYLOAD]
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.planes.other, {type = "AJS37",
-			livery = {"#2 Bare Metal F7 Skaraborgs Flygflottilj"},
-			fuel = 4476, flare = 36, chaff = 105, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "AJS37", fuel = 4476, flare = 36, chaff = 105, pylons = {
 				[2] = {["CLSID"] = "{ARAKM70BHE}"}, [3] = {["CLSID"] = "{ARAKM70BHE}"},
 				[4] = {["CLSID"] = "{VIGGEN_X-TANK}"},
 				[5] = {["CLSID"] = "{ARAKM70BHE}"}, [6] = {["CLSID"] = "{ARAKM70BHE}"}
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.planes.other, {type = "AV8BNA",
-			livery = {"default"},
-			fuel = 3520, flare = 120, chaff = 60, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "AV8BNA", fuel = 3520, flare = 120, chaff = 60, pylons = {
 				[1] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, [8] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, -- AIM-9M
 				[2] = {["CLSID"] = "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"}, [3] = {["CLSID"] = "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"}, -- GBU-16
 				[6] = {["CLSID"] = "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"}, [7] = {["CLSID"] = "{0D33DDAE-524F-4A4E-B5B8-621754FE3ADE}"},
 				[4] = {["CLSID"] = "{GAU_12_Equalizer}"},
 				[5] = {["CLSID"] = "{A111396E-D3E8-4b9c-8AC9-2432489304D5}"} -- AN/AAQ-28 litening
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.planes.other, {type = "C-101CC",
-			livery = {"USAF Agressor Fictional"},
-			fuel = 1885, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "C-101CC", fuel = 1885, pylons = {
 				[1] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"}, [7] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"}, -- LAU-161 M151
 				[2] = {["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}"}, [6] = {["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}"}, -- LAU-68 M151
 				[3] = {["CLSID"] = "BIN_200"}, [5] = {["CLSID"] = "BIN_200"},
 				[4] = {["CLSID"] = "{C-101-DEFA553}"}
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.planes.other, {type = "F-5E-3",
-			livery = {"black 'Mig-28'", "USA standard"},
-			fuel = 2046, flare = 15, chaff = 30, ammoType = 2, pylons = { -- ammoType 2 = Combat Mix
+		table.insert(spawnOnDemand.planes.other, {type = "F-5E-3", fuel = 2046, flare = 15, chaff = 30, ammoType = 2, pylons = { -- ammoType 2 = Combat Mix
 				[1] = {["CLSID"] = "{9BFD8C90-F7AE-4e90-833B-BFD0CED0E536}"}, [7] = {["CLSID"] = "{9BFD8C90-F7AE-4e90-833B-BFD0CED0E536}"}, -- AIM-9P
 				[2] = {["CLSID"] = "{LAU3_HE5}"}, [3] = {["CLSID"] = "{LAU3_HE5}"}, [5] = {["CLSID"] = "{LAU3_HE5}"}, [6] = {["CLSID"] = "{LAU3_HE5}"}, -- MK5 HEAT
 				[4] = {["CLSID"] = "{0395076D-2F77-4420-9D33-087A4398130B}"} -- 275gal
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.planes.other, {type = "F-86F Sabre",
-			livery = {"default livery"},
-	 		fuel = 1282, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "F-86F Sabre", fuel = 1282, pylons = {
 				[1] = {["CLSID"] = "{HVARx2}"}, [2] = {["CLSID"] = "{HVARx2}"}, [3] = {["CLSID"] = "{HVARx2}"}, [4] = {["CLSID"] = "{HVARx2}"},
 				[7] = {["CLSID"] = "{HVARx2}"}, [8] = {["CLSID"] = "{HVARx2}"}, [10] = {["CLSID"] = "{HVARx2}"}, [9] = {["CLSID"] = "{HVARx2}"}
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.planes.other, {type = "L-39ZA",
-			livery = {"Splinter camo woodland"},
-			fuel = 980, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "L-39ZA", fuel = 980, pylons = {
 				[1] = {["CLSID"] = "{UB-16-57UMP}"}, [5] = {["CLSID"] = "{UB-16-57UMP}"},
 				[2] = {["CLSID"] = "{FB3CE165-BF07-4979-887C-92B87F13276B}"}, [4] = {["CLSID"] = "{FB3CE165-BF07-4979-887C-92B87F13276B}"} -- FAB-100
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.planes.other, {type = "MQ-9 Reaper",
-			livery = {"standard"},
-			fuel = 1300, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "MQ-9 Reaper", fuel = 1300, pylons = {
 				[1] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, [4] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, -- AGM-114K
 				[2] = {["CLSID"] = "AGM114x2_OH_58"}, [3] = {["CLSID"] = "AGM114x2_OH_58"}
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.planes.other, {type = "MiG-21Bis",
-			livery = {"VVS Metal"},
-			fuel = 2280, flare = 32, chaff = 32, ammoType = 2, pylons = { -- ammoType 2 = A/G
+		table.insert(spawnOnDemand.planes.other, {type = "MiG-21Bis",	fuel = 2280, flare = 32, chaff = 32, ammoType = 2, pylons = { -- ammoType 2 = A/G
 				[1] = {["CLSID"] = "{4203753F-8198-4E85-9924-6F8FF679F9FF}"}, [5] = {["CLSID"] = "{4203753F-8198-4E85-9924-6F8FF679F9FF}"}, -- RBK-250
 				[2] = {["CLSID"] = "{UB-32_S5M}"}, [4] = {["CLSID"] = "{UB-32_S5M}"},
 				[3] = {["CLSID"] = "{PTB_800_MIG21}"},
 				[6] = {["CLSID"] = "{ASO-2}"}
 		}, task = "CAS"})
 		-- fighter
-		table.insert(spawnOnDemand.planes.other, {type = "AJS37",
-			livery = {"#2 Bare Metal F7 Skaraborgs Flygflottilj"},
-			fuel = 4476, flare = 36, chaff = 105, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "AJS37", fuel = 4476, flare = 36, chaff = 105, pylons = {
 				[1] = {["CLSID"] = "{Robot24J}"}, [7] = {["CLSID"] = "{Robot24J}"},
 				[2] = {["CLSID"] = "{Robot74}"}, [3] = {["CLSID"] = "{Robot74}"},
 				[4] = {["CLSID"] = "{VIGGEN_X-TANK}"},
 				[5] = {["CLSID"] = "{Robot74}"}, [6] = {["CLSID"] = "{Robot74}"}
 		}, task = "CAP"})
-		table.insert(spawnOnDemand.planes.other, {type = "AV8BNA",
-			livery = {"default"},
-			fuel = 3520, flare = 120, chaff = 60, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "AV8BNA", fuel = 3520, flare = 120, chaff = 60, pylons = {
 				[1] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, [8] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, -- AIM-9M
 				[2] = {["CLSID"] = "{LAU_7_AGM_122_SIDEARM}"}, [7] = {["CLSID"] = "{LAU_7_AGM_122_SIDEARM}"},
 				[3] = {["CLSID"] = "LAU_117_AGM_65G"}, [6] = {["CLSID"] = "LAU_117_AGM_65G"},
 				[4] = {["CLSID"] = "{GAU_12_Equalizer}"}, [5] = {["CLSID"] = "{ALQ_164_RF_Jammer}"}
 		}, task = "CAP"})
-		table.insert(spawnOnDemand.planes.other, {type = "C-101CC",
-			livery = {"USAF Agressor Fictional"},
-			fuel = 1885, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "C-101CC", fuel = 1885, pylons = {
 				[1] = {["CLSID"] = "{9BFD8C90-F7AE-4e90-833B-BFD0CED0E536}"}, [7] = {["CLSID"] = "{9BFD8C90-F7AE-4e90-833B-BFD0CED0E536}"}, -- AIM-9P
 				[4] = {["CLSID"] = "{AN-M3}"}
 		}, task = "CAP"})
-		table.insert(spawnOnDemand.planes.other, {type = "F-5E-3",
-			livery = {"black 'Mig-28'", "USA standard"},
-			fuel = 2046, flare = 15, chaff = 30, ammoType = 2, pylons = { -- ammoType 2 = Combat Mix
+		table.insert(spawnOnDemand.planes.other, {type = "F-5E-3", fuel = 2046, flare = 15, chaff = 30, ammoType = 2, pylons = { -- ammoType 2 = Combat Mix
 				[1] = {["CLSID"] = "{AIM-9P5}"}, [7] = {["CLSID"] = "{AIM-9P5}"},
 				[3] = {["CLSID"] = "{PTB-150GAL}"}, [4] = {["CLSID"] = "{PTB-150GAL}"}, [5] = {["CLSID"] = "{PTB-150GAL}"}
 		}, task = "CAP"})
-		table.insert(spawnOnDemand.planes.other, {type = "F-86F Sabre",
-			livery = {"default livery"},
-			fuel = 1282, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "F-86F Sabre", fuel = 1282, pylons = {
 				[5] = {["CLSID"] = "{GAR-8}"}, [6] = {["CLSID"] = "{GAR-8}"},
 				[7] = {["CLSID"] = "{PTB_120_F86F35}"}, [4] = {["CLSID"] = "{PTB_120_F86F35}"}
 		}, task = "CAP"})
-		table.insert(spawnOnDemand.planes.other, {type = "L-39C",
-			livery = {"Black Diamond Jet Team"},
-			fuel = 980, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "L-39C", fuel = 980, pylons = {
 				[1] = {["CLSID"] = "{R-3S}"}, [3] = {["CLSID"] = "{R-3S}"}
 		}, task = "CAP"})
-		table.insert(spawnOnDemand.planes.other, {type = "M-2000C",
-			livery = {"UAE Air Defense Air Force"},
-			fuel = 3165, flare = 16, chaff = 112, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "M-2000C", fuel = 3165, flare = 16, chaff = 112, pylons = {
 				[8] = {["CLSID"] = "{Matra_S530D}"}, [2] = {["CLSID"] = "{Matra_S530D}"}, -- [NEGATIVE WEIGHT OF PAYLOAD]
 				[9] = {["CLSID"] = "{MMagicII}"}, [1] = {["CLSID"] = "{MMagicII}"},
 				[5] = {["CLSID"] = "{M2KC_RPL_522}"}
 		}, task = "CAP"})
-		table.insert(spawnOnDemand.planes.other, {type = "MiG-15bis",
-			livery = {"default livery"},
-			fuel = 1172, pylons = {
+		table.insert(spawnOnDemand.planes.other, {type = "MiG-15bis", fuel = 1172, pylons = {
 				[1] = {["CLSID"] = "PTB300_MIG15"}, [2] = {["CLSID"] = "PTB300_MIG15"}
 		}, task = "CAP"})
-		table.insert(spawnOnDemand.planes.other, {type = "MiG-21Bis",
-			livery = {"VVS Metal"},
-			fuel = 2280, flare = 32, chaff = 32, ammoType = 3, pylons = { -- ammoType 3 = A/A
+		table.insert(spawnOnDemand.planes.other, {type = "MiG-21Bis", fuel = 2280, flare = 32, chaff = 32, ammoType = 3, pylons = { -- ammoType 3 = A/A
 				[1] = {["CLSID"] = "{R-60 2L}"}, [2] = {["CLSID"] = "{R-3R}"},
 				[3] = {["CLSID"] = "{PTB_490C_MIG21}"},
 				[4] = {["CLSID"] = "{R-3R}"}, [5] = {["CLSID"] = "{R-60 2R}"},
 				[6] = {["CLSID"] = "{ASO-2}"}
 		}, task = "CAP"})
-		table.insert(spawnOnDemand.planes.other, {type = "MiG-19P",
-			livery = {"default", "Snow Camouflage Fictional"},
-			fuel = 1800, ammoType = 1, pylons = { -- ammoType 1 = AP-T, APHE, HEI-T, HEI-T, HEI-T
+		table.insert(spawnOnDemand.planes.other, {type = "MiG-19P", fuel = 1800, ammoType = 1, pylons = { -- ammoType 1 = AP-T, APHE, HEI-T, HEI-T, HEI-T
 				[1] = {["CLSID"] = "{K-13A}"}, [6] = {["CLSID"] = "{K-13A}"},
 				[2] = {["CLSID"] = "PTB760_MIG19"}, [5] = {["CLSID"] = "PTB760_MIG19"}
 		}, task = "CAP"})
 		-- CAS
 		-- TODO: use random selection from "attack" instead of duplicate definition? (what about payload)
 		spawnOnDemand.planes.CAS = {}
-		table.insert(spawnOnDemand.planes.CAS, {type = "A-10C",
-			livery = {"A-10 Grey"},
-			fuel = 2515, flare = 120, chaff = 240, ammoType = 1, pylons = { -- ammoType 1 = Combat Mix
+		table.insert(spawnOnDemand.planes.CAS, {type = "A-10C", fuel = 2515, flare = 120, chaff = 240, ammoType = 1, pylons = { -- ammoType 1 = Combat Mix
 				[1] = {["CLSID"] = "ALQ_184"},
 				[3] = {["CLSID"] = "LAU_88_AGM_65D_ONE"}, [9] = {["CLSID"] = "LAU_88_AGM_65D_ONE"},
 				[5] = {["CLSID"] = "{BDU-50LGB}"}, [7] = {["CLSID"] = "{BDU-50LGB}"},
 				[10] = {["CLSID"] = "{A111396E-D3E8-4b9c-8AC9-2432489304D5}"} -- AAQ-28
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.planes.CAS, {type = "AV8BNA",
-			livery = {"default"},
-			fuel = 3520, flare = 120, chaff = 60, pylons = {
+		table.insert(spawnOnDemand.planes.CAS, {type = "AV8BNA", fuel = 3520, flare = 120, chaff = 60, pylons = {
 				[1] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, [8] = {["CLSID"] = "{6CEB49FC-DED8-4DED-B053-E1F033FF72D3}"}, -- AIM-9M
 				[2] = {["CLSID"] = "{LAU_7_AGM_122_SIDEARM}"}, [7] = {["CLSID"] = "{LAU_7_AGM_122_SIDEARM}"},
 				[3] = {["CLSID"] = "LAU_117_AGM_65G"}, [6] = {["CLSID"] = "LAU_117_AGM_65G"},
@@ -3357,8 +3641,8 @@ do
 		}, task = "CAS"})
 		-- AFAC
 		spawnOnDemand.planes.AFAC = {}
-		table.insert(spawnOnDemand.planes.AFAC, {type = "MQ-9 Reaper", livery = {"standard", "'camo' scheme"}, fuel = 1300, pylons = {}, task = "AFAC"})
-		table.insert(spawnOnDemand.planes.AFAC, {type = "RQ-1A Predator", livery = {"USAF Standard"}, fuel = 200, pylons = {}, task = "AFAC"})
+		table.insert(spawnOnDemand.planes.AFAC, {type = "MQ-9 Reaper", fuel = 1300, pylons = {}, task = "AFAC"})
+		table.insert(spawnOnDemand.planes.AFAC, {type = "RQ-1A Predator", fuel = 200, pylons = {}, task = "AFAC"})
 
 		-- vehicles
 		spawnOnDemand.vehicles = {}
@@ -3393,69 +3677,51 @@ do
 		-- helicopters
 		spawnOnDemand.helos = {}
 		spawnOnDemand.helos.cargo = {}
-		table.insert(spawnOnDemand.helos.cargo, {type = "CH-47D", livery = {"standard"}, fuel = 3600, flare = 120, chaff = 120})
-		table.insert(spawnOnDemand.helos.cargo, {type = "CH-53E", livery = {"standard"}, fuel = 1908, flare = 60, chaff = 60})
-		table.insert(spawnOnDemand.helos.cargo, {type = "Ka-27", livery = {"standard"}, fuel = 2616, flare = 0, chaff = 0})
-		table.insert(spawnOnDemand.helos.cargo, {type = "Mi-26", livery = {"United Nations"}, fuel = 9600, flare = 192, chaff = 0})
-		table.insert(spawnOnDemand.helos.cargo, {type = "UH-60A", livery = {"standard"}, fuel = 1100, flare = 30, chaff = 30})
+		table.insert(spawnOnDemand.helos.cargo, {type = "CH-47D", fuel = 3600, flare = 120, chaff = 120})
+		table.insert(spawnOnDemand.helos.cargo, {type = "CH-53E", fuel = 1908, flare = 60, chaff = 60})
+		table.insert(spawnOnDemand.helos.cargo, {type = "Ka-27", fuel = 2616})
+		table.insert(spawnOnDemand.helos.cargo, {type = "Mi-26", fuel = 9600, flare = 192})
+		table.insert(spawnOnDemand.helos.cargo, {type = "UH-60A", fuel = 1100, flare = 30, chaff = 30})
 		-- attack
 		spawnOnDemand.helos.other = {}
-		table.insert(spawnOnDemand.helos.other, {type = "AH-1W",
-			livery = {"standard"},
-			fuel = 1250, flare = 30, chaff = 30, pylons = {
+		table.insert(spawnOnDemand.helos.other, {type = "AH-1W", fuel = 1250, flare = 30, chaff = 30, pylons = {
 				[1] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, [4] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, -- AGM-114
 				[2] = {["CLSID"] = "{M260_HYDRA}"}, [3] = {["CLSID"] = "{M260_HYDRA}"}
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.helos.other, {type = "AH-64D",
-			livery = {"standard"},
-			fuel = 1157, flare = 30, chaff = 30, pylons = {
+		table.insert(spawnOnDemand.helos.other, {type = "AH-64D", fuel = 1157, flare = 30, chaff = 30, pylons = {
 				[1] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, [4] = {["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}"}, -- AGM-114K
 				[2] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"}, [3] = {["CLSID"] = "{FD90A1DC-9147-49FA-BF56-CB83EF0BD32B}"} -- MK151 HE
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.helos.other, {type = "Ka-50",
-			livery = {"US army"},
-			fuel = 1450, flare = 128, chaff = 0, pylons = {
+		table.insert(spawnOnDemand.helos.other, {type = "Ka-50", fuel = 1450, flare = 128, chaff = 0, pylons = {
 				[1] = {["CLSID"] = "{A6FD14D3-6D30-4C85-88A7-8D17BEE120E2}"}, [4] = {["CLSID"] = "{A6FD14D3-6D30-4C85-88A7-8D17BEE120E2}"}, -- 9A4172 Vikhr
 				[2] = {["CLSID"] = "{6A4B9E69-64FE-439a-9163-3A87FB6A4D81}"}, [3] = {["CLSID"] = "{6A4B9E69-64FE-439a-9163-3A87FB6A4D81}"} -- S-8KOM
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.helos.other, {type = "Mi-24V",
-			livery = {"standard"},
-			fuel = 1704, flare = 192, chaff = 0, pylons = {
+		table.insert(spawnOnDemand.helos.other, {type = "Mi-24V", fuel = 1704, flare = 192, chaff = 0, pylons = {
 				[1] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"}, [2] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"},
 				[5] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"}, [6] = {["CLSID"] = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}"}, -- 9M114 Shturm-V
 				[3] = {["CLSID"] = "{637334E4-AB5A-47C0-83A6-51B7F1DF3CD5}"}, [4] = {["CLSID"] = "{637334E4-AB5A-47C0-83A6-51B7F1DF3CD5}"} -- S-5KO
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.helos.other, {type = "Mi-8MT",
-			livery = {"Standard"},
-			fuel = 1929, flare = 192, chaff = 0, pylons = {
+		table.insert(spawnOnDemand.helos.other, {type = "Mi-8MT", fuel = 1929, flare = 192, pylons = {
 				[1] = {["CLSID"] = "GUV_VOG"}, [6] = {["CLSID"] = "GUV_VOG"},
 				[2] = {["CLSID"] = "GUV_YakB_GSHP"}, [5] = {["CLSID"] = "GUV_YakB_GSHP"},
 				[3] = {["CLSID"] = "{6A4B9E69-64FE-439a-9163-3A87FB6A4D81}"}, [4] = {["CLSID"] = "{6A4B9E69-64FE-439a-9163-3A87FB6A4D81}"}, -- S-8KOM
 				[7] = {["CLSID"] = "KORD_12_7"}, -- door gunners
 				[8] = {["CLSID"] = "PKT_7_62"} -- rear gunner
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.helos.other, {type = "SA342L",
-			livery = {"Low Level Hell", "OH-16 Arapaho", "HunAF86", "UN 664 Squadron AAC", "Ravens Gazelle Desert Camo", "Ravens Gazelle Forest Camo", "Ravens Gazelle Snow Camo"},
-			fuel = 375, flare = 32, chaff = 0, pylons = {
+		table.insert(spawnOnDemand.helos.other, {type = "SA342L", fuel = 375, flare = 32, pylons = {
 				[2] = {["CLSID"] = "{LAU_SNEB68G}"},
 				[6] = {["CLSID"] = "{IR_Deflector}"}
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.helos.other, {type = "SA342M",
-			livery = {"US Marines Fictional"},
-			fuel = 291, flare = 32, chaff = 0, pylons = {
+		table.insert(spawnOnDemand.helos.other, {type = "SA342M", fuel = 291, flare = 32, pylons = {
 				[1] = {["CLSID"] = "{HOT3D}"}, [3] = {["CLSID"] = "{HOT3D}"},
 				[2] = {["CLSID"] = "{HOT3G}"}, [4] = {["CLSID"] = "{HOT3G}"}
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.helos.other, {type = "SA342Mistral",
-			livery = {"US Marines Fictional"},
-			fuel = 416, flare = 32, chaff = 0, pylons = {
+		table.insert(spawnOnDemand.helos.other, {type = "SA342Mistral", fuel = 416, flare = 32, pylons = {
 				[1] = {["CLSID"] = "{MBDA_MistralD}"}, [2] = {["CLSID"] = "{MBDA_MistralD}"},
 				[3] = {["CLSID"] = "{MBDA_MistralD}"}, [4] = {["CLSID"] = "{MBDA_MistralD}"},
 				[6] = {["CLSID"] = "{IR_Deflector}"}
 		}, task = "CAS"})
-		table.insert(spawnOnDemand.helos.other, {type = "UH-1H",
-			livery = {"US ARMY 1972"},
-			fuel = 631, flare = 60, chaff = 0, pylons = {
+		table.insert(spawnOnDemand.helos.other, {type = "UH-1H", fuel = 631, flare = 60, pylons = {
 				[1] = {["CLSID"] = "M134_L"}, [6] = {["CLSID"] = "M134_R"},
 				[2] = {["CLSID"] = "M261_MK151"}, [5] = {["CLSID"] = "M261_MK151"},
 				[3] = {["CLSID"] = "M60_SIDE_L"}, [4] = {["CLSID"] = "M60_SIDE_R"} -- door gunners
@@ -3492,9 +3758,18 @@ do
 		-- AWACS
 		spawnOnDemand.AWACS = {}
 		spawnOnDemand.AWACS.blue = {}
-		table.insert(spawnOnDemand.AWACS.blue, {type = "E-3A", livery = {"nato", "usaf standard"}, fuel = 65000, flare = 60, chaff = 120})
+		table.insert(spawnOnDemand.AWACS.blue, {type = "E-3A", fuel = 65000, flare = 60, chaff = 120})
 		spawnOnDemand.AWACS.red = {}
-		table.insert(spawnOnDemand.AWACS.red, {type = "A-50", livery = {"RF Air Force new"}, fuel = 70000, flare = 192, chaff = 192})
+		table.insert(spawnOnDemand.AWACS.red, {type = "A-50", fuel = 70000, flare = 192, chaff = 192})
+
+		-- Tankers
+		spawnOnDemand.tankers = {}
+		spawnOnDemand.tankers.blue = {}
+		--table.insert(spawnOnDemand.tankers.blue, {type = "KC130", fuel = 30000, flare = 60, chaff = 120})
+		table.insert(spawnOnDemand.tankers.blue, {type = "KC-135", fuel = 90700})
+		--table.insert(spawnOnDemand.tankers.blue, {type = "KC135MPRS", fuel = 90700, flare = 60, chaff = 120})
+		spawnOnDemand.tankers.red = {}
+		table.insert(spawnOnDemand.tankers.red, {type = "IL-78M", fuel = 90000, flare = 96, chaff = 96})
 
 		-- localizing settings
 		local settings = settings or {}
@@ -3659,6 +3934,24 @@ do
 		spawnOnDemand.settings.awacsInvisible = settings.awacsInvisible
 		if spawnOnDemand.settings.awacsInvisible == nil then spawnOnDemand.settings.awacsInvisible = true end
 
+		-- Tanker settings
+		spawnOnDemand.settings.tankerMinDist = settings.tankerMinDist or 5
+		if spawnOnDemand.settings.tankerMinDist < 0 then
+			spawnOnDemand.settings.tankerMinDist = 5
+		end
+		spawnOnDemand.settings.tankerMaxDist = settings.tankerMaxDist or 10
+		if spawnOnDemand.settings.tankerMaxDist < 0 or spawnOnDemand.settings.tankerMaxDist < spawnOnDemand.settings.tankerMinDist then
+			spawnOnDemand.settings.tankerMaxDist = 10
+		end
+		spawnOnDemand.settings.tankerSkill = settings.tankerSkill or "Excellent"
+		spawnOnDemand.settings.tankerFrequency = settings.tankerFrequency or 251
+		if spawnOnDemand.settings.tankerFrequency <= 0 then
+			spawnOnDemand.settings.tankerFrequency = 251
+		end
+		spawnOnDemand.settings.tankerBeacon = spawnOnDemand.settings.tankerBeacon or true
+		spawnOnDemand.settings.tankerInvisible = settings.tankerInvisible
+		if spawnOnDemand.settings.tankerInvisible == nil then spawnOnDemand.settings.tankerInvisible = true end
+
 		-- player warning settings
 		spawnOnDemand.settings.showLowFuel = settings.showLowFuel
 		if spawnOnDemand.settings.showLowFuel == nil then spawnOnDemand.settings.showLowFuel = true end
@@ -3701,6 +3994,8 @@ do
 		spawnOnDemand.settings.winID = 0
 		spawnOnDemand.settings.warAWACS = settings.warAWACS
 		if spawnOnDemand.settings.warAWACS == nil then spawnOnDemand.settings.warAWACS = true end
+		spawnOnDemand.settings.warTankers = settings.warTankers
+		if spawnOnDemand.settings.warTankers == nil then spawnOnDemand.settings.warTankers = true end
 		spawnOnDemand.settings.warFriendlyMinDist = settings.warFriendlyMinDist or 1
 		if spawnOnDemand.settings.warFriendlyMinDist <= 0 then
 			spawnOnDemand.settings.warFriendlyMinDist = 1
@@ -3809,15 +4104,24 @@ do
 			spawnOnDemand.settings.airbaseSpawnNum = 2
 		end
 
+		-- crash crew
+		spawnOnDemand.settings.crashCrewLand = settings.crashCrewLand
+		if spawnOnDemand.settings.crashCrewLand == nil then spawnOnDemand.settings.crashCrewLand = true end
+		spawnOnDemand.settings.crashCrewWater = settings.crashCrewWater
+		if spawnOnDemand.settings.crashCrewWater == nil then spawnOnDemand.settings.crashCrewWater = true end
+		spawnOnDemand.settings.crashCrewBeacon = settings.crashCrewBeacon
+		if spawnOnDemand.settings.crashCrewBeacon == nil then spawnOnDemand.settings.crashCrewBeacon = false end
+
 		-- sound settings
 		spawnOnDemand.settings.soundMessage = settings.soundMessage or ""
 
 		-- beacon settings
-		if spawnOnDemand.settings.planeBeacon or spawnOnDemand.settings.vehicleBeacon or spawnOnDemand.settings.troopBeacon or spawnOnDemand.settings.heloBeacon or spawnOnDemand.settings.awacsBeacon then
+		if spawnOnDemand.settings.planeBeacon or spawnOnDemand.settings.vehicleBeacon or spawnOnDemand.settings.troopBeacon or spawnOnDemand.settings.heloBeacon or spawnOnDemand.settings.awacsBeacon or spawnOnDemand.settings.tankerBeacon then
 			spawnOnDemand.settings.soundBeacon = settings.soundBeacon or ""
 			spawnOnDemand.settings.freqs = {}
 			spawnOnDemand.settings.freqs.used = {}
 			spawnOnDemand.generateVHFFreqs()
+			spawnOnDemand.generateTacanFreqs()
 		end
 
 		-- zero spawned groups
@@ -3849,6 +4153,66 @@ do
 
 	end
 
+	function spawnOnDemand.createTacanBeacon()
+		local tacan = spawnOnDemand.settings.freqs.tacan
+
+		if not tacan or #tacan == 0 then
+			spawnOnDemand.toLog("ERROR: TACAN frequencies not found!")
+			return nil
+		end
+
+		local freq
+		local found = false
+		for x = 1, #tacan do
+			freq = tacan[mist.random(#tacan)]
+			if not spawnOnDemand.settings.freqs.used.tacan[freq.channel] then
+				spawnOnDemand.settings.freqs.used.tacan[freq.channel] = freq.frequency -- value is never used
+				found = true
+				break
+			end
+		end
+		if not found then
+			spawnOnDemand.toLog("Unused TACAN frequency not found!")
+			return nil
+		end
+		return freq
+	end
+
+	function spawnOnDemand.generateTacanFreqs()
+		spawnOnDemand.settings.freqs.tacan = {}
+
+		-- 18-58 (1105-1145)
+		local base = 1087
+		for channel = 18, 58 do
+			local freq = {
+				channel = channel,
+				frequency = base + channel
+			}
+			table.insert(spawnOnDemand.settings.freqs.tacan, freq)
+		end
+
+		-- 71-126 (1032-1087)
+		base = 961
+		for channel = 71, 126 do
+			local freq = {
+				channel = channel,
+				frequency = (base + channel) * 1000000, -- in MHz
+				callsign = tostring(channel)
+			}
+			table.insert(spawnOnDemand.settings.freqs.tacan, freq)
+		end
+
+		spawnOnDemand.settings.freqs.used.tacan = {}
+
+		-- freqs to avoid per FAA
+		for i = 1, 17 do
+			spawnOnDemand.settings.freqs.used.tacan[i] = "reserved" -- value is never used
+		end
+		for i = 59, 70 do
+			spawnOnDemand.settings.freqs.used.tacan[i] = "reserved"
+		end
+	end
+
 	function spawnOnDemand.generateVHFFreqs()
 		spawnOnDemand.settings.freqs.vhf = {}
 		local debug = spawnOnDemand.settings.debug
@@ -3867,7 +4231,7 @@ do
 				dofile("./Mods/terrains/PersianGulf/Beacons.lua")
 			else
 				spawnOnDemand.toLog("ERROR: Theatre not found!")
-				return
+				return nil
 			end
 		end
 
@@ -3948,6 +4312,8 @@ do
 			end
 		end
 
+		spawnOnDemand.settings.freqs.used.vhf = {}
+
 		-- for debug
 		if debug then
 			spawnOnDemand.toLog(string.format("%i VHF frequencies generated.", #spawnOnDemand.settings.freqs.vhf))
@@ -3956,26 +4322,27 @@ do
 	end
 
 	function spawnOnDemand.createVHFBeacon(controller)
-		if not spawnOnDemand.settings.freqs then
-			spawnOnDemand.toLog("ERROR: Beacon frequencies not found!")
+		local vhf = spawnOnDemand.settings.freqs.vhf
+
+		if not vhf or #vhf == 0 then
+			spawnOnDemand.toLog("ERROR: VHF frequencies not found!")
 			return nil
 		end
 
-		local vhf = spawnOnDemand.settings.freqs.vhf
 		local freq = 0
 		local sound = spawnOnDemand.settings.soundBeacon
-		if string.len(sound) > 0 and #vhf > 0 then
+		if string.len(sound) > 0 then
 			local found = false
 			for x = 1, #vhf do
 				freq = vhf[mist.random(#vhf)]
-				if not spawnOnDemand.settings.freqs.used[freq] then
-					spawnOnDemand.settings.freqs.used[freq] = freq -- value is never used
+				if not spawnOnDemand.settings.freqs.used.vhf[freq] then
+					spawnOnDemand.settings.freqs.used.vhf[freq] = freq -- value is never used
 					found = true
 					break
 				end
 			end
 			if not found then
-				spawnOnDemand.toLog("Unused frequency not found!")
+				spawnOnDemand.toLog("Unused VHF frequency not found!")
 				return nil
 			end
 			local freqCommand = {
@@ -4163,6 +4530,8 @@ do
 				missionCommands.addCommandForGroup(groupID, "Fighter(s) - Friendly", path, spawnOnDemand.spawnPlanes, {isFriendly = true})
 				missionCommands.addCommandForGroup(groupID, "AWACS", path, spawnOnDemand.spawnAWACS)
 				missionCommands.addCommandForGroup(groupID, "AWACS - Friendly", path, spawnOnDemand.spawnAWACS, {isFriendly = true})
+				missionCommands.addCommandForGroup(groupID, "Tanker", path, spawnOnDemand.spawnTanker)
+				missionCommands.addCommandForGroup(groupID, "Tanker - Friendly", path, spawnOnDemand.spawnTanker, {isFriendly = true})
 			end
 
 			-- add vehicles
@@ -4372,7 +4741,7 @@ do
 
 						-- remove used beacon
 						if group.vhf then
-							spawnOnDemand.settings.freqs.used[group.vhf] = nil
+							spawnOnDemand.settings.freqs.used.vhf[group.vhf] = nil
 						end
 
 						-- remove group
@@ -4406,6 +4775,29 @@ do
 		return count
 	end
 
+	function spawnOnDemand.crashCrew(unit)
+		local pos = unit:getPosition().p
+		local type = land.getSurfaceType({x = pos.x, y = pos.z})
+
+		if (type == land.SurfaceType.SHALLOW_WATER or type == land.SurfaceType.WATER) and spawnOnDemand.settings.crashCrewWater then
+			--local model =
+		elseif spawnOnDemand.settings.crashCrewLand then
+			--local model =
+		else
+			return
+		end
+
+		local msg = "Crash crew dispatched!"
+
+		-- TODO: beacon
+		--msg = string.format("%s [%s]", msg, freq)
+
+		spawnOnDemand.toCoalition(msg)
+		if spawnOnDemand.settings.debug then
+			spawnOnDemand.toLog(msg)
+		end
+	end
+
 	function spawnOnDemand.events(event)
 		local unit = spawnOnDemand.unit
 		local group = spawnOnDemand.group
@@ -4433,6 +4825,11 @@ do
 
 			elseif event.id == world.event.S_EVENT_DEAD then
 
+				if unit:getPlayerName() then
+					--spawnOnDemand.crashCrew(unit)
+					return
+				end
+
 				local i = event.initiator
 				if i:getCategory() == Object.Category.UNIT then
 					local group = i:getGroup()
@@ -4442,6 +4839,10 @@ do
 						local myGroup = spawnOnDemand.findSpawnedGroup(groupName)
 						if myGroup and myGroup.type then
 							groupName = myGroup.type
+						end
+						spawnOnDemand.removeUnit(groupName, i:getName())
+						if myGroup.tacan then
+							spawnOnDemand.settings.freqs.used.tacan[myGroup.tacan.channel] = nil -- clear
 						end
 						local msg = string.format("%s destroyed!", groupName)
 						spawnOnDemand.toCoalition(msg)
@@ -4652,7 +5053,7 @@ do
 			v1.4.2  - Added crash crew
 			v1.4.3  - Added AFAC
 			v1.4.4  - Generating radom AFAC laser code
-			v1.5 - Cleaned up code
+			v1.5.0  - Cleaned up code
 			v1.5.1  - Added MiG-19P, removed mods (until working again)
 			v1.5.2  - Removed Hawk
 			v1.5.3  - Cleaned up skins (using only defaults)
@@ -4660,11 +5061,14 @@ do
 			v1.5.5  - Updated plane propeties
 			v1.5.6  - Added route patterns to doRouteLoop (not used in script yet)
 			v1.5.7  - AA groups can be stationary, 50/50 in war
+			v1.5.8  - Using allSkins for plane/helo liveries
+			v1.6.0  - Added tankers and bug fixes
+			v1.6.1  - Re-adding crash crew
 		--]]
 
 		spawnOnDemand.version = {}
 		spawnOnDemand.version.major = 1
-		spawnOnDemand.version.minor = 5.7 -- including revision
+		spawnOnDemand.version.minor = 6.1 -- including revision
 		spawnOnDemand.toLog(string.format("v%i.%g locked and loaded.", spawnOnDemand.version.major, spawnOnDemand.version.minor))
 	end
 

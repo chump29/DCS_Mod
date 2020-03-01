@@ -6,6 +6,7 @@
 local base = _G
 local ipairs = base.ipairs
 local require = base.require
+--local string = base.string
 local table = base.table
 
 allSkins = {
@@ -40,7 +41,6 @@ allSkins = {
 }
 
 do
-
 	local lfs = require("lfs")
 
 	function allSkins.getLiveries(path)
@@ -53,6 +53,8 @@ do
 		local function invalid(obj) return obj == nil or obj == "." or obj == ".." end
 
 		for airframe in lfs.dir(path) do
+			--airframe = string.upper(airframe)
+
 			if not invalid(airframe) and lfs.attributes(path .. airframe, "mode") == "directory" then
 
 				for livery in lfs.dir(path .. airframe) do

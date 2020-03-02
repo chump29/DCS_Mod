@@ -1587,6 +1587,7 @@ do
 		local gun = plane.gun or 100
 		local unit = mist.utils.deepCopy(spawnOnDemand.templates.unit.plane)
 		local alt = land.getHeight(point) + mist.random(4572, 7620) -- 15,000ft to 25,000ft (in m)
+		alt = (alt + 500) / 1000 * 1000 -- round up to nearest thousand
 		unit.alt = alt
 		unit.hardpoint_racks = nil -- clear
 		local skins = allSkins.liveries[plane.type]
@@ -1595,9 +1596,8 @@ do
 		end
 		local skills = spawnOnDemand.settings.skills
 		unit.skill = skill or skills[mist.random(#skills)]
-		local altInFt = mist.utils.metersToFeet(alt)
-		local speed = (220 * 0.018 * ((altInFt - altInFt % 1000) / 1000)) + 220 -- wanting steady 220kts IAS (every 1,000ft IAS increases TAS by 1.8%)
-		unit.speed = mist.utils.knotsToMps(speed) -- in mps (TAS)
+		local speed = mist.utils.knotsToMps(220) -- in mps
+		unit.speed = speed
 		unit.AddPropAircraft = nil -- clear
 		unit.type = plane.type
 		unit.x = point.x
@@ -1625,28 +1625,10 @@ do
 
 		-- create route
 		local points = {}
-		local start = mist.fixedWing.buildWP(point) -- starting point
+		local start = mist.fixedWing.buildWP(point, "turning_point", speed, alt, "radio") -- starting point
 		local spawnType = planeData.spawn
-		start.type = spawnType.type
 		start.action = spawnType.action
 		local tasks = planeData.tasks
-
-		-- create tacan (blue only)
-		if spawnOnDemand.group:getCoalition() == coalition.side.RED and isFriendly then
-			tasks[3] = nil -- clear
-		end
-		local tacan
-		local freq = ""
-		if tasks[3] and spawnOnDemand.settings.tankerBeacon then
-			tacan = spawnOnDemand.createTacanBeacon()
-			if tacan then
-				freq = " [" .. tacan.channel .. "Y]"
-				local params = tasks[3].params.action.params
-				params.frequency = tacan.frequency
-				params.callsign = tacan.callsign
-				params.channel = tacan.channel
-			end
-		end
 
 		tasks[2].params.altitude = alt
 		tasks[2].params.speed = speed
@@ -1706,6 +1688,24 @@ do
 		controller:setOption(AI.Option.Air.id.PROHIBIT_WP_PASS_REPORT, true)
 		if spawnOnDemand.settings.tankerInvisible then
 			spawnOnDemand.setInvisible(controller, true)
+		end
+
+		-- create tacan (blue only)
+		local tacan
+		local freq = ""
+		if spawnOnDemand.group:getCoalition() == coalition.side.BLUE and isFriendly and spawnOnDemand.settings.tankerBeacon then
+			tacan = spawnOnDemand.createTacanBeacon()
+			if tacan then
+				freq = " [" .. tacan.channel .. "Y]"
+				local command = mist.utils.deepCopy(spawnOnDemand.templates.tasks.TACAN)
+				command.frequency = tacan.frequency
+				command.callsign = tacan.callsign
+				command.channel = tacan.channel
+				command.unitId = group:getUnits()[1]:getID()
+				if controller then
+					controller:setCommand(command)
+				end
+			end
 		end
 
 		-- define plane type
@@ -3425,25 +3425,33 @@ do
 					speedEdited = true
 				}
 			},
-			[3] = {
-				number = 3,
-				auto = true,
-				id = "WrappedAction",
-				enabled = true,
-				params = {
-					action = {
-						id = "ActivateBeacon",
-						params = {
-							type = 4,
-							frequency = 0,
-							callsign = "",
-							channel = 0,
-							modeChannel = "Y",
-							bearing = true,
-							system = 4
-						}
-					}
-				}
+            [3] = {
+            	enabled = true,
+            	auto = false,
+            	id = "WrappedAction",
+            	number = 3,
+            	params = {
+            		action = {
+            			id = "SetImmortal",
+            			params = {
+            				value = true
+            			}
+            		}
+            	}
+            }
+		}
+		spawnOnDemand.templates.tasks.TACAN = {
+			id = "ActivateBeacon",
+			params = {
+				type = 4, --BEACON_TYPE_TACAN
+				system = 4, -- TACAN_TANKER
+				AA = true,
+				callsign = "",
+				frequency = 0,
+				channel = 0,
+				modeChannel = "Y",
+				unitId = 0,
+				bearing = true,
 			}
 		}
 		spawnOnDemand.templates.tasks.AFAC = {

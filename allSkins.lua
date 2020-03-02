@@ -6,7 +6,7 @@
 local base = _G
 local ipairs = base.ipairs
 local require = base.require
---local string = base.string
+local string = base.string
 local table = base.table
 
 allSkins = {
@@ -37,6 +37,12 @@ allSkins = {
 		lfs.currentdir() .. "CoreMods\\aircraft\\SA342\\Liveries\\",
 		lfs.currentdir() .. "CoreMods\\aircraft\\Su-34\\Liveries\\",
 		lfs.currentdir() .. "CoreMods\\aircraft\\Yak-52\\Liveries\\"
+	},
+	-- NOTE: will be auto-populated with skins found in paths
+	liveries = {},
+	count = {
+		airframes = 0,
+		skins = 0
 	}
 }
 
@@ -48,14 +54,12 @@ do
 
 		if debug then env.info("allSkins: Scanning " .. path) end
 
-		if not allSkins.liveries then allSkins.liveries = {} end
-
 		local function invalid(obj) return obj == nil or obj == "." or obj == ".." end
 
 		for airframe in lfs.dir(path) do
-			--airframe = string.upper(airframe)
-
 			if not invalid(airframe) and lfs.attributes(path .. airframe, "mode") == "directory" then
+
+				allSkins.count.airframes = allSkins.count.airframes + 1
 
 				for livery in lfs.dir(path .. airframe) do
 					if not invalid(livery) and lfs.attributes(path .. airframe .. "\\" .. livery, "mode") == "directory" then
@@ -63,6 +67,8 @@ do
 						if not allSkins.liveries[airframe] then allSkins.liveries[airframe] = {} end
 
 						table.insert(allSkins.liveries[airframe], livery)
+
+						allSkins.count.skins = allSkins.count.skins + 1
 
 						if debug then env.info("allSkins: Inserted " .. livery .. " for " .. airframe) end
 					end
@@ -75,5 +81,5 @@ do
 		allSkins.getLiveries(path)
 	end
 
-	env.info("allSkins: scanned.")
+	env.info(string.format("allSkins: scanned %i skins for %i airframes.", allSkins.count.skins, allSkins.count.airframes))
 end

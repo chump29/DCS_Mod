@@ -27,7 +27,7 @@ do
 
 		local unit = event.initiator
 		local unitName
-		if unit then
+		if unit and unit:isExist() then
 			unitName = string.upper(unit:getDesc().typeName)
 		end
 

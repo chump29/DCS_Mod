@@ -214,6 +214,4 @@ do
 	end
 
 	targetScript.start(true)
-
-	targetScript.log("targets loaded.")
 end

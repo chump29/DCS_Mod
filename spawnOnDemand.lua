@@ -6,7 +6,7 @@
 -- TODO: add light/heavy vehicle categories
 -- TODO: add location/spawnNum/noRoute to all spawners
 -- TODO: fix scenarios (vehicles)
--- TODO: finish crash crew/find models
+-- TODO: something if SAR is successful
 
 local base = _G
 local assert = base.assert
@@ -162,7 +162,7 @@ do
 		-- Crash Crew
 		crashCrewLand = true,					-- Determines if crash crew is dispatched for crashes on land [default: true]
 		crashCrewWater = true,					-- Determines if crash crew is dispatched for crashes on water [default: true]
-		crashCrewBeacon = false,				-- Determines if SAR beacon is turned on to a random frequency [default: false]
+		crashCrewBeacon = true,					--* Determines if SAR beacon is turned on to a random frequency [default: false]
 
 		-- Debug
 		showF10Debug = false,					-- Show F10 debug menu [default: false]
@@ -189,7 +189,7 @@ do
 			msg = {string.format("Status:%s* = Friendly", string.rep("    ", 6))} -- horizontal spacing
 			local footer = ""
 			local groups = {}
-			for index, spawnedGroup in pairs(spawnedGroups) do
+			for index, spawnedGroup in ipairs(spawnedGroups) do
 				if index == 36 then -- maximum groups + 1 to show
 					local diff = spawnedGroupsCount - index + 1
 					footer = string.format("\n... and %i more", diff)
@@ -207,6 +207,8 @@ do
 								local strDist, _ = string.gsub(dist, "nm", "")
 								local str = string.format("\n#%i: %i %s - %s", groupID, #units, spawnedGroup.friendlyName, dist)
 								if spawnedGroup.isCarBomb then
+									str = string.format("\n#%i: %s - %s", groupID, spawnedGroup.friendlyName, dist)
+								elseif spawnGroup.groupType == spawnOnDemand.settings.groupTypes.CRASHCREW then
 									str = string.format("\n#%i: %s - %s", groupID, spawnedGroup.friendlyName, dist)
 								end
 								table.insert(groups, {
@@ -265,7 +267,8 @@ do
 	function spawnOnDemand.startWar(obj)
 		obj = obj or {}
 		local warType = obj.warType or spawnOnDemand.settings.warTypes.USER
-		local spawnGroupTypes = spawnOnDemand.tableLength(spawnOnDemand.settings.groupTypes) - 2 -- exclude AWACS & Tankers
+		local excludes = {"AWACS", "TANKER", "CRASHCREW"}
+		local spawnGroupTypes = spawnOnDemand.tableLength(spawnOnDemand.settings.groupTypes) - #excludes
 
 		-- check for existing war
 		if spawnOnDemand.isWar() then
@@ -1696,8 +1699,8 @@ do
 		if spawnOnDemand.group:getCoalition() == coalition.side.BLUE and isFriendly and spawnOnDemand.settings.tankerBeacon then
 			tacan = spawnOnDemand.createTacanBeacon()
 			if tacan then
-				freq = " [" .. tacan.channel .. "Y]"
 				local command = mist.utils.deepCopy(spawnOnDemand.templates.tasks.TACAN)
+				freq = " [" .. tostring(tacan.channel) .. command.modeChannel .. "]"
 				command.frequency = tacan.frequency
 				command.callsign = tacan.callsign
 				command.channel = tacan.channel
@@ -3028,6 +3031,15 @@ do
 		return data
 	end
 
+	function spawnOnDemand.getCrashCrew(isLand)
+		isLand = isLand or true
+		if isLand then
+			return spawnOnDemand.vehicles.crashCrew.land[1]
+		else
+			return spawnOnDemand.vehicles.crashCrew.sea[1]
+		end
+	end
+
 	function spawnOnDemand.getRandomCAS()
 		local data = {}
 		data.planes = {}
@@ -3281,13 +3293,18 @@ do
 		}
 		spawnOnDemand.templates.group.vehicle = {
 			visible = false,
+			hiddenOnPlanner = false,
 			taskSelected = true,
 			tasks = {},
 			hidden = false,
 			units = {},
 			name = "",
 			start_time = 0,
-			task = "Ground Nothing"
+			task = "Ground Nothing",
+			uncontrollable = false,
+			manualHeading = false,
+			y = 0,
+			x = 0
 		}
 		spawnOnDemand.templates.group.ship = {
 			visible = false,
@@ -3449,9 +3466,9 @@ do
 				callsign = "",
 				frequency = 0,
 				channel = 0,
-				modeChannel = "Y",
+				modeChannel = "X",
 				unitId = 0,
-				bearing = true,
+				bearing = true
 			}
 		}
 		spawnOnDemand.templates.tasks.AFAC = {
@@ -3681,6 +3698,12 @@ do
 		table.insert(spawnOnDemand.vehicles.other, "M1043 HMMWV Armament")
 		table.insert(spawnOnDemand.vehicles.other, "M1126 Stryker ICV")
 		--table.insert(spawnOnDemand.vehicles.other, "TOYO_TECH") -- Technical Small 12.7mm (ranger)
+		-- crash crew
+		spawnOnDemand.vehicles.crashCrew = {}
+		spawnOnDemand.vehicles.crashCrew.land = {}
+		table.insert(spawnOnDemand.vehicles.crashCrew.land, "Ural ATsP-6")
+		spawnOnDemand.vehicles.crashCrew.sea = {}
+		table.insert(spawnOnDemand.vehicles.crashCrew.sea, "speedboat")
 
 		-- helicopters
 		spawnOnDemand.helos = {}
@@ -4119,12 +4142,19 @@ do
 		if spawnOnDemand.settings.crashCrewWater == nil then spawnOnDemand.settings.crashCrewWater = true end
 		spawnOnDemand.settings.crashCrewBeacon = settings.crashCrewBeacon
 		if spawnOnDemand.settings.crashCrewBeacon == nil then spawnOnDemand.settings.crashCrewBeacon = false end
+		spawnOnDemand.settings.activeSAR = false
 
 		-- sound settings
 		spawnOnDemand.settings.soundMessage = settings.soundMessage or ""
 
 		-- beacon settings
-		if spawnOnDemand.settings.planeBeacon or spawnOnDemand.settings.vehicleBeacon or spawnOnDemand.settings.troopBeacon or spawnOnDemand.settings.heloBeacon or spawnOnDemand.settings.awacsBeacon or spawnOnDemand.settings.tankerBeacon then
+		if spawnOnDemand.settings.planeBeacon
+			or spawnOnDemand.settings.vehicleBeacon
+			or spawnOnDemand.settings.troopBeacon
+			or spawnOnDemand.settings.heloBeacon
+			or spawnOnDemand.settings.awacsBeacon
+			or spawnOnDemand.settings.tankerBeacon
+			or spawnOnDemand.settings.crashCrewBeacon then
 			spawnOnDemand.settings.soundBeacon = settings.soundBeacon or ""
 			spawnOnDemand.settings.freqs = {}
 			spawnOnDemand.settings.freqs.used = {}
@@ -4627,8 +4657,8 @@ do
 	function spawnOnDemand.init()
 
 		-- get player unit/group
-		local x = spawnOnDemand.getPlayerData()
-		if not x then return end
+		local found = spawnOnDemand.getPlayerData()
+		if not found then return end
 
 		-- get settings
 		spawnOnDemand.getSettings()
@@ -4783,32 +4813,181 @@ do
 		return count
 	end
 
-	function spawnOnDemand.crashCrew(unit)
-		local pos = unit:getPosition().p
+	function spawnOnDemand.spawnCrashCrew(downedUnit)
+		local pos = downedUnit:getPosition().p
 		local type = land.getSurfaceType({x = pos.x, y = pos.z})
+		local crew
 
+		-- determine if land/sea rescue
 		if (type == land.SurfaceType.SHALLOW_WATER or type == land.SurfaceType.WATER) and spawnOnDemand.settings.crashCrewWater then
-			--local model =
+			crew = spawnOnDemand.getCrashCrew(false)
 		elseif spawnOnDemand.settings.crashCrewLand then
-			--local model =
+			crew = spawnOnDemand.getCrashCrew()
 		else
+			spawnOnDemand.log("ERROR: cannot find SurfaceType!")
 			return
 		end
 
-		local msg = "Crash crew dispatched!"
+		-- create group
+		spawnOnDemand.spawnedGroupID = spawnOnDemand.spawnedGroupID + 1
+		local groupName = string.format("Spawned Crash Crew group #%i", spawnOnDemand.spawnedGroupID)
+		local newGroupData = mist.utils.deepCopy(spawnOnDemand.templates.group.vehicle)
+		newGroupData.name = groupName
+		newGroupData.hiddenOnPlanner = true
+		newGroupData.manualHeading = true
+		newGroupData.hidden = true
 
-		-- TODO: beacon
-		--msg = string.format("%s [%s]", msg, freq)
+		-- set units
+		local units = {}
+		for index = 1, 3 do
+			local vehicle = crew
+			spawnOnDemand.spawnedUnitID = spawnOnDemand.spawnedUnitID + 1
+			local unit = mist.utils.deepCopy(spawnOnDemand.templates.unit.vehicle)
+			unit.type = vehicle
+			unit.skill = spawnOnDemand.settings.skills[1] -- Average
+			unit.name = string.format("%s (#%i)", vehicle, spawnOnDemand.spawnedUnitID)
 
-		spawnOnDemand.toCoalition(msg)
+			local inM = mist.utils.feetToMeters(71) -- will end up ~100ft away (a²+b²=c²)
+			if index == 1 then -- 45°
+				unit.y = pos.z + inM
+				unit.x = pos.x + inM
+			elseif index == 2 then -- 135°
+				unit.y = pos.z + inM
+				unit.x = pos.x - inM
+			else -- 270°
+				unit.y = pos.z - mist.utils.feetToMeters(100)
+				unit.x = pos.x
+			end
+			newGroupData.y = unit.y
+			newGroupData.x = unit.x
+
+			local heading = mist.getHeading(downedUnit, true)
+			local headingAdd = 0
+			if index == 1 then
+				headingAdd = 225
+			elseif index == 2 then
+				headingAdd = 315
+			else
+				headingAdd = 90
+			end
+			unit.heading = heading + mist.utils.toRadian(headingAdd) -- face wreck (in radians)
+
+			table.insert(newGroupData.units, unit)
+			table.insert(units, unit.name)
+		end
+
+		-- spawn group
+		local countryID = downedUnit:getCountry()
+		local group = coalition.addGroup(countryID, Group.Category.GROUND, newGroupData)
+		if not group then
+			spawnOnDemand.toLog("Error spawning Crash Crew!")
+			return nil
+		end
+
+		-- set options
+		local controller = group:getController()
+		controller:setOption(AI.Option.Ground.id.DISPERSE_ON_ATTACK, false)
+		spawnOnDemand.setInvisible(controller, true)
+
+		-- create beacon
+		local vhf
+		local freq = ""
+		local isFriendly = downedUnit:getCoalition() == spawnOnDemand.unit:getCoalition()
+		if spawnOnDemand.settings.crashCrewBeacon and isFriendly then
+			vhf = spawnOnDemand.createVHFBeacon(controller)
+			if vhf then
+				freq = " [" .. vhf .. "]"
+			end
+
+			-- signal flares
+			trigger.action.signalFlare(pos, trigger.flareColor.Green, 0)
+			trigger.action.signalFlare(pos, trigger.flareColor.Red, 90)
+			trigger.action.signalFlare(pos, trigger.flareColor.White, 180)
+			trigger.action.signalFlare(pos, trigger.flareColor.Yellow, 270)
+		end
+
+		-- create spawned group object
+		local vehicleType = "Crash Crew"
+		if spawnOnDemand.settings.crashCrewBeacon and vhf then
+			vehicleType = string.format("%s (SAR)", vehicleType)
+		end
+		local spawnedGroup = {
+			groupName = groupName,
+			friendlyName = string.format("%s%s", spawnOnDemand.showFriendly(vehicleType, isFriendly), freq),
+			display = vehicleType,
+			units = units,
+			isFriendly = isFriendly,
+			vhf = vhf,
+			groupType = spawnOnDemand.settings.groupTypes.CRASHCREW,
+			type = vehicleType
+		}
+
+		-- notify player, if beacon
+		local msg = string.format("%s dispatched!", spawnedGroup.friendlyName)
+		if spawnOnDemand.settings.crashCrewBeacon and vhf then
+			spawnOnDemand.toPlayer(msg, 5)
+
+			-- add group
+			table.insert(spawnOnDemand.spawnedGroups, spawnedGroup)
+
+			-- set flag
+			spawnOnDemand.settings.activeSAR = true
+
+			-- keep alive for 10 minutes
+			mist.scheduleFunction(spawnOnDemand.destroyCrashCrew, {group}, timer.getTime() + 600)
+		else
+
+			-- keep alive for 5 minutes
+			mist.scheduleFunction(spawnOnDemand.destroyCrashCrew, {group}, timer.getTime() + 300)
+		end
+
+		-- for debug
 		if spawnOnDemand.settings.debug then
 			spawnOnDemand.toLog(msg)
+		end
+
+		-- return object
+		return spawnOnDemand.convertForMistDB(newGroupData, countryID)
+	end
+
+	function spawnOnDemand.destroyCrashCrew(group)
+		if group and group:isExist() then
+
+			-- if SAR, send message
+			local spawnedGroup = spawnOnDemand.findSpawnedGroup(group:getName())
+			if spawnedGroup and spawnedGroup.vhf then
+				spawnOnDemand.toPlayer("SAR cancelled!", 5)
+
+				-- remove group
+				local spawnedGroupIndex = spawnOnDemand.findSpawnedGroupIndex(spawnedGroup)
+				if spawnedGroupIndex then
+					spawnOnDemand.spawnedGroups[spawnedGroupIndex] = nil
+					spawnOnDemand.settings.activeSAR = false
+				end
+			end
+
+			-- destroy group (no events)
+			group:destroy()
+
+			if spawnOnDemand.settings.debug then
+				spawnOnDemand.log(string.format("Destroyed Crash Crew (%s)", group:getName()))
+			end
 		end
 	end
 
 	function spawnOnDemand.events(event)
 		local unit = spawnOnDemand.unit
 		local group = spawnOnDemand.group
+
+		-- dispatch crash crew
+		local initiator = event.initiator
+		local name
+		if initiator then
+			name = initiator:getPlayerName()
+		end
+		if event.id == world.event.S_EVENT_CRASH and name and not spawnOnDemand.settings.activeSAR then
+			spawnOnDemand.spawnCrashCrew(initiator)
+		end
 
 		-- check if player is still alive
 		if unit and group then
@@ -4832,12 +5011,6 @@ do
 				end
 
 			elseif event.id == world.event.S_EVENT_DEAD then
-
-				if unit:getPlayerName() then
-					--spawnOnDemand.crashCrew(unit)
-					return
-				end
-
 				local i = event.initiator
 				if i:getCategory() == Object.Category.UNIT then
 					local group = i:getGroup()
@@ -5005,25 +5178,25 @@ do
 	-- changelog
 	function spawnOnDemand.showVersion()
 		--[[
-			v0.1.0  - Added planes options
-			v0.2.0  - Added vehicles options
-			v0.3.0  - Added troops options
-			v0.4.0  - Added friendly/enemy logic
-			v0.5.0  - Added VHF AM beacons on enemies
-			v0.6.0  - Added incoming missile warning functionality
-			v0.7.0  - Added war options
+			v0.1    - Added planes options
+			v0.2    - Added vehicles options
+			v0.3    - Added troops options
+			v0.4    - Added friendly/enemy logic
+			v0.5    - Added VHF AM beacons on enemies
+			v0.6    - Added incoming missile warning functionality
+			v0.7    - Added war options
 			v0.7.1  - Sorted status by distance
 			v0.7.2  - Added used beacon exclusions by map
 			v0.7.3  - Added ADF frequency ranges by typeName
 			v0.7.4  - Added war group spawn fairness
-			v0.8.0  - Added hit message functionality
+			v0.8    - Added hit message functionality
 			v0.8.1  - Vehicles/troops no longer spawn in water
 			v0.8.2  - Added war spawn options
 			v0.8.3  - Added attack planes, tasks
 			v0.8.4  - Optimized code
-			v0.9.0  - Added helicopters options
-			v0.91.0 - Added war distribution
-			v1.0.0  - Added airbase spawning
+			v0.9    - Added helicopters options
+			v0.9.1  - Added war distribution
+			v1.0    - Added airbase spawning
 			v1.0.1  - Added AI behavior checks
 			v1.0.2  - Added player protection on ground from missiles
 			v1.0.3  - Added win flag option
@@ -5032,7 +5205,7 @@ do
 			v1.0.6  - Added war team spawn option
 			v1.0.7  - Added F10 debug options
 			v1.0.8  - Added maximum airbase spawn number
-			v1.1.0  - Added AWACS options
+			v1.1    - Added AWACS options
 			v1.1.1  - Added more skins (NOTE: lots of custom ones)
 			v1.1.2  - Added friendly/enemy war spawn distance options
 			v1.1.3  - Added groupType enum
@@ -5041,7 +5214,7 @@ do
 			v1.1.6  - Added incoming weapon category/guidance information
 			v1.1.7  - Updated payloads/skins
 			v1.1.8  - Bug fixes
-			v1.2.0  - Added support options
+			v1.2    - Added support options
 			v1.2.1  - Added route loop options
 			v1.2.2  - Added player warning options
 			v1.2.3  - Bug fixes
@@ -5052,16 +5225,16 @@ do
 			v1.2.8  - Updated aircraft/properties/skins
 			v1.2.9  - Added toCoalition() functionality
 			v1.2.10 - Added F10 options for groups
-			v1.3.0  - Added scenario options
+			v1.3    - Added scenario options
 			v1.3.1  - Added car bomb scenario
 			v1.3.2  - Added war type options
 			v1.3.3  - Added VIP scenario
-			v1.4.0  - Added ship options
+			v1.4    - Added ship options
 			v1.4.1  - Added boat convoy scenario
 			v1.4.2  - Added crash crew
 			v1.4.3  - Added AFAC
 			v1.4.4  - Generating radom AFAC laser code
-			v1.5.0  - Cleaned up code
+			v1.5    - Cleaned up code
 			v1.5.1  - Added MiG-19P, removed mods (until working again)
 			v1.5.2  - Removed Hawk
 			v1.5.3  - Cleaned up skins (using only defaults)
@@ -5070,7 +5243,7 @@ do
 			v1.5.6  - Added route patterns to doRouteLoop (not used in script yet)
 			v1.5.7  - AA groups can be stationary, 50/50 in war
 			v1.5.8  - Using allSkins for plane/helo liveries
-			v1.6.0  - Added tankers and bug fixes
+			v1.6    - Added tankers and bug fixes
 			v1.6.1  - Re-adding crash crew
 		--]]
 

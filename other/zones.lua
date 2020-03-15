@@ -15,14 +15,7 @@ do
 	}
 
 	-- declare landing zones
-	local zones = {
-		"Extract #001",
-		"Extract #002",
-		"Extract #003",
-		"Extract #004",
-		"Extract #005",
-		"Extract #006",
-		"Extract #007",
+	local zones = { -- NOTE: put only one
 		"Extract #008"
 	}
 
@@ -58,9 +51,6 @@ do
 		local msg = string.format("Hey Captain %s, any chance you could drop us boys off at the strip club in Poti? My mate said he'd drop a green smoke canister when he hears us approaching to make it easy to find. What do ya say sir, come on, you'll be doing us a solid sir!", unit:getPlayerName())
 		trigger.action.outTextForGroup(unit:getGroup():getID(), msg, 15) -- show for 15 seconds
 
-		-- remove player from checks (and re-index the table)
-		table.remove(hueys, hueyIndex(unit:getName()))
-
 	end
 
 	function checkTime()
@@ -85,11 +75,12 @@ do
 					-- timer reached?
 					if data.t == 45 then
 
+						-- clear watched units
+						hueys = {}
+						onGround = {}
+
 						-- show message
 						showMsg(data.u)
-
-						-- remove unit from checks
-						removeOnGround(name)
 
 					end
 

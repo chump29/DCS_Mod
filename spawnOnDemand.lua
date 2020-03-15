@@ -4864,11 +4864,11 @@ do
 			local heading = mist.getHeading(downedUnit, true)
 			local headingAdd = 0
 			if index == 1 then
-				headingAdd = 225
+				headingAdd = 45
 			elseif index == 2 then
-				headingAdd = 315
+				headingAdd = 135
 			else
-				headingAdd = 90
+				headingAdd = 270
 			end
 			unit.heading = heading + mist.utils.toRadian(headingAdd) -- face wreck (in radians)
 
@@ -4906,11 +4906,13 @@ do
 			trigger.action.signalFlare(pos, trigger.flareColor.Yellow, 270)
 		end
 
-		-- create spawned group object
+		-- determine vehicle type
 		local vehicleType = "Crash Crew"
 		if spawnOnDemand.settings.crashCrewBeacon and vhf then
 			vehicleType = string.format("%s (SAR)", vehicleType)
 		end
+
+		-- create spawned group object
 		local spawnedGroup = {
 			groupName = groupName,
 			friendlyName = string.format("%s%s", spawnOnDemand.showFriendly(vehicleType, isFriendly), freq),
@@ -4982,7 +4984,7 @@ do
 		-- dispatch crash crew
 		local initiator = event.initiator
 		local name
-		if initiator then
+		if initiator and initiator:getCategory() == Object.Category.UNIT and initiator:getCoalition() == spawnOnDemand.unit:getCoalition() then
 			name = initiator:getPlayerName()
 		end
 		if event.id == world.event.S_EVENT_CRASH and name and not spawnOnDemand.settings.activeSAR then
@@ -5020,11 +5022,11 @@ do
 						local myGroup = spawnOnDemand.findSpawnedGroup(groupName)
 						if myGroup and myGroup.type then
 							groupName = myGroup.type
+							if myGroup.tacan then
+								spawnOnDemand.settings.freqs.used.tacan[myGroup.tacan.channel] = nil -- clear
+							end
 						end
 						spawnOnDemand.removeUnit(groupName, i:getName())
-						if myGroup.tacan then
-							spawnOnDemand.settings.freqs.used.tacan[myGroup.tacan.channel] = nil -- clear
-						end
 						local msg = string.format("%s destroyed!", groupName)
 						spawnOnDemand.toCoalition(msg)
 					end

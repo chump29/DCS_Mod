@@ -78,6 +78,7 @@ do
 						-- clear watched units
 						hueys = {}
 						onGround = {}
+						zones = {}
 
 						-- show message
 						showMsg(data.u)

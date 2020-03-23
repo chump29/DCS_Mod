@@ -162,7 +162,7 @@ do
 		-- Crash Crew
 		crashCrewLand = true,					-- Determines if crash crew is dispatched for crashes on land [default: true]
 		crashCrewWater = true,					-- Determines if crash crew is dispatched for crashes on water [default: true]
-		crashCrewBeacon = true,					--* Determines if SAR beacon is turned on to a random frequency [default: false]
+		crashCrewBeacon = false,					--* Determines if SAR beacon is turned on to a random frequency [default: false]
 
 		-- Debug
 		showF10Debug = false,					-- Show F10 debug menu [default: false]
@@ -4984,7 +4984,7 @@ do
 		-- dispatch crash crew
 		local initiator = event.initiator
 		local name
-		if initiator and initiator:getCategory() == Object.Category.UNIT and initiator:getCoalition() == spawnOnDemand.unit:getCoalition() then
+		if initiator and initiator:getCategory() == Object.Category.UNIT and spawnOnDemand.unit and initiator:getCoalition() == spawnOnDemand.unit:getCoalition() then
 			name = initiator:getPlayerName()
 		end
 		if event.id == world.event.S_EVENT_CRASH and name and not spawnOnDemand.settings.activeSAR then

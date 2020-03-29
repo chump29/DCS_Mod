@@ -4984,7 +4984,7 @@ do
 		-- dispatch crash crew
 		local initiator = event.initiator
 		local name
-		if initiator and initiator:getCategory() == Object.Category.UNIT and spawnOnDemand.unit and initiator:getCoalition() == spawnOnDemand.unit:getCoalition() then
+		if initiator and initiator:getCategory() == Object.Category.UNIT and initiator:isExist() and spawnOnDemand.unit and spawnOnDemand.unit:isExist() and initiator:getCoalition() == spawnOnDemand.unit:getCoalition() then
 			name = initiator:getPlayerName()
 		end
 		if event.id == world.event.S_EVENT_CRASH and name and not spawnOnDemand.settings.activeSAR then

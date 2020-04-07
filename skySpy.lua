@@ -69,7 +69,7 @@ do
 
 				if debug then skySpy.log(string.format("%s is dead", playerName)) end
 
-			elseif unit and unit:getCategory() == Object.Category.UNIT then
+			elseif unitName and unit:getCategory() == Object.Category.UNIT then
 
 				-- exceptions
 				if string.find(unit:getGroup():getName(), "^RAT_") ~= nil then return end -- RAT planes

@@ -1399,6 +1399,14 @@ do
 	end
 
 	function spawnOnDemand.spawnAWACS(obj)
+
+		for _, group in ipairs(spawnOnDemand.spawnedGroups) do
+			if group.groupType == spawnOnDemand.settings.groupTypes.AWACS then
+				--spawnOnDemand.toPlayer("Only one AWACS can be in the air at a time!", 5, useSound, showText)
+				return nil
+			end
+		end
+
 		obj = obj or {}
 		local isFriendly = obj.isFriendly or false
 		local useSound = obj.useSound
@@ -1546,8 +1554,8 @@ do
 		local debug = spawnOnDemand.settings.debug
 
 		for _, group in ipairs(spawnOnDemand.spawnedGroups) do
-			if group.tacan then
-				spawnOnDemand.toPlayer("Only one Tanker can be in the air at a time!", 5, useSound, showText)
+			if group.groupType == spawnOnDemand.settings.groupTypes.TANKER then
+				--spawnOnDemand.toPlayer("Only one Tanker can be in the air at a time!", 5, useSound, showText)
 				return nil
 			end
 		end

@@ -28,7 +28,10 @@ do
 		local unit = event.initiator
 		local unitName
 		if unit and unit:isExist() then
-			unitName = string.upper(unit:getDesc().typeName)
+			local desc = unit:getDesc()
+			if desc then
+				unitName = string.upper(desc.typeName)
+			end
 		end
 
 		local target = event.target
@@ -36,7 +39,10 @@ do
 		local weapon = event.weapon
 		local weaponName
 		if weapon then
-			weaponName = string.upper(weapon:getDesc().displayName)
+			local desc = weapon:getDesc()
+			if desc then
+				weaponName = string.upper(desc.displayName)
+			end
 		end
 
 		local groupId

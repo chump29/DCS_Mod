@@ -120,8 +120,8 @@ do
 		warDistribution = {20, 40, 30, 10, 0},	-- Distribution (out of a combined 100, 0 = disable) of planes vs. vehicles vs. troops vs. helicopters vs. ships [default: {40, 30, 10, 10, 10}]
 		warTeams = 2,							-- Spawn group teams (0 = friendly, 1 = enemy, 2 = both) [default: 2]
 		warFlag = 1234,							-- Flag number set when war has been won [default: 1234]
-		warAWACS = true,						-- Spawn AWACS during war [default: true]
-		warTankers = true,						-- Spawn tankers during war [default: true]
+		warAWACS = false,						--* Spawn AWACS during war [default: true]
+		warTankers = false,						--* Spawn tankers during war [default: true]
 		warFriendlyMinDist = 1,					-- Minimum distance friendly ground groups will spawn away from player during war (in nautical miles) [default: 1]  \
 		warFriendlyMaxDist = 5,					-- Maximum distance friendly ground groups will spawn away from player during war (in nautical miles) [default: 5]  / Front
 		warEnemyMinDist = 5,					-- Minimum distance enemy ground groups will spawn away from player during war (in nautical miles) [default: 5]     \ Lines
@@ -162,7 +162,7 @@ do
 		-- Crash Crew
 		crashCrewLand = true,					-- Determines if crash crew is dispatched for crashes on land [default: true]
 		crashCrewWater = true,					-- Determines if crash crew is dispatched for crashes on water [default: true]
-		crashCrewBeacon = false,					--* Determines if SAR beacon is turned on to a random frequency [default: false]
+		crashCrewBeacon = false,				-- Determines if SAR beacon is turned on to a random frequency [default: false]
 
 		-- Debug
 		showF10Debug = false,					-- Show F10 debug menu [default: false]
@@ -265,6 +265,8 @@ do
 	end
 
 	function spawnOnDemand.startWar(obj)
+		local debug = spawnOnDemand.settings.debug
+
 		obj = obj or {}
 		local warType = obj.warType or spawnOnDemand.settings.warTypes.USER
 		local excludes = {"AWACS", "TANKER", "CRASHCREW"}
@@ -397,13 +399,19 @@ do
 			-- random AA
 			local aa = false
 			if groupType == spawnOnDemand.settings.groupTypes.VEHICLES then
-				if mist.random(2) == 1 then -- 50/50
+				if mist.random(3) == 1 then -- 33% chance
 					aa = true
 				end
 			end
 
+			local addTime = mist.random(90) -- try to spread out a bit over ~90s
+
+			if debug then
+				spawnOnDemand.toLog(string.format("Spawning %s in %i seconds...", groupType, addTime))
+			end
+
 			-- schedule spawn
-			mist.scheduleFunction(spawnOnDemand.spawnWar, {groupType, friendly, aa}, timer.getTime() + mist.random(90)) -- try to spread out a bit over ~90s
+			mist.scheduleFunction(spawnOnDemand.spawnWar, {groupType, friendly, aa}, timer.getTime() + addTime)
 
 		end
 
@@ -423,7 +431,7 @@ do
 		spawnOnDemand.toCoalition("Let the war begin!")
 
 		-- for debug
-		if spawnOnDemand.settings.debug then
+		if debug then
 			spawnOnDemand.toLog(string.format("%i groups are spawning for war.", rand))
 		end
 
@@ -3268,6 +3276,7 @@ do
 			["SHIPS"] = 5,
 			["AWACS"] = 6, -- does not get included when determining spawn group type during war
 			["TANKER"] = 7 -- does not get included when determining spawn group type during war
+			["CRASHCREW"] = 8 -- does not get included when determining spawn group type during war
 		}
 
 		-- smoke color

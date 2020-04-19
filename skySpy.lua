@@ -80,6 +80,7 @@ do
 				-- exceptions
 				if string.find(unit:getGroup():getName(), "^RAT_") ~= nil then return end -- RAT planes
 				if string.find(unit:getGroup():getName(), "^TS_") ~= nil then return end -- TargetScript targets
+				if string.find(unit:getGroup():getName(), "^ATIS_") ~= nil then return end -- ATIS relays
 
 				local name = ""
 				if playerName then

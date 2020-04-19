@@ -114,7 +114,7 @@ do
 		soundBeacon = "beacon.ogg",				-- Sound used for beacons (required for beacons to function)
 
 		-- War
-		showWarF10 = true,						-- Show war option in F10 menu [default: true]
+		showWarF10 = false,						--* Show war option in F10 menu [default: true]
 		warGroupsMin = 20,						-- Minimum number of groups spawned [default: 25]
 		warGroupsMax = 40,						-- Maximum number of groups spawned [default: 50]
 		warDistribution = {20, 40, 30, 10, 0},	-- Distribution (out of a combined 100, 0 = disable) of planes vs. vehicles vs. troops vs. helicopters vs. ships [default: {40, 30, 10, 10, 10}]
@@ -407,7 +407,7 @@ do
 			local addTime = mist.random(90) -- try to spread out a bit over ~90s
 
 			if debug then
-				spawnOnDemand.toLog(string.format("Spawning %s in %i seconds...", groupType, addTime))
+				spawnOnDemand.toLog(string.format("Spawning group type #%s in %i seconds...", groupType, addTime))
 			end
 
 			-- schedule spawn
@@ -4480,8 +4480,10 @@ do
 									str = "Navy"
 								end
 								str = string.format("%s ship(s)", str)
-							else -- spawnOnDemand.settings.groupTypes.AWACS
+							elseif groupType == spawnOnDemand.settings.groupTypes.AWACS then
 								str = "AWACS"
+							else
+								str = "Unknown" -- should not happen
 							end
 							spawnedGroup.friendlyName = string.format("%s%s", spawnOnDemand.showFriendly(str, isFriendly), freq)
 

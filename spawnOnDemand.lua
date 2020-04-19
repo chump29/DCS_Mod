@@ -3275,7 +3275,7 @@ do
 			["HELOS"] = 4,
 			["SHIPS"] = 5,
 			["AWACS"] = 6, -- does not get included when determining spawn group type during war
-			["TANKER"] = 7 -- does not get included when determining spawn group type during war
+			["TANKER"] = 7, -- does not get included when determining spawn group type during war
 			["CRASHCREW"] = 8 -- does not get included when determining spawn group type during war
 		}
 

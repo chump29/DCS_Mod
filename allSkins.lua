@@ -15,6 +15,7 @@ allSkins = {
 		lfs.currentdir() .. "Bazar\\Liveries\\",
 		lfs.writedir() .. "Mods\\aircraft\\Civil Aircraft Mod\\Liveries\\",
 		"D:\\DCS.Liveries\\",
+		"D:\\DCS.229.Liveries\\",
 		 -- because some people have to be different:
 		 -- TODO: refactor to auto scan dir
 		lfs.currentdir() .. "CoreMods\\aircraft\\AJS37\\Liveries\\",

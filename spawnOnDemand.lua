@@ -7,6 +7,7 @@
 -- TODO: add location/spawnNum/noRoute to all spawners
 -- TODO: fix scenarios (vehicles)
 -- TODO: something if SAR is successful
+-- TODO: crash crew pilot model & different vehicles
 
 local base = _G
 local assert = base.assert
@@ -3719,8 +3720,11 @@ do
 		spawnOnDemand.vehicles.crashCrew = {}
 		spawnOnDemand.vehicles.crashCrew.land = {}
 		table.insert(spawnOnDemand.vehicles.crashCrew.land, "Ural ATsP-6")
+		--table.insert(spawnOnDemand.vehicles.crashCrew.land, "Civil Ambulance") -- Ambulance mod
 		spawnOnDemand.vehicles.crashCrew.sea = {}
 		table.insert(spawnOnDemand.vehicles.crashCrew.sea, "speedboat")
+		--spawnOnDemand.vehicles.crashCrew.pilot = {}
+		--table.insert(spawnOnDemand.vehicles.crashCrew.pilot, "LifeBoat") -- lifeboat mod
 
 		-- helicopters
 		spawnOnDemand.helos = {}

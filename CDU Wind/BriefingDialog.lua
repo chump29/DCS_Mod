@@ -25,11 +25,11 @@ local gettext           = require('i_18n')
 local DCS               = require('DCS')
 local ChoiceOfRoleDialog = require('ChoiceOfRoleDialog')
 local autobriefingutils = require('autobriefingutils')
-local UC				= require('utils_common')
+local UC                = require('utils_common')
 local net               = require('net')
 local keys              = require('mul_keys')
 local Terrain           = require('terrain')
-local i18n 				= require('i18n')
+local i18n              = require('i18n')
 local DB                = require('me_db_api')
 local imagePreview      = require('imagePreview')
 
@@ -49,16 +49,16 @@ local function _(text, dText)
     if newText == text and dText then
         return dText
     end
-	return newText
+    return newText
 end
 
 local cdata = {
         BRIEFING = _('BRIEFING'),
-		details = _('Details'),
-		BACK = _('BACK'),
-		FLY = _('FLY'),
-		flyMission = _('Fly mission'),
-		pauseMsg = _('Press Pause/Break to start'),
+        details = _('Details'),
+        BACK = _('BACK'),
+        FLY = _('FLY'),
+        flyMission = _('Fly mission'),
+        pauseMsg = _('Press Pause/Break to start'),
         of = _('OF'),
         title_data = _('TITLE DATA'),
         title = _('Title'),
@@ -98,7 +98,7 @@ local cdata = {
         cloud_cover_base = _('base'),
         NA = _('N/A'),
 
-        magVar = _("MagVar"),
+        magDec = _("Magnetic Declination"),
         cduWind = _("CDU Wind")
     }
 
@@ -109,7 +109,7 @@ local cdata = {
     end
 
 function create()
-	window = DialogLoader.spawnDialogFromFile('MissionEditor/modules/dialogs/briefing_dialog.dlg', cdata)
+    window = DialogLoader.spawnDialogFromFile('MissionEditor/modules/dialogs/briefing_dialog.dlg', cdata)
 
     containerMain = window.containerMain
     panelBottom = containerMain.panelBottom
@@ -123,23 +123,23 @@ function create()
     autobriefingutils.setEditBoxSectionDataItemSkin(pNoVisible.editboxSkinSectionDataItem:getSkin())
     autobriefingutils.setStaticTitleItemSkin(pNoVisible.staticSkinTitleItem:getSkin())
     autobriefingutils.setStaticGridCellSkin(pNoVisible.staticGridCellSkin:getSkin())
-	autobriefingutils.setStaticGridCellMiddleSkin(pNoVisible.staticGridCellMiddleSkin:getSkin())
+    autobriefingutils.setStaticGridCellMiddleSkin(pNoVisible.staticGridCellMiddleSkin:getSkin())
     autobriefingutils.setGridSkin(pNoVisible.grid:getSkin())
     autobriefingutils.setGridHeaderSkin(pNoVisible.gridHeaderCell:getSkin())
-	autobriefingutils.setGridHeaderMiddleSkin(pNoVisible.gridHeaderMiddle:getSkin())
+    autobriefingutils.setGridHeaderMiddleSkin(pNoVisible.gridHeaderMiddle:getSkin())
 
-	buttonClose = DialogLoader.findWidgetByName(window, 'buttonClose')
-	buttonFly = DialogLoader.findWidgetByName(window, 'buttonFly')
-	staticPause = DialogLoader.findWidgetByName(window, 'staticPause')
-	buttonBack = DialogLoader.findWidgetByName(window, 'buttonBack')
+    buttonClose = DialogLoader.findWidgetByName(window, 'buttonClose')
+    buttonFly = DialogLoader.findWidgetByName(window, 'buttonFly')
+    staticPause = DialogLoader.findWidgetByName(window, 'staticPause')
+    buttonBack = DialogLoader.findWidgetByName(window, 'buttonBack')
 
-	buttonPrev = pCenter.buttonPrev
-	buttonNext = pCenter.buttonNext
-	staticImage = pCenter.bgPanel.imageScrollPane.pictureWidget
-	staticImageSkin = staticImage:getSkin()
+    buttonPrev = pCenter.buttonPrev
+    buttonNext = pCenter.buttonNext
+    staticImage = pCenter.bgPanel.imageScrollPane.pictureWidget
+    staticImageSkin = staticImage:getSkin()
     imagePreviewWidget = imagePreview.new(pCenter.bgPanel.imageScrollPane, staticImage)
-	picture = staticImageSkin.skinData.states.released[1].picture
-	staticImageNumber = pCenter.staticImageNumber
+    picture = staticImageSkin.skinData.states.released[1].picture
+    staticImageNumber = pCenter.staticImageNumber
     staticOF = pCenter.widgetOf
     autoBriefingScrollPane = pCenter.bgPanel.autoBriefingScrollPane
 
@@ -151,7 +151,7 @@ function create()
 
     buttonBack:setVisible(false)
 
-	local screenWidth, screenHeight = Gui.GetWindowSize()
+    local screenWidth, screenHeight = Gui.GetWindowSize()
 
     local width, height = Gui.GetWindowSize()
     window:setBounds(0,0,width, height)
@@ -166,31 +166,31 @@ function create()
 end
 
 function show()
-	if not window then
-		 create()
-	end
+    if not window then
+         create()
+    end
 
-	if window:getVisible() == false then
-		DCS.lockAllMouseInput()
-	end
+    if window:getVisible() == false then
+        DCS.lockAllMouseInput()
+    end
 
-	staticPause:setVisible(unpauseMessage)
---	buttonBack:setVisible(not unpauseMessage)
+    staticPause:setVisible(unpauseMessage)
+--  buttonBack:setVisible(not unpauseMessage)
 
     unitType = DCS.getPlayerUnitType()
 
     update()
-	window:setVisible(true)
+    window:setVisible(true)
     setPause(true)
 end
 
 function hide()
-	if window then
-		if window:getVisible() == true then
-			DCS.unlockMouseInput()
-		end
-		window:setVisible(false)
-	end
+    if window then
+        if window:getVisible() == true then
+            DCS.unlockMouseInput()
+        end
+        window:setVisible(false)
+    end
 end
 
 function update()
@@ -224,16 +224,16 @@ function getVisible()
     if window == nil then
         return false
     end
-	return window:getVisible()
+    return window:getVisible()
 end
 
 function kill()
-	Gui.SetWaitCursor(false)
+    Gui.SetWaitCursor(false)
 
-	if window then
-		window:kill()
-		window = nil
-	end
+    if window then
+        window:kill()
+        window = nil
+    end
 end
 
 function Close_onChange()
@@ -255,7 +255,7 @@ function Fly_onChange()
     if DCS.isMultiplayer() then
         net.spawn_player()
     else
-       	DCS.spawnPlayer()
+        DCS.spawnPlayer()
     end
     hide()
     setPause(false)
@@ -355,12 +355,12 @@ function updateAirdrome()
         radio= Terrain.getRadio()
     end
 
-	for airdromeNumber, airdromeInfo in pairs(Terrain.GetTerrainConfig('Airdromes')) do
+    for airdromeNumber, airdromeInfo in pairs(Terrain.GetTerrainConfig('Airdromes')) do
         if (airdromeInfo.reference_point) and (airdromeInfo.abandoned ~= true)  then
             local airdrome      = {}
-            airdrome.x, airdrome.y	= airdromeInfo.reference_point.x, airdromeInfo.reference_point.y
+            airdrome.x, airdrome.y  = airdromeInfo.reference_point.x, airdromeInfo.reference_point.y
             airdrome.height        = Terrain.GetHeight(airdrome.x, airdrome.y)
-            local locale		= i18n.getLocale()
+            local locale        = i18n.getLocale()
             local name
 
             if airdromeInfo.display_name then
@@ -371,7 +371,7 @@ function updateAirdrome()
 
             local frequencyList = {}
             if airdromeInfo.frequency then
-                frequencyList	= airdromeInfo.frequency
+                frequencyList   = airdromeInfo.frequency
             else
                 if airdromeInfo.radio then
                     for k, radioId in pairs(airdromeInfo.radio) do
@@ -386,9 +386,9 @@ function updateAirdrome()
             end
 
             airdrome.frequencyList = frequencyList
-            airdromesById_[airdromeNumber]	= airdrome
+            airdromesById_[airdromeNumber]  = airdrome
         end
-	end
+    end
 end
 
 function updateStartGroups(a_tblStartData)
@@ -406,11 +406,11 @@ function updateStartGroups(a_tblStartData)
             if unitTypeDesc and unitTypeDesc.HumanRadio then
                 for _tmp, frequencyL in base.pairs(airdrome.frequencyList) do
                     local freq = frequencyL/1000000.0
-					if not frequency then
-						frequency = string.format("%.3f %s", freq, _('MHz'))
-					else
-						frequency = frequency.."\n"..string.format("%.3f %s", freq, _('MHz'))
-					end
+                    if not frequency then
+                        frequency = string.format("%.3f %s", freq, _('MHz'))
+                    else
+                        frequency = frequency.."\n"..string.format("%.3f %s", freq, _('MHz'))
+                    end
                 end
             end
             positionAirdrome = {x = airdrome.x, y = airdromeHeight, z = airdrome.y}
@@ -478,8 +478,8 @@ function generateAutoBriefing()
             side = _("Red")
         elseif dataBrf.side == "blue" then
             side = _("Blue")
-		elseif dataBrf.side == "neutrals" then
-			side = _("Neutrals")
+        elseif dataBrf.side == "neutrals" then
+            side = _("Neutrals")
         end
     end
 
@@ -510,7 +510,7 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(cdata.weather))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature,    string.format('%+d', dataBrf.temperature) .. '°' ))
     table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'),    string.format('%d / %0.2f', dataBrf.qnh or 0, (dataBrf.qnh or 0) / 25.4)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.magVar, CDUW.getMagneticDeclination(true)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.magDec, CDUW.getMagneticDeclination(true)))
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. dataBrf.clouds_base))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,           UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
     table.insert(autoBriefing, composeEntry(nil, cdata.cduWind, CDUW.cduWindString(dataBrf.weather, dataBrf.humanPosition, dataBrf.temperature)))
@@ -544,11 +544,9 @@ function generateSimpleAutoBriefing()
     table.insert(autoBriefing, composeEntry(cdata.weather))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature,    string.format('%+d', dataBrf.temperature) .. '°' ))
     table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'),    string.format('%d / %0.2f', dataBrf.qnh or 0, (dataBrf.qnh or 0) / 25.4)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.magVar, CDUW.getMagneticDeclination(true)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.magDec, CDUW.getMagneticDeclination(true)))
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. dataBrf.clouds_base))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,           UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
     table.insert(autoBriefing, composeEntry(nil, cdata.cduWind, CDUW.cduWindString(dataBrf.weather, nil, dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,        UC.composeTurbulenceString(dataBrf.weather)))
 end
-
-

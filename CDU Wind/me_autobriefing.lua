@@ -12,33 +12,33 @@ local table = base.table
 local math = base.math
 local string = base.string
 
-local SkinUtils 				= require('SkinUtils')
-local MissionModule 			= require('me_mission')
-local DB 						= require('me_db_api')
-local U 						= require('me_utilities')
-local UC				        = require('utils_common')
-local BriefingUtils 			= require('me_briefing_utils')
-local i18n 						= require('i18n')
-local Tools 					= require('tools')
-local crutches 					= require('me_crutches')
-local panel_generator 			= require('me_generator_dialog')
-local panel_generator_simple 	= require('me_simple_generator_dialog')
-local panel_campaign			= require('me_campaign')
-local MapWindow					= require('me_map_window')
+local SkinUtils                 = require('SkinUtils')
+local MissionModule             = require('me_mission')
+local DB                        = require('me_db_api')
+local U                         = require('me_utilities')
+local UC                        = require('utils_common')
+local BriefingUtils             = require('me_briefing_utils')
+local i18n                      = require('i18n')
+local Tools                     = require('tools')
+local crutches                  = require('me_crutches')
+local panel_generator           = require('me_generator_dialog')
+local panel_generator_simple    = require('me_simple_generator_dialog')
+local panel_campaign            = require('me_campaign')
+local MapWindow                 = require('me_map_window')
 local ImageSearchPath           = require('image_search_path')
 local mod_dictionary            = require('dictionary')
-local CoalitionController		= require('Mission.CoalitionController')
-local AirdromeController	    = require('Mission.AirdromeController')
+local CoalitionController       = require('Mission.CoalitionController')
+local AirdromeController        = require('Mission.AirdromeController')
 local autobriefingutils         = require('autobriefingutils')
-local music				        = require('me_music')
-local LangController	        = require('Mission.LangController')
-local waitScreen	        	= require('me_wait_screen')
-local OptionsData		        = require('Options.Data')
+local music                     = require('me_music')
+local LangController            = require('Mission.LangController')
+local waitScreen                = require('me_wait_screen')
+local OptionsData               = require('Options.Data')
 local Terrain                   = require('terrain')
-local DialogLoader	            = require('DialogLoader')
-local Gui						= require('dxgui')
+local DialogLoader              = require('DialogLoader')
+local Gui                       = require('dxgui')
 local imagePreview              = require('imagePreview')
-local Analytics					= require("Analytics")
+local Analytics                 = require("Analytics")
 
 local CDUW = require('cdu_wind')
 
@@ -96,7 +96,7 @@ local cdata =
     BRIEFING = _('BRIEFING'),
     noWeapon = _('No weapon'),
 
-    magVar = _("MagVar"),
+    magDec = _("Magnetic Declination"),
     cduWind = _("CDU Wind")
 }
 
@@ -156,10 +156,10 @@ local function create_()
     autobriefingutils.setEditBoxSectionDataItemSkin(pNoVisible.editboxSkinSectionDataItem:getSkin())
     autobriefingutils.setStaticTitleItemSkin(pNoVisible.staticSkinTitleItem:getSkin())
     autobriefingutils.setStaticGridCellSkin(pNoVisible.staticGridCellSkin:getSkin())
-	autobriefingutils.setStaticGridCellMiddleSkin(pNoVisible.staticGridCellMiddleSkin:getSkin())
+    autobriefingutils.setStaticGridCellMiddleSkin(pNoVisible.staticGridCellMiddleSkin:getSkin())
     autobriefingutils.setGridSkin(pNoVisible.grid:getSkin())
     autobriefingutils.setGridHeaderSkin(pNoVisible.gridHeaderCell:getSkin())
-	autobriefingutils.setGridHeaderMiddleSkin(pNoVisible.gridHeaderMiddle:getSkin())
+    autobriefingutils.setGridHeaderMiddleSkin(pNoVisible.gridHeaderMiddle:getSkin())
 
     widgetOf = pCenter.widgetOf
 
@@ -168,7 +168,7 @@ local function create_()
     imagePreviewWidget = imagePreview.new(pCenter.bgPanel.imageScrollPane, pictureWidget)
 
     buttonPrev = pCenter.buttonPrev
-	buttonNext = pCenter.buttonNext
+    buttonNext = pCenter.buttonNext
     staticImageNumber = pCenter.staticImageNumber
 
     buttonPrev.onChange = Prev_onChange
@@ -228,12 +228,12 @@ function Fly(params, doNotApplyOptions)
 
     waitScreen.setUpdateFunction(function()
 
-		params.file = path
-		params.command = params.command or ""
-		if (MissionModule.play(params, returnScreen, MissionModule.mission.path, doNotApplyOptions, doSave) == false) then
-			show(true)
-		end
-	end)
+        params.file = path
+        params.command = params.command or ""
+        if (MissionModule.play(params, returnScreen, MissionModule.mission.path, doNotApplyOptions, doSave) == false) then
+            show(true)
+        end
+    end)
 end
 
 function updateAutoBriefing()
@@ -284,7 +284,7 @@ function update()
         dataImagesCount = #mission.pictureFileNameB
         widgetOf:setText(cdata.of .. ' ' .. tostring(#mission.pictureFileNameB))
         listPict = mission.pictureFileNameB
-	elseif coalitionName == CoalitionController.neutralCoalitionName() then
+    elseif coalitionName == CoalitionController.neutralCoalitionName() then
         if mission.pictureFileNameN and mission.pictureFileNameN[1] and (mission.pictureFileNameN[1] ~='') then
             local fileName, path = mod_dictionary.getValueResource(mission.pictureFileNameN[1],LangController.getCurLang())
             pictureFilename = base.tempMissionPath .. path
@@ -358,7 +358,7 @@ end
 -------------------------------------------------------------------------------
 --установка необходимости пересохранения
 function setDoSave(save)
-	doSave = save
+    doSave = save
 end
 
 -------------------------------------------------------------------------------
@@ -401,11 +401,11 @@ function getDataUnit(unit)
                     if unitTypeDesc and unitTypeDesc.HumanRadio then
                         for _tmp, frequencyL in base.pairs(airdrome.frequencyList) do
                             local freq = frequencyL/1000000.0
-							if not frequency then
-								frequency = string.format("%.3f %s", freq, _('MHz'))
-							else
-								frequency = frequency.."\n"..string.format("%.3f %s", freq, _('MHz'))
-							end
+                            if not frequency then
+                                frequency = string.format("%.3f %s", freq, _('MHz'))
+                            else
+                                frequency = frequency.."\n"..string.format("%.3f %s", freq, _('MHz'))
+                            end
                         end
                     end
                     positionAirdrome = {x = airdrome.x, y = airdromeHeight, z = airdrome.y}
@@ -455,11 +455,11 @@ function generateAutoBriefing(mission)
     local mission_goal
     autoBriefing = {}
     -- определяем цвет коалиции
-    if coalitionName == CoalitionController.redCoalitionName()	then
+    if coalitionName == CoalitionController.redCoalitionName()  then
         mission_goal = mission.descriptionRedTask
     elseif coalitionName == CoalitionController.blueCoalitionName() then
-		mission_goal = mission.descriptionBlueTask
-	elseif coalitionName == CoalitionController.neutralCoalitionName() then
+        mission_goal = mission.descriptionBlueTask
+    elseif coalitionName == CoalitionController.neutralCoalitionName() then
         mission_goal = mission.descriptionNeutralsTask
     end
 
@@ -476,7 +476,7 @@ function generateAutoBriefing(mission)
     end
     local windString = UC.composeWindString(mission.weather, humanPosition)
 
-    local magVarString = CDUW.getMagneticDeclination(true)
+    local magDecString = CDUW.getMagneticDeclination(true)
     local cduWindString = CDUW.cduWindString(mission.weather, humanPosition, mission.weather.season.temperature)
 
     -- турбулентность
@@ -555,7 +555,7 @@ function generateAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(cdata.weather))
         table.insert(autoBriefing, composeEntry(nil, cdata.temperature,    string.format('%+d', mission.weather.season.temperature) .. '°' ))
         table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'),    string.format('%d / %0.2f', mission.weather.qnh or 0, (mission.weather.qnh or 0) / 25.4)))
-        table.insert(autoBriefing, composeEntry(nil, cdata.magVar, magVarString))
+        table.insert(autoBriefing, composeEntry(nil, cdata.magDec, magDecString))
         table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. mission.weather.clouds.base))
         table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
         table.insert(autoBriefing, composeEntry(nil, cdata.cduWind, cduWindString))
@@ -579,7 +579,7 @@ function generateSimpleAutoBriefing(mission)
     -- ветер
     local windString = UC.composeWindString(mission.weather)
 
-    local magVarString = CDUW.getMagneticDeclination(true)
+    local magDecString = CDUW.getMagneticDeclination(true)
     local cduWindString = CDUW.cduWindString(mission.weather, nil, mission.weather.season.temperature)
 
     -- турбулентность
@@ -592,7 +592,7 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(cdata.description, nil,    mission.descriptionText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature,    string.format('%+d', mission.weather.season.temperature) .. '°' ))
-    table.insert(autoBriefing, composeEntry(nil, cdata.magVar, magVarString))
+    table.insert(autoBriefing, composeEntry(nil, cdata.magDec, magDecString))
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. mission.weather.clouds.base))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
     table.insert(autoBriefing, composeEntry(nil, cdata.cduWind, cduWindString))
@@ -700,7 +700,7 @@ function composeWeaponsString()
     for i,pylon in pairs(playerUnit.payload.pylons) do
         --local item = playerUnit.payload.pylons[i].name
         local launcherCLSID = pylon.CLSID
-        local item			= base.get_weapon_display_name_by_clsid(launcherCLSID)
+        local item          = base.get_weapon_display_name_by_clsid(launcherCLSID)
         if weapons[item] then
             weapons[item] = weapons[item] + 1
         else
@@ -726,7 +726,7 @@ end
 
 
 -------------------------------------------------------------------------------
---			Обработка действий контролов									 ---------------------------
+--          Обработка действий контролов                                     ---------------------------
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
@@ -749,34 +749,34 @@ end
 -------------------------------------------------------------------------------
 -- обрабочик кнопки Mission Editor
 function missionEditorBtnOnChange()
-	MapWindow.unselectAll()
+    MapWindow.unselectAll()
     show(false, returnScreen)
     panel_campaign.show(false)
     panel_generator.show(false)
     panel_generator_simple.show(false)
 
     waitScreen.setUpdateFunction(function()
-		base.setPlannerMission(true)
+        base.setPlannerMission(true)
 
-		base.MapWindow.show(true)
+        base.MapWindow.show(true)
 
-		base.mmw.show(false)
+        base.mmw.show(false)
 
-		base.menubar.setPlannerMission(true)
-		base.toolbar.setPlannerMission(true)
+        base.menubar.setPlannerMission(true)
+        base.toolbar.setPlannerMission(true)
 
-		doSave = true
-	end)
+        doSave = true
+    end)
 end
 
 -------------------------------------------------------------------------------
 -- обрабочик кнопки fly
 function flyBtnOnChange()
-	base.menubar.show(false)
-	base.toolbar.show(false)
-	base.statusbar.show(false)
+    base.menubar.show(false)
+    base.toolbar.show(false)
+    base.statusbar.show(false)
     base.mapInfoPanel.show(false)
-	base.setCoordPanel.show(false)
+    base.setCoordPanel.show(false)
     base.panel_route.show(false)
     music.stop()
 

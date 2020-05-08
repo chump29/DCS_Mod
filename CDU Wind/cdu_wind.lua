@@ -1,3 +1,4 @@
+-- modified by Chump
 local base = _G
 
 module('cdu_wind')
@@ -49,7 +50,7 @@ function getMagneticDeclination(toStr)
   --Normandy -10 (West), year ~ 1944
   --Persian Gulf +2 (East), year ~ 2011
 
-  local theatre = MissionModule.mission.theatre
+  local theatre = MissionModule.mission.theatre or get_terrain_related_data("name")
   local dec = 0
   if theatre == "Caucasus" then
     dec = 6
@@ -59,12 +60,14 @@ function getMagneticDeclination(toStr)
     dec = -10
   elseif theatre == "PersianGulf" then
     dec = 2
+  else
+    return "UNKNOWN"
   end
 
   if toStr then
     local dir = "East"
     if dec < 0 then dir = "West" end
-    dec = string.format("%i° %s", dec, dir)
+    dec = string.format("%i° %s (%+i)", dec, dir, dec * -1)
   end
 
   return dec

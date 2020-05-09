@@ -31,6 +31,7 @@ do
 			end
 			targetScript.say(typeName .. msg)
 			targetScript.activeGroup = groupName
+			targetScript.log("Spawned " .. typeName)
 		end
 	end
 

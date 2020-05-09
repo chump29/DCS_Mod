@@ -5050,8 +5050,10 @@ do
 							end
 						end
 						spawnOnDemand.removeUnit(groupName, i:getName())
-						local msg = string.format("%s destroyed!", groupName)
-						spawnOnDemand.toCoalition(msg)
+
+						-- NOTE: letting SkySpy handle this message
+						--local msg = string.format("%s destroyed!", groupName)
+						--spawnOnDemand.toCoalition(msg)
 					end
 				end
 

@@ -64,6 +64,7 @@ do
 
 				for livery in lfs.dir(path .. airframe) do
 					if not invalid(livery) and lfs.attributes(path .. airframe .. "\\" .. livery, "mode") == "directory" then
+						airframe = string.upper(airframe)
 
 						if not allSkins.liveries[airframe] then allSkins.liveries[airframe] = {} end
 

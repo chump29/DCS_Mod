@@ -48,8 +48,9 @@ do
 			plane:ATC_Messages(false)
 			plane:Commute(false)
 
-			if allSkins.liveries[obj[1]] and #allSkins.liveries[obj[1]] > 0 then
-				local livery = allSkins.liveries[obj[1]][mist.random(#allSkins.liveries[obj[1]])]
+			local planeType = allSkins.liveries[string.upper(obj[1])]
+			if planeType and #planeType > 0 then
+				local livery = planeType[mist.random(#planeType)]
 				if RATPlanes.debug then env.info("RAT: " .. alias .. " using livery " .. livery) end
 				plane:Livery(livery)
 			end

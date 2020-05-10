@@ -613,7 +613,7 @@ do
 				unit.hardpoint_racks = nil -- clear
 			end
 			local type = plane.type
-			local skins = allSkins.liveries[type]
+			local skins = allSkins.liveries[string.upper(type)]
 			if skins then
 				unit.livery_id = skins[mist.random(#skins)]
 			end
@@ -1143,7 +1143,7 @@ do
 			local unit = mist.utils.deepCopy(spawnOnDemand.templates.unit.plane) -- same
 			unit.alt = land.getHeight(point) + mist.random(15, 305) -- 50ft to 1,000ft (in m)
 			local type = helo.type
-			local skins = allSkins.liveries[type]
+			local skins = allSkins.liveries[string.upper(type)]
 			if skins then
 				unit.livery_id = skins[mist.random(#skins)]
 			end
@@ -1456,7 +1456,7 @@ do
 		local alt = land.getHeight(point) + mist.random(4572, 9144) -- 15,000ft to 30,000ft (in m)
 		unit.alt = alt
 		unit.hardpoint_racks = nil -- clear
-		local skins = allSkins.liveries[plane.type]
+		local skins = allSkins.liveries[string.upper(plane.type)]
 		if skins then
 			unit.livery_id = skins[mist.random(#skins)]
 		end
@@ -1610,7 +1610,7 @@ do
 		alt = (alt + 500) / 1000 * 1000 -- round up to nearest thousand
 		unit.alt = alt
 		unit.hardpoint_racks = nil -- clear
-		local skins = allSkins.liveries[plane.type]
+		local skins = allSkins.liveries[string.upper(plane.type)]
 		if skins then
 			unit.livery_id = skins[mist.random(#skins)]
 		end
@@ -1798,7 +1798,7 @@ do
 		local alt = land.getHeight(point) + mist.random(153, 3048) -- 500ft to 10,000ft (in m)
 		local speed = mist.random(93, 257) -- 180kts to 500kts (in mps)
 		unit.alt = alt
-		local skins = allSkins.liveries[plane.type]
+		local skins = allSkins.liveries[string.upper(plane.type)]
 		if skins then
 			unit.livery_id = skins[mist.random(#skins)]
 		end
@@ -2113,7 +2113,7 @@ do
 		local speed = mist.random(29, 60) -- 56kts - 117kts (in mps)
 		unit.alt = alt
 		unit.hardpoint_racks = nil
-		local skins = allSkins.liveries[plane.type]
+		local skins = allSkins.liveries[string.upper(plane.type)]
 		if skins then
 			unit.livery_id = skins[mist.random(#skins)]
 		end

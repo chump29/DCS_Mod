@@ -4408,7 +4408,7 @@ do
 				id = "SetFrequency",
 				params = {
 					frequency = freq,
-					modulation = radio.modulation.AM
+					modulation = 0 -- why won't radio.modulation.AM work?
 				}
 			}
 			local msgCommand = {

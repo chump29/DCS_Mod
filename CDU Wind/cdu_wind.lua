@@ -43,8 +43,6 @@ function toPositiveDegrees(radians, raw)
 end
 
 function getMagneticDeclination(toStr)
-  toStr = toStr or false
-
   --Caucasus +6 (East), year ~ 2011
   --NTTR +12 (East), year ~ 2011
   --Normandy -10 (West), year ~ 1944
@@ -71,6 +69,10 @@ function getMagneticDeclination(toStr)
   end
 
   return dec
+end
+
+function getTempString(c)
+  return string.format("%+d°C / %+d°F", c, c * 9 / 5 + 32)
 end
 
 function cduWindToStr(wind, temperature)

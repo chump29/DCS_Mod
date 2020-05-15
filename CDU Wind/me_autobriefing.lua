@@ -39,7 +39,6 @@ local DialogLoader              = require('DialogLoader')
 local Gui                       = require('dxgui')
 local imagePreview              = require('imagePreview')
 local Analytics                 = require("Analytics")
-
 local CDUW = require('cdu_wind')
 
 i18n.setup(_M)
@@ -476,9 +475,6 @@ function generateAutoBriefing(mission)
     end
     local windString = UC.composeWindString(mission.weather, humanPosition)
 
-    local magDecString = CDUW.getMagneticDeclination(true)
-    local cduWindString = CDUW.cduWindString(mission.weather, humanPosition, mission.weather.season.temperature)
-
     -- турбулентность
     local turbulenceString = UC.composeTurbulenceString(mission.weather)
     local startTime = (not group.lateActivation) and (mission.start_time + group.start_time) or 0.0
@@ -553,12 +549,12 @@ function generateAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(cdata.specification))
         table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
         table.insert(autoBriefing, composeEntry(cdata.weather))
-        table.insert(autoBriefing, composeEntry(nil, cdata.temperature,    string.format('%+d', mission.weather.season.temperature) .. '°' ))
+        table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(mission.weather.season.temperature)))
         table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'),    string.format('%d / %0.2f', mission.weather.qnh or 0, (mission.weather.qnh or 0) / 25.4)))
-        table.insert(autoBriefing, composeEntry(nil, cdata.magDec, magDecString))
+        table.insert(autoBriefing, composeEntry(nil, cdata.magDec, CDUW.getMagneticDeclination(true)))
         table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. mission.weather.clouds.base))
         table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
-        table.insert(autoBriefing, composeEntry(nil, cdata.cduWind, cduWindString))
+        table.insert(autoBriefing, composeEntry(nil, cdata.cduWind, CDUW.cduWindString(mission.weather, humanPosition, mission.weather.season.temperature)))
         table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,         turbulenceString))
         table.insert(autoBriefing, composeEntry(cdata.take_off_and_departure))
         table.insert(autoBriefing, composeEntry(nil,  cdata.mission_start,  autobriefingutils.composeDateString(startTime, false, mission.date)))
@@ -579,9 +575,6 @@ function generateSimpleAutoBriefing(mission)
     -- ветер
     local windString = UC.composeWindString(mission.weather)
 
-    local magDecString = CDUW.getMagneticDeclination(true)
-    local cduWindString = CDUW.cduWindString(mission.weather, nil, mission.weather.season.temperature)
-
     -- турбулентность
     local turbulenceString = UC.composeTurbulenceString(mission.weather)
 
@@ -591,11 +584,11 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.start,      autobriefingutils.composeDateString(mission.start_time, true, mission.date)))
     table.insert(autoBriefing, composeEntry(cdata.description, nil,    mission.descriptionText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.temperature,    string.format('%+d', mission.weather.season.temperature) .. '°' ))
-    table.insert(autoBriefing, composeEntry(nil, cdata.magDec, magDecString))
+    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(mission.weather.season.temperature)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.magDec, CDUW.getMagneticDeclination(true)))
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. mission.weather.clouds.base))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
-    table.insert(autoBriefing, composeEntry(nil, cdata.cduWind, cduWindString))
+    table.insert(autoBriefing, composeEntry(nil, cdata.cduWind, CDUW.cduWindString(mission.weather, nil, mission.weather.season.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,         turbulenceString))
     table.insert(autoBriefing, composeEntry(nil, cdata.general_visbility,  mission.weather.visibility.distance/1000 .. ' ' .. cdata.km_unit ))
     --base.U.traverseTable(autoBriefing)
@@ -786,5 +779,3 @@ function flyBtnOnChange()
         Fly({command = '--mission'})
     end
 end
-
-

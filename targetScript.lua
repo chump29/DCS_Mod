@@ -51,6 +51,7 @@ do
 		local group = Group.getByName(groupName)
 		if group then
 			mist.scheduleFunction(targetScript.handleGroup, {group}, timer.getTime() + mist.random(30))
+			targetScript.log("Spawning " .. groupName)
 		else
 			targetScript.log(string.format("[activateGroup]: Group (%s) not found!", groupName), true)
 		end

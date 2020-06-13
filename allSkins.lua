@@ -8,6 +8,7 @@ local ipairs = base.ipairs
 local require = base.require
 local string = base.string
 local table = base.table
+local lfs = require("lfs")
 
 allSkins = {
 	debug = false,
@@ -48,8 +49,6 @@ allSkins = {
 }
 
 do
-	local lfs = require("lfs")
-
 	function allSkins.getLiveries(path)
 		local debug = allSkins.debug
 

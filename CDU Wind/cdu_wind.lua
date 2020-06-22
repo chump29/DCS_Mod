@@ -48,8 +48,20 @@ function getMagneticDeclination(toStr)
   --Normandy -10 (West), year ~ 1944
   --Persian Gulf +2 (East), year ~ 2011
 
-  local theatre = MissionModule.mission.theatre or get_terrain_related_data("name")
-  local dec = 0
+  local theatre
+  if MissionModule.mission then
+    theatre = MissionModule.mission.theatre
+  elseif env then
+    theatre = env.mission.theatre
+  elseif mist then -- MiST
+    theatre = mist.DBs.missionData.theatre
+  elseif UTILS then -- MOOSE
+    theatre = UTILS.GetDCSMap()
+  elseif get_terrain_related_data("name") then
+    theatre = get_terrain_related_data("name")
+  end
+
+  local dec
   if theatre == "Caucasus" then
     dec = 6
   elseif theatre == "Nevada" then
@@ -59,7 +71,7 @@ function getMagneticDeclination(toStr)
   elseif theatre == "PersianGulf" then
     dec = 2
   else
-    return "UNKNOWN"
+    return dec
   end
 
   if toStr then

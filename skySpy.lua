@@ -81,6 +81,7 @@ do
 				if string.find(unit:getGroup():getName(), "^RAT_") ~= nil then return end -- RAT planes
 				if string.find(unit:getGroup():getName(), "^TS_") ~= nil then return end -- TargetScript targets
 				if string.find(unit:getGroup():getName(), "^ATIS_") ~= nil then return end -- ATIS relays
+				if string.find(unit:getGroup():getName(), "^ZEUSX_") ~= nil then return end -- ZEUSX spawns
 
 				local name = ""
 				if playerName then

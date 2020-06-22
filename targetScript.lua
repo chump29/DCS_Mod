@@ -11,7 +11,7 @@ local string = base.string
 targetScript = {
 	jtac = {"TS_JTAC", 1688},
 	groupNames = {"TS_BRDM", "TS_BTR", "TS_Infantry", "TS_MTLB", "TS_AAA"},
-	rareGroupNames = {"TS_A2A"} -- blank if none
+	rareGroupNames = {"TS_SA9", "TS_SA13", "TS_SA15", "TS_SA19"} -- blank if none
 }
 
 do
@@ -20,37 +20,37 @@ do
 	assert(ctld ~= nil, "CTLD" .. failMsg)
 
 	function targetScript.handleGroup(group)
-		if group:isExist() then
-			local groupName = group:getName()
-			mist.respawnGroup(groupName)
-			trigger.action.activateGroup(group)
-			local typeName = group:getUnits()[1]:getDesc().typeName
-			local msg = " spotted!"
-			if targetScript.countUnitsInGroup(group) > 1 then
-				msg = "s" .. msg
-			end
-			targetScript.say(typeName .. msg)
-			targetScript.activeGroup = groupName
-			targetScript.log("Spawned " .. typeName)
+		if not group then
+			targetScript.log("[handleGroup]: Cannot find group to spawn!")
+			return
 		end
+		local groupName = group:getName()
+		mist.respawnGroup(groupName)
+		trigger.action.activateGroup(group)
+		local typeName = group:getUnits()[1]:getDesc().typeName
+		local msg = " spotted!"
+		if targetScript.countUnitsInGroup(group) > 1 then
+			msg = "s" .. msg
+		end
+		targetScript.say(typeName .. msg)
+		targetScript.activeGroup = groupName
+		targetScript.log("Spawned " .. typeName)
 	end
 
-	function targetScript.activateGroup()
+	function targetScript.activateGroup(time)
+		time = time or mist.random(30)
 		local groupName = targetScript.groupNames[mist.random(#targetScript.groupNames)]
 
 		if #targetScript.rareGroupNames > 0 then
-			if mist.random(4) == 1 then -- 25%
-				if mist.random(3) == 1 then -- 33%
-					if mist.random(2) == 1 then -- 50%
-						groupName = targetScript.rareGroupNames[mist.random(#targetScript.rareGroupNames)]
-					end
-				end
+			if mist.random(10) == 1 then -- 10%
+				groupName = targetScript.rareGroupNames[mist.random(#targetScript.rareGroupNames)]
+				trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/incoming.ogg")
 			end
 		end
 
 		local group = Group.getByName(groupName)
 		if group then
-			mist.scheduleFunction(targetScript.handleGroup, {group}, timer.getTime() + mist.random(30))
+			mist.scheduleFunction(targetScript.handleGroup, {group}, timer.getTime() + time)
 			targetScript.log("Spawning " .. groupName)
 		else
 			targetScript.log(string.format("[activateGroup]: Group (%s) not found!", groupName), true)
@@ -117,8 +117,9 @@ do
 	end
 
 	function targetScript.newTargets()
+		targetScript.say("Refreshing targets...")
 		targetScript.deactivateGroups()
-		targetScript.activateGroup()
+		targetScript.activateGroup(1)
 	end
 
 	function targetScript.generateMenu()

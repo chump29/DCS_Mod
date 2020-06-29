@@ -23,7 +23,7 @@ do
 			if unit and unit:getLife() > 1 then
 				local unitName = unit:getName()
 				local u = UNIT:FindByName(unitName)
-				if unitName and u then
+				if u and u:GetHeight() <= 3.048 then -- in m
 					for _, zone in ipairs(honkZone.zones) do
 						local z = ZONE:FindByName(zone)
 						if z and u:IsInZone(z) then

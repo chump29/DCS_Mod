@@ -9,7 +9,7 @@ local ipairs = base.ipairs
 local string = base.string
 
 targetScript = {
-	jtac = {"TS_JTAC", 1688},
+	jtac = {"TS_JTAC", 0}, -- use 0 for random JTAC laser code
 	groupNames = {"TS_BRDM", "TS_BTR", "TS_Infantry", "TS_MTLB", "TS_AAA"},
 	rareGroupNames = {"TS_SA9", "TS_SA13", "TS_SA15", "TS_SA19"} -- blank if none
 }
@@ -98,11 +98,26 @@ do
 		end
 	end
 
+	function targetScript.getLaserCode()
+		if not targetScript.code then
+			if targetScript.jtac[2] > 0 then
+				targetScript.code = targetScript.jtac[2]
+			else
+				local code = 1000
+				code = code + (mist.random(5, 7) * 100)
+				code = code + (mist.random(8) * 10)
+				code = code + mist.random(8)
+				targetScript.code = code
+			end
+		end
+		return targetScript.code
+	end
+
 	function targetScript.doJTAC(obj)
 		if not obj then obj = { status = true } end
 		local status = obj.status
 		if status and not targetScript.jtacOn then
-			ctld.JTACAutoLase(targetScript.jtac[1], targetScript.jtac[2], false)
+			ctld.JTACAutoLase(targetScript.jtac[1], targetScript.getLaserCode(), false)
 			targetScript.jtacOn = true
 			targetScript.say("JTAC enabled.")
 			targetScript.generateMenu()

@@ -20,7 +20,7 @@ zeusX = {
 
 do
 
-	local debug = zeusX.debug
+	local debug = zeusX.debug or false
 
 	function zeusX.getLaserCode()
 		if not zeusX.laserCode then
@@ -62,7 +62,7 @@ do
 		end
 	end
 
-	function zeusX.handleDestroy(text, pos)
+	function zeusX.handleDestroy(pos)
 		local destroyObject = function(obj, val)
 			if obj then
 				local name = obj:getName()
@@ -71,24 +71,35 @@ do
 			end
 			return true
 		end
-		local destroyed = 0
-		local obj = text:match(".+%s(.+)")
-		if obj and obj == "jtacs" then
-			for _, g in ipairs(zeusX.jtacs) do
-				destroyObject(Group.getByName(g:GetName()))
-				destroyed = destroyed + 1
+		local function inRange(unit, pos)
+			local p = unit:getPosition()
+			if p then
+				return ((p.p.x - pos.x) ^ 2 + (p.p.z - pos.z) ^ 2) ^ 0.5 <= mist.utils.feetToMeters(1500)
 			end
-			zeusX.jtacs = {}
-		else
-			local vol = {
-				id = world.VolumeType.SPHERE,
-				params = {
-					point = pos,
-					radius = mist.utils.feetToMeters(1500)
-				}
-			}
-			destroyed = world.searchObjects(Object.Category.UNIT, vol, destroyObject)
 		end
+		local destroyed = 0
+		-- Air units
+		local unitNames = mist.makeUnitTable({"[all][plane]", "[all][helicopter]"})
+		if #unitNames > 0 then
+			for _, unitName in ipairs(unitNames) do
+				local unit = Unit.getByName(unitName)
+				if unit and not unit:getPlayerName() and unit:isActive() and inRange(unit, pos) then
+					if unitName:lower():find("jtac") then
+						 ctld.JTACAutoLaseStop(unit:getGroup():getName())
+					end
+					destroyObject(unit)
+				end
+			end
+		end
+		-- Ground units
+		local vol = {
+			id = world.VolumeType.SPHERE,
+			params = {
+				point = pos,
+				radius = mist.utils.feetToMeters(1500)
+			}
+		}
+		destroyed = world.searchObjects(Object.Category.UNIT, vol, destroyObject)
 		if debug then
 			if destroyed > 0 then
 				env.info(string.format("ZeusX: Destroyed %i objects.", destroyed))
@@ -106,8 +117,8 @@ do
 			local text = trim(event.text:lower())
 			if text:find("-create") then
 				zeusX.handleCreate(text, event.pos)
-			elseif text:find("-destroy") then
-				zeusX.handleDestroy(text, event.pos)
+			elseif text == "-destroy" then
+				zeusX.handleDestroy(event.pos)
 			end
 		end
 	end

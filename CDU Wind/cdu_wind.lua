@@ -57,7 +57,7 @@ function getMagneticDeclination(toStr)
     theatre = mist.DBs.missionData.theatre
   elseif UTILS then -- MOOSE
     theatre = UTILS.GetDCSMap()
-  elseif get_terrain_related_data("name") then
+  elseif get_terrain_related_data and get_terrain_related_data("name") then
     theatre = get_terrain_related_data("name")
   end
 

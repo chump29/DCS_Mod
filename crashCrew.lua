@@ -3,9 +3,9 @@
 -- by Chump
 --]]
 
-CrashCrew = {
-	num = 1
-}
+-- TODO: SAR beacon, water
+
+CrashCrew = {}
 
 do
 
@@ -44,6 +44,9 @@ do
 
 			local pos = unit:getPosition().p
 
+			local surface = land.getSurfaceType({x = pos.x, y = pos.z})
+			if surface == land.SurfaceType.SHALLOW_WATER or surface == land.SurfaceType.WATER then return end
+
 			for index = 1, 3 do
 				local unitPos = {
 					heading = UNIT
@@ -76,17 +79,24 @@ do
 				mist.scheduleFunction(DestroyCrashCrew, {g}, timer.getTime() + 120)
 			end
 
+			trigger.action.signalFlare(pos, trigger.flareColor.Green, 0)
+			trigger.action.signalFlare(pos, trigger.flareColor.Red, 90)
+			trigger.action.signalFlare(pos, trigger.flareColor.White, 180)
+			trigger.action.signalFlare(pos, trigger.flareColor.Yellow, 270)
+
 			CrashCrew.num = CrashCrew.num + 1
 			if CrashCrew.num > 10 then
 				CrashCrew.num = 1
 			end
 
-			local msg = string.format("Crash Crew dispatched to %s!", playerName)
 			--trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/static-short.ogg")
-			--trigger.action.outText(msg, 10)
+			local msg = string.format("Crash Crew dispatched to %s!", playerName)
+			trigger.action.outText(msg, 10)
 			env.info(msg)
 		end
 	end
+
+	CrashCrew.num = 1
 
 	mist.addEventHandler(CrashCrewEventHandler)
 

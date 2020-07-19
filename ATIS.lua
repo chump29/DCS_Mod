@@ -3,27 +3,25 @@
 -- by Chump
 --]]
 
--- TODO: create unit at specified/all/etc airbases
+local ATISfreqs = {}
 
 do
-	local base = _G
-	local assert = base.assert
-	local dofile = base.dofile
-	local ipairs = base.ipairs
-	local math = base.math
-	local next = base.next
-	local pairs = base.pairs
-	local require = base.require
-	local string = base.string
-	local table = base.table
-	local tonumber = base.tonumber
-	local tostring = base.tostring
+
+	local assert = _G.assert
+	local dofile = _G.dofile
+	local ipairs = _G.ipairs
+	local math = _G.math
+	local next = _G.next
+	local pairs = _G.pairs
+	local require = _G.require
+	local string = _G.string
+	local table = _G.table
+	local tonumber = _G.tonumber
+	local tostring = _G.tostring
 
 	local failMsg = " must be loaded prior to this script!"
-	assert(ATIS ~= nil, "MOOSE" .. failMsg)
-	assert(require ~= nil, "REQUIRE" .. failMsg)
-
-	local freqs = {}
+	assert(BASE ~= nil, "MOOSE" .. failMsg)
+	assert(require ~= nil, "REQUIRE" .. failMsg) -- for dofile()
 
 	local function HzToMHz(freq)
 		if not freq then return nil end
@@ -44,13 +42,21 @@ do
 				for _, freqData in pairs(obj.frequency) do
 					table.insert(ATCfreqs, HzToMHz(freqData[2]))
 				end
-				freqs[obj.radioId] = {atisFreq = atisFreq, ATCfreqs = ATCfreqs}
+				ATISfreqs[obj.radioId] = {atisFreq = atisFreq, ATCfreqs = ATCfreqs}
 			end
 		end
 	end
 	radio = nil
 
-	if #freqs == 0 then
+	local function CountArray(arr)
+		local count = 0
+		for _, _ in pairs(arr) do
+			count = count + 1
+		end
+		return count
+	end
+
+	if CountArray(ATISfreqs) == 0 then
 		env.info("ATIS: No frequency data found!")
 		return
 	end
@@ -65,7 +71,7 @@ do
 
 	local function GetObj(id)
 		if id == -1 then return nil end
-		return freqs[string.format("airfield%i_0", id)]
+		return ATISfreqs[string.format("airfield%i_0", id)]
 	end
 
 	local FindWhat = {
@@ -76,20 +82,20 @@ do
 
 	local function FindMe(what, freq, isInner)
 		isInner = isInner or false
-		for _, obj in pairs(freqs) do
-			if what == FindWhat.ILS then
+		for _, obj in pairs(ATISfreqs) do
+			if what == FindWhat.ILS and obj.ils then
 				for _, ils in ipairs(obj.ils) do
 					if ils.freq == freq then
 						return true
 					end
 				end
-			elseif what == FindWhat.NDB then
+			elseif what == FindWhat.NDB and obj.ndb then
 				for _, ndb in ipairs(obj.ndb) do
-					if ndb.freq == freq and ndb.isInner = isInner then
+					if ndb.freq == freq and ndb.isInner == isInner then
 						return true
 					end
 				end
-			elseif what == FindWhat.PRMG then
+			elseif what == FindWhat.PRMG and obj.prmg then
 				for _, prmg in ipairs(obj.prmg) do
 					if prmg.channel == freq then
 						return true
@@ -139,12 +145,13 @@ do
 		if airbase:getDesc().category == Airbase.Category.AIRDROME then
 			local callsign = airbase:getCallsign()
 			local name = "ATIS_" .. callsign
-			if Unit.getByName(name) then
+			if Group.getByName(name) then
 				local obj = GetObj(airbase:getID())
 				if obj then
-					local atis = ATIS:New(callsign, obj.atisFreq)
-					atis:SetSoundfilesPath("ATIS/")
-					atis:SetRadioRelayUnitName(name)
+					local atis = ATIS
+						:New(callsign, obj.atisFreq)
+						:SetSoundfilesPath("ATIS/")
+						:SetRadioRelayUnitName(name)
 					if #obj.ATCfreqs > 0 then
 						atis:SetTowerFrequencies(obj.ATCfreqs)
 					end
@@ -178,10 +185,15 @@ do
 					end
 					atis:Start()
 					env.info(string.format("ATIS: Broadcasting from %s on %.2f MHz", callsign, obj.atisFreq))
+				else
+					env.info("ATIS: Airfield Object not found!")
 				end
+			else
+				env.info(string.format("ATIS: ATIS Group (%s) not found!", name))
 			end
 		end
 	end
 	airbases = nil
-	freqs = nil
+	ATISfreqs = nil
+
 end

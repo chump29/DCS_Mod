@@ -9,7 +9,7 @@ do
 
 	assert(BASE ~= nil, "MOOSE must be loaded prior to this script!")
 
-	RESCUEHELO -- NOTE: global on purpose!
+	RESCUEHELO = RESCUEHELO -- NOTE: global on purpose!
 		:New(UNIT:FindByName("Carrier"), "CSAR")
 		:Start()
 

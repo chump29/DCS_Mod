@@ -26,7 +26,7 @@ do
 		if not event or not event.initiator then return end
 
 		local unit = event.initiator
-		if not unit then return end
+		if not unit or not unit:getCategory() == Object.Category.UNIT then return end
 
 		local playerName = unit:getPlayerName()
 		if not playerName then return end
@@ -44,7 +44,20 @@ do
 			say(string.format("%s is dead!", playerName))
 
 		elseif event.id == world.event.S_EVENT_CRASH then
-			say(string.format("%s has crashed!", playerName))
+			local category = unit:getGroup():getCategory()
+			local cat
+			if category == Group.Category.HELICOPTER then
+				cat = "helicopter"
+			elseif category == Group.Category.AIRPLANE then
+				cat = "plane"
+			elseif category == Group.Category.GROUND then
+				cat = "vehicle"
+			elseif category == Group.Category.SHIP then
+				cat = "ship"
+			else
+				return
+			end
+			say(string.format("%s's %s has crashed!", playerName, category))
 
 		end
 	end

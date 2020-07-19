@@ -3,11 +3,6 @@
 -- by Chump
 --]]
 
-local base = _G
-local assert = base.assert
-local ipairs = base.ipairs
-local string = base.string
-
 targetScript = {
 	jtac = {"TS_JTAC", 0}, -- use 0 for random JTAC laser code
 	groupNames = {"TS_BRDM", "TS_BTR", "TS_Infantry", "TS_MTLB", "TS_AAA"},
@@ -15,15 +10,21 @@ targetScript = {
 }
 
 do
+
+	local assert = _G.assert
+	local ipairs = _G.ipairs
+	local string = _G.string
+
 	local failMsg = " must be loaded prior to this script!"
-	assert(mist ~= nil, "MiST" .. failMsg)
 	assert(ctld ~= nil, "CTLD" .. failMsg)
+	assert(mist ~= nil, "MiST" .. failMsg)
 
 	function targetScript.handleGroup(group)
 		if not group then
 			targetScript.log("[handleGroup]: Cannot find group to spawn!")
 			return
 		end
+env.info(mist.utils.serialize("group", group))
 		local groupName = group:getName()
 		mist.respawnGroup(groupName)
 		trigger.action.activateGroup(group)
@@ -232,4 +233,5 @@ do
 	end
 
 	targetScript.start(true)
+
 end

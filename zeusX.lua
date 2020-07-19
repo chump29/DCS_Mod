@@ -3,22 +3,21 @@
 -- by Chump
 --]]
 
-local base = _G
-local assert = base.assert
-local ipairs = base.ipairs
-local string = base.string
-local table = base.table
-
-local str = " must be included before this script!"
-assert(BASE ~= nil, "MOOSE" .. str)
-assert(mist ~= nil, "MiST" .. str)
-assert(ctld ~= nil, "CTLD" .. str)
-
 zeusX = {
 	debug = false
 }
 
 do
+
+	local assert = _G.assert
+	local ipairs = _G.ipairs
+	local string = _G.string
+	local table = _G.table
+
+	local failMsg = " must be loaded prior to this script!"
+	assert(BASE ~= nil, "MOOSE" .. failMsg)
+	assert(ctld ~= nil, "CTLD" .. failMsg)
+	assert(mist ~= nil, "MiST" .. failMsg)
 
 	local debug = zeusX.debug or false
 
@@ -31,6 +30,24 @@ do
 			zeusX.laserCode = code
 		end
 		return zeusX.laserCode
+	end
+
+	function zeusX.getAlias(name)
+		local alias = "Unknown"
+		if name:find("a2a") then
+			alias = "CAP Flight"
+		elseif name:find("armor") then
+			alias = "Armor Group"
+		elseif name:find("helo") then
+			alias = "Helo Flight"
+		elseif name:find("inf") then
+			alias = "Infantry Platoon"
+		elseif name:find("jtac") then
+			alias = "JTAC"
+		elseif name:find("sam") then
+			alias = "SAM Battery"
+		end
+		return alias
 	end
 
 	function zeusX.handleCreate(text, pos)
@@ -48,7 +65,7 @@ do
 					pos.y = mist.utils.feetToMeters(5000)
 				end
 				local s = SPAWN
-					:New(name)
+					:NewWithAlias(name, zeusX.getAlias(name))
 					:SpawnFromVec3(pos)
 				if obj == "jtac" then
 					mist.scheduleFunction(autoLase, {s:GetName()}, timer.getTime() + 1)

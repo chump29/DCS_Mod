@@ -3,8 +3,6 @@
 -- by Chump
 --]]
 
--- TODO: SAR beacon, water
-
 CrashCrew = {}
 
 do
@@ -20,7 +18,7 @@ do
 		if not event or not event.initiator then return end
 
 		local unit = event.initiator
-		if not unit then return end
+		if not unit or not unit:getCategory() == Object.Category.UNIT then return end
 
 		local playerName = unit:getPlayerName()
 		if not playerName then return end
@@ -44,8 +42,11 @@ do
 
 			local pos = unit:getPosition().p
 
+			local ccType = "Land"
 			local surface = land.getSurfaceType({x = pos.x, y = pos.z})
-			if surface == land.SurfaceType.SHALLOW_WATER or surface == land.SurfaceType.WATER then return end
+			if surface == land.SurfaceType.SHALLOW_WATER or surface == land.SurfaceType.WATER then
+				ccType = "Water"
+			end
 
 			for index = 1, 3 do
 				local unitPos = {
@@ -70,13 +71,13 @@ do
 				end
 
 				local g = SPAWN
-					:NewWithAlias("CrashCrew", string.format("Crash Crew %i-%i", CrashCrew.num, index))
+					:NewWithAlias("CrashCrew" .. ccType, string.format("Crash Crew %i-%i", CrashCrew.num, index))
 					:InitCoalition(coalition.side.BLUE)
 					:InitCountry(country.id.USA)
 					:InitHeading(unitPos.heading)
 					:SpawnFromVec2({x = unitPos.x, y = unitPos.y})
 
-				mist.scheduleFunction(DestroyCrashCrew, {g}, timer.getTime() + 120)
+				mist.scheduleFunction(DestroyCrashCrew, {g}, timer.getTime() + mist.random(60, 120))
 			end
 
 			trigger.action.signalFlare(pos, trigger.flareColor.Green, 0)
@@ -89,7 +90,7 @@ do
 				CrashCrew.num = 1
 			end
 
-			--trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/static-short.ogg")
+			trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/siren.ogg")
 			local msg = string.format("Crash Crew dispatched to %s!", playerName)
 			trigger.action.outText(msg, 10)
 			env.info(msg)

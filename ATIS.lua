@@ -28,13 +28,21 @@ do
 		return freq / 1000000
 	end
 
+	local function CountArray(arr)
+		local count = 0
+		for _, _ in pairs(arr) do
+			count = count + 1
+		end
+		return count
+	end
+
 	dofile(string.format("./Mods/terrains/%s/Radio.lua", env.mission.theatre))
 	if not radio then
 		env.info("ATIS: Could not load Radio data!")
 		return
 	end
 	for _, obj in ipairs(radio) do
-		if #obj.frequency > 0 then
+		if CountArray(obj.frequency) > 0 then
 			local vhf = obj.frequency[VHF_HI]
 			if vhf and vhf[2] then
 				local atisFreq = HzToMHz(vhf[2] + 50000)
@@ -47,14 +55,6 @@ do
 		end
 	end
 	radio = nil
-
-	local function CountArray(arr)
-		local count = 0
-		for _, _ in pairs(arr) do
-			count = count + 1
-		end
-		return count
-	end
 
 	if CountArray(ATISfreqs) == 0 then
 		env.info("ATIS: No frequency data found!")

@@ -3,13 +3,6 @@
 -- by Chump
 --]]
 
-local base = _G
-local ipairs = base.ipairs
-local require = base.require
-local string = base.string
-local table = base.table
-local lfs = require("lfs")
-
 allSkins = {
 	debug = false,
 	paths = { -- NOTE: path MUST end in slash
@@ -49,7 +42,14 @@ allSkins = {
 }
 
 do
-	function allSkins.getLiveries(path)
+
+	local ipairs = _G.ipairs
+	local require = _G.require
+	local string = _G.string
+	local table = _G.table
+	local lfs = require("lfs")
+
+	local function GetLiveries(path)
 		local debug = allSkins.debug
 
 		if debug then env.info("allSkins: Scanning " .. path) end
@@ -79,8 +79,9 @@ do
 	end
 
 	for _, path in ipairs(allSkins.paths) do
-		allSkins.getLiveries(path)
+		GetLiveries(path)
 	end
 
 	env.info(string.format("allSkins: scanned %i skins for %i airframes.", allSkins.count.skins, allSkins.count.airframes))
+
 end

@@ -70,11 +70,11 @@ do
 	end
 
 	local function FromOne(obj)
-		CreatePlane(obj, "Al Maktoum Intl", "Dubai Intl")
+		CreatePlane(obj, "Al Maktoum Intl", "Al Minhad AB")
 	end
 
 	local function FromTwo(obj)
-		CreatePlane(obj, "Dubai Intl", "Al Maktoum Intl")
+		CreatePlane(obj, "Al Minhad AB", "Al Maktoum Intl")
 	end
 
 	if not RATPlanes.planes or #RATPlanes.planes == 0 then

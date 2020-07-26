@@ -11,7 +11,14 @@ RangeScript = {
 	},
 	RareTargetGroupNames = {
 		"TargetHelo"
-	}
+	},
+	Sounds = { -- must be included in .miz via SOUND TO ALL trigger
+		Spawn = "incoming.ogg",
+		Clear = "completely_different.ogg",
+		Win = "cheer2.ogg" -- must use MaxSpawnCount
+	},
+	MaxSpawnCount = 2, -- 0 = no limit
+	WinFlag = 1234 -- 0 for none
 }
 
 do
@@ -24,20 +31,25 @@ do
 	assert(BASE ~= nil, "MOOSE" .. failMsg)
 	assert(mist ~= nil, "MiST" .. failMsg)
 
+	local function log(msg)
+		env.info("RangeScript: " .. msg)
+	end
+
 	local function SpawnGroup(groupName)
 		local g = SPAWN
 			:NewWithAlias(groupName, "Target")
 			:Spawn()
-		RangeScript.count = RangeScript.count + #g:GetUnits()
-		trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/incoming.ogg")
+		RangeScript.unitCount = RangeScript.unitCount + #g:GetUnits()
+		RangeScript.spawnCount = RangeScript.spawnCount + 1
+		trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/" .. RangeScript.Sounds.Spawn)
 		local msg = string.format("%s(s) spotted!", g:GetDCSDesc().typeName)
 		trigger.action.outText(msg, 10)
-		env.info(msg)
+		log(msg)
 	end
 
 	local function PickGroup()
 		if #RangeScript.TargetGroupNames == 0 then
-			env.info("RangeScript: No Targets to choose from!")
+			log("No Targets to choose from!")
 			return
 		end
 
@@ -50,10 +62,11 @@ do
 		end
 
 		mist.scheduleFunction(SpawnGroup, {groupName}, timer.getTime() + 10)
-		env.info(string.format("Spawning %s...", groupName))
+		log(string.format("Spawning %s...", groupName))
 	end
 
 	local function RefreshTargets()
+		log("Refreshing targets...")
 		local function DestroyGroup(group)
 			if group then group:destroy() end
 		end
@@ -82,13 +95,24 @@ do
 		if not unit or not unit:getCategory() == Object.Category.UNIT then return end
 
 		if event.id == world.event.S_EVENT_DEAD and unit:getName():find("Target") then
-			RangeScript.count = RangeScript.count - 1
+			RangeScript.unitCount = RangeScript.unitCount - 1
 
-			if RangeScript.count == 0 then
-				trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/cheer2.ogg")
+			if RangeScript.unitCount == 0 then
+				trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/" .. RangeScript.Sounds.Clear)
 				local msg = "All targets destroyed!"
 				trigger.action.outText(msg, 10)
-				env.info(msg)
+				log(msg)
+
+				if RangeScript.MaxSpawnCount > 0 and RangeScript.spawnCount == RangeScript.MaxSpawnCount then
+					trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/" .. RangeScript.Sounds.Win)
+					trigger.action.outText("Outstanding job! Return to base!", 10)
+					log("MaxSpawnCount reached! Stopping.")
+					if RangeScript.WinFlag > 0 then
+						trigger.action.setUserFlag(RangeScript.WinFlag, true)
+					end
+					mist.removeEventHandler(RangeScript.EventHandlerID)
+					return
+				end
 
 				PickGroup()
 			end
@@ -99,13 +123,13 @@ do
 		end
 	end
 
-	RangeScript.count = 0
+	RangeScript.unitCount = 0
+	RangeScript.spawnCount = 0
 
-	mist.addEventHandler(RangeScriptEventHandler)
+	RangeScript.EventHandlerID = mist.addEventHandler(RangeScriptEventHandler)
 
 	PickGroup()
 
 	env.info("Range Script is providing targets...")
 
 end
-

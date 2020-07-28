@@ -7,7 +7,8 @@ RangeScript = {
 	TargetGroupNames = {
 		"TargetBTR",
 		"TargetInfantry",
-		"TargetTank"
+		"TargetTank",
+		"TargetBMP"
 	},
 	RareTargetGroupNames = {
 		"TargetHelo"
@@ -62,7 +63,7 @@ do
 		end
 
 		mist.scheduleFunction(SpawnGroup, {groupName}, timer.getTime() + 10)
-		log(string.format("Spawning %s...", groupName))
+		log(string.format("Spawning %s group...", groupName))
 	end
 
 	local function RefreshTargets()
@@ -92,13 +93,12 @@ do
 		if not event or not event.initiator then return end
 
 		local unit = event.initiator
-		if not unit or not unit:getCategory() == Object.Category.UNIT then return end
+		if not unit or not unit:getCategory() == Object.Category.UNIT or not unit:isActive() then return end
 
 		if event.id == world.event.S_EVENT_DEAD and unit:getName():find("Target") then
 			RangeScript.unitCount = RangeScript.unitCount - 1
 
 			if RangeScript.unitCount == 0 then
-				trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/" .. RangeScript.Sounds.Clear)
 				local msg = "All targets destroyed!"
 				trigger.action.outText(msg, 10)
 				log(msg)
@@ -112,6 +112,8 @@ do
 					end
 					mist.removeEventHandler(RangeScript.EventHandlerID)
 					return
+				else
+					trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/" .. RangeScript.Sounds.Clear)
 				end
 
 				PickGroup()

@@ -12,7 +12,7 @@ do
 	assert(BASE ~= nil, "MOOSE" .. failMsg)
 	assert(mist ~= nil, "MiST" .. failMsg)
 
-	local ATC = PSEUDOATC
+	PSEUDOATC
 		:New()
 		:Start()
 
@@ -26,7 +26,7 @@ do
 		if not event or not event.initiator then return end
 
 		local unit = event.initiator
-		if not unit or not unit:getCategory() == Object.Category.UNIT then return end
+		if not unit or not unit:getCategory() == Object.Category.UNIT or not unit:isActive() then return end
 
 		local playerName = unit:getPlayerName()
 		if not playerName then return end

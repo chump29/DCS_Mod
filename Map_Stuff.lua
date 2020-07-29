@@ -57,7 +57,7 @@ do
 			else
 				return
 			end
-			say(string.format("%s's %s has crashed!", playerName, category))
+			say(string.format("%s's %s has crashed!", playerName, cat))
 
 		end
 	end

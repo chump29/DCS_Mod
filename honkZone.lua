@@ -68,7 +68,7 @@ do
 		return
 	end
 
-	SCHEDULER:New(nil, CheckZone, {z}, 10, 2)
+	SCHEDULER:New(nil, CheckZone, {z}, 10, 3)
 
 	log(" Watching zone " .. z:GetName() .. "...")
 

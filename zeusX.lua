@@ -46,6 +46,8 @@ do
 			alias = "JTAC"
 		elseif name:find("sam") then
 			alias = "SAM Battery"
+		--elseif name:find("ship") then
+		--	alias = "Battle Group"
 		end
 		return alias
 	end

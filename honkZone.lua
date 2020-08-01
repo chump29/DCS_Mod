@@ -49,7 +49,7 @@ do
 		if players and #players > 0 then
 			for _, unit in ipairs(players) do
 				local u = UNIT:Find(unit)
-				if u then
+				if u and not u:InAir() then
 					if u:IsInZone(z) then
 						InZone(z, u)
 					else
@@ -68,7 +68,7 @@ do
 		return
 	end
 
-	SCHEDULER:New(nil, CheckZone, {z}, 10, 3)
+	SCHEDULER:New(nil, CheckZone, {z}, 60, 3)
 
 	log(" Watching zone " .. z:GetName() .. "...")
 

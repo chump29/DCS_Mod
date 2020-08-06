@@ -69,12 +69,8 @@ do
 		end
 	end
 
-	local function FromOne(obj)
-		CreatePlane(obj, "Al Maktoum Intl", "Al Minhad AB")
-	end
-
-	local function FromTwo(obj)
-		CreatePlane(obj, "Al Minhad AB", "Al Maktoum Intl")
+	local function FromTo(obj, from, to)
+		CreatePlane(obj, from, to)
 	end
 
 	if not RATPlanes.planes or #RATPlanes.planes == 0 then
@@ -83,8 +79,8 @@ do
 	end
 
 	for _, plane in ipairs(RATPlanes.planes) do
-		FromOne(plane)
-		FromTwo(plane)
+		FromTo(plane, "Al Maktoum Intl", "Al Minhad AB")
+		FromTo(plane, "Al Minhad AB", "Al Maktoum Intl")
 	end
 
 	env.info("RAT is running.")

@@ -3,13 +3,17 @@
 -- by Chump
 --]]
 
--- TODO: on/off menu
-
 RATPlanes = {
 	debug = false,
 	planes = {
 		{"Yak-52", "RAT_Yak"},
-		{"Christen Eagle II", "RAT_CE2"}
+		{"Christen Eagle II", "RAT_CE2"},
+		{"I-16", "RAT_I16"}
+	},
+	zones = {
+		"RAT1",
+		"RAT2",
+		"RAT3"
 	}
 }
 
@@ -49,7 +53,14 @@ do
 			plane:SetAISkill("Random")
 			plane:SetCoalitionAircraft("blue")
 			plane:SetDeparture(from)
-			plane:SetDestination(to)
+
+			if to then
+				plane:SetDestination(to)
+			elseif #RATPlanes.zones > 0 then
+				plane:DestinationZone()
+				plane:SetDestination(RATPlanes.zones)
+			end
+
 			plane:SetFL(mist.random(10, 100))
 			plane:SetROT("evade")
 			plane:SetSpawnDelay(mist.random(10, 30))
@@ -71,6 +82,29 @@ do
 
 	local function FromTo(obj, from, to)
 		CreatePlane(obj, from, to)
+		if debug then env.info(string.format("RAT: %s > %s", from, to or "Zone")) end
+	end
+
+	local function countArray(arr)
+		local count = 0
+		for _, _ in pairs(arr) do
+			count = count + 1
+		end
+		return count
+	end
+
+	local function TurnOff()
+		for _, plane in pairs(RATPlanes.spawned) do
+			plane:destroy()
+		end
+		RATPlanes.spawned = nil
+		env.info("RAT: Turned off!")
+	end
+
+	local function DoMenu()
+		if countArray(RATPlanes.spawned) > 0 then
+			MENU_COALITION_COMMAND:New(BLUE, "RAT Off", nil, TurnOff)
+		end
 	end
 
 	if not RATPlanes.planes or #RATPlanes.planes == 0 then
@@ -79,8 +113,7 @@ do
 	end
 
 	for _, plane in ipairs(RATPlanes.planes) do
-		FromTo(plane, "Al Maktoum Intl", "Al Minhad AB")
-		FromTo(plane, "Al Minhad AB", "Al Maktoum Intl")
+		FromTo(plane, "Kobuleti", nil)
 	end
 
 	env.info("RAT is running.")

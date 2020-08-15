@@ -5,21 +5,22 @@
 
 RangeScript = {
 	TargetGroupNames = {
+		"TargetBRDM",
 		"TargetBTR",
 		"TargetInfantry",
-		"TargetTank",
-		"TargetBMP"
+		"TargetTank"
 	},
 	RareTargetGroupNames = {
-		"TargetHelo"
+		"TargetHelo",
+		"TargetSAM"
 	},
 	Sounds = { -- must be included in .miz via SOUND TO ALL trigger
 		Spawn = "incoming.ogg",
 		Clear = "completely_different.ogg",
 		Win = "cheer2.ogg" -- must use MaxSpawnCount
 	},
-	MaxSpawnCount = 2, -- 0 = no limit
-	WinFlag = 1234 -- 0 for none
+	MaxSpawnCount = 0, -- 0 = no limit
+	WinFlag = 0 -- 0 for none
 }
 
 do

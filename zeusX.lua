@@ -21,6 +21,8 @@ do
 
 	local debug = zeusX.debug or false
 
+	local count = 0
+
 	function zeusX.getLaserCode()
 		if not zeusX.laserCode then
 			local code = 1000
@@ -46,8 +48,8 @@ do
 			alias = "JTAC"
 		elseif name:find("sam") then
 			alias = "SAM Battery"
-		--elseif name:find("ship") then
-		--	alias = "Battle Group"
+		elseif name:find("ship") then
+			alias = "Battle Group"
 		end
 		return alias
 	end
@@ -65,9 +67,21 @@ do
 					pos.y = mist.utils.feetToMeters(500)
 				elseif obj == "a2a_red" or obj == "a2a_blue" or obj == "jtac" then
 					pos.y = mist.utils.feetToMeters(5000)
+				else
+					local surfaceType = land.getSurfaceType({x = pos.x, y = pos.z})
+					if obj == "ship_red" or obj == "ship_blue" then
+						if surfaceType ~= land.SurfaceType.SHALLOW_WATER and surfaceType ~= land.SurfaceType.WATER then
+							if debug then env.warning("ZeusX: Cannot place naval units on land!") end
+							return
+						end
+					elseif surfaceType == land.SurfaceType.SHALLOW_WATER or surfaceType == land.SurfaceType.WATER then
+						if debug then env.warning("ZeusX: Cannot place land units on water!") end
+						return
+					end
 				end
+				count = count + 1
 				local s = SPAWN
-					:NewWithAlias(name, zeusX.getAlias(name))
+					:NewWithAlias(name, string.format("%s-%i", zeusX.getAlias(name), count))
 					:SpawnFromVec3(pos)
 				if obj == "jtac" then
 					mist.scheduleFunction(autoLase, {s:GetName()}, timer.getTime() + 1)

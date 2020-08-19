@@ -93,7 +93,7 @@ local cdata =
     NA = _('N/A'),
     details = _('Details'),
     BRIEFING = _('BRIEFING'),
-    noWeapon = _('No weapon')
+    noWeapon = _('No weapon'),
 }
 
 if base.LOFAC then
@@ -146,6 +146,8 @@ local function create_()
     missionEditorBtn.onChange = missionEditorBtnOnChange
     flyBtn.onChange = flyBtnOnChange
     pNoVisible = window.pNoVisible
+    sbHorz = pCenter.bgPanel.sbHorz
+    sbVert = pCenter.bgPanel.sbVert
 
     autobriefingutils.setStaticSectionItemSkin(pNoVisible.staticSkinSectionItem:getSkin())
     autobriefingutils.setStaticSectionDataItemSkin(pNoVisible.staticSkinSectionDataItem:getSkin())
@@ -159,9 +161,9 @@ local function create_()
 
     widgetOf = pCenter.widgetOf
 
-    pictureWidget = pCenter.bgPanel.imageScrollPane.pictureWidget
+    pictureWidget = pCenter.bgPanel.pictureWidget
 
-    imagePreviewWidget = imagePreview.new(pCenter.bgPanel.imageScrollPane, pictureWidget)
+    imagePreviewWidget = imagePreview.new(pictureWidget, sbHorz, sbVert)
 
     buttonPrev = pCenter.buttonPrev
     buttonNext = pCenter.buttonNext

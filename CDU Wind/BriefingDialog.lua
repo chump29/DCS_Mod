@@ -95,7 +95,7 @@ local cdata = {
 
         km_unit = _('km'),
         cloud_cover_base = _('base'),
-        NA = _('N/A')
+        NA = _('N/A'),
     }
 
     if base.LOFAC then
@@ -113,6 +113,8 @@ function create()
     flyBtn = panelBottom.buttonFly
     pCenter = containerMain.pCenter
     pNoVisible = window.pNoVisible
+    sbHorz = pCenter.bgPanel.sbHorz
+    sbVert = pCenter.bgPanel.sbVert
 
     autobriefingutils.setStaticSectionItemSkin(pNoVisible.staticSkinSectionItem:getSkin())
     autobriefingutils.setStaticSectionDataItemSkin(pNoVisible.staticSkinSectionDataItem:getSkin())
@@ -131,9 +133,9 @@ function create()
 
     buttonPrev = pCenter.buttonPrev
     buttonNext = pCenter.buttonNext
-    staticImage = pCenter.bgPanel.imageScrollPane.pictureWidget
+    staticImage = pCenter.bgPanel.pictureWidget
     staticImageSkin = staticImage:getSkin()
-    imagePreviewWidget = imagePreview.new(pCenter.bgPanel.imageScrollPane, staticImage)
+    imagePreviewWidget = imagePreview.new(staticImage, sbHorz, sbVert)
     picture = staticImageSkin.skinData.states.released[1].picture
     staticImageNumber = pCenter.staticImageNumber
     staticOF = pCenter.widgetOf

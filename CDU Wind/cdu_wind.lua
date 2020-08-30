@@ -47,6 +47,7 @@ function getMagneticDeclination(toStr)
   --NTTR +12 (East), year ~ 2011
   --Normandy -10 (West), year ~ 1944
   --Persian Gulf +2 (East), year ~ 2011
+  --Syria +5 (East), year ~ 2020
 
   local theatre
   if MissionModule.mission then
@@ -70,6 +71,8 @@ function getMagneticDeclination(toStr)
     dec = -10
   elseif theatre == "PersianGulf" then
     dec = 2
+  elseif theatre == "Syria" then
+    dec = 5
   else
     return dec
   end

@@ -94,17 +94,13 @@ do
 	end
 
 	local function TurnOff()
+		if not RATPlanes.isOn then return end
 		for _, plane in pairs(RATPlanes.spawned) do
 			plane:destroy()
 		end
 		RATPlanes.spawned = nil
+		RATPlanes.isOn = false
 		env.info("RAT: Turned off!")
-	end
-
-	local function DoMenu()
-		if countArray(RATPlanes.spawned) > 0 then
-			MENU_COALITION_COMMAND:New(BLUE, "RAT Off", nil, TurnOff)
-		end
 	end
 
 	if not RATPlanes.planes or #RATPlanes.planes == 0 then
@@ -112,9 +108,22 @@ do
 		return
 	end
 
-	for _, plane in ipairs(RATPlanes.planes) do
-		FromTo(plane, "Kobuleti", nil)
+	local function TurnOn(obj)
+		if RATPlanes.isOn then return end
+		local fromMenu = obj.fromMenu or false
+		for _, plane in ipairs(RATPlanes.planes) do
+			FromTo(plane, "Kobuleti", nil)
+		end
+		RATPlanes.isOn = true
+		if RATPlanes.debug and fromMenu then
+			env.info("RAT: Turned on!")
+		end
 	end
+
+	MENU_COALITION_COMMAND:New(BLUE, "RAT Off", nil, TurnOff)
+	MENU_COALITION_COMMAND:New(BLUE, "RAT On", nil, TurnOn, {fromMenu = true})
+
+	TurnOn()
 
 	env.info("RAT is running.")
 

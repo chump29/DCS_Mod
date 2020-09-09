@@ -20,7 +20,16 @@ RangeScript = {
 		Win = "cheer2.ogg" -- must use MaxSpawnCount
 	},
 	MaxSpawnCount = 0, -- 0 = no limit
-	WinFlag = 0 -- 0 for none
+	WinFlag = 0, -- 0 for none
+	JTAC = { -- uses CTLD
+		GroupName = "JTAC", -- leave empty if not using JTAC
+		LaserCode = 1788 -- if UseFAC=true, cannot be 1688
+	},
+	FAC = {
+		UseFAC = true, -- use built-in FAC
+		Frequency = 30, -- in MHz
+		Modulation = 1 -- 0 = AM, 1 = FM
+	}
 }
 
 do
@@ -31,16 +40,54 @@ do
 
 	local failMsg = " must be loaded prior to this script!"
 	assert(BASE ~= nil, "MOOSE" .. failMsg)
+	assert(ctld ~= nil, "CTLD" .. failMsg)
 	assert(mist ~= nil, "MiST" .. failMsg)
 
 	local function log(msg)
 		env.info("RangeScript: " .. msg)
 	end
 
+	local function HandleJTAC(groupName)
+		local function Task(groupId)
+			local modulation = radio.modulation.FM
+			if RangeScript.FAC.Modulation == 0 then
+				modulation = radio.modulation.AM
+			end
+			local frequency = RangeScript.FAC.Frequency * 1000000
+			return {
+				number = 1,
+				auto = false,
+				id = "FAC_AttackGroup",
+				enabled = true,
+				params = {
+					number = 1,
+					designation = AI.Task.Designation.LASER,
+					modulation = modulation,
+					groupId = groupId,
+					frequency = frequency,
+					weaponType = Weapon.flag.AnyWeapon,
+					datalink = true,
+					callname = 12 -- Playboy
+				}
+			}
+		end
+
+		if RangeScript.FAC.UseFAC then
+			local group = Group.getByName(groupName)
+			if group then
+				local controller = group:getController()
+				if controller then
+					controller:pushTask(Task(group:getID()))
+				end
+			end
+		end
+	end
+
 	local function SpawnGroup(groupName)
 		local g = SPAWN
 			:NewWithAlias(groupName, "Target")
 			:Spawn()
+		HandleJTAC(groupName)
 		RangeScript.unitCount = RangeScript.unitCount + #g:GetUnits()
 		RangeScript.spawnCount = RangeScript.spawnCount + 1
 		trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/" .. RangeScript.Sounds.Spawn)
@@ -132,6 +179,11 @@ do
 	RangeScript.EventHandlerID = mist.addEventHandler(RangeScriptEventHandler)
 
 	PickGroup()
+
+	local jtacGroupName = RangeScript.JTAC.GroupName
+		if jtacGroupName then
+		ctld.JTACAutoLase(jtacGroupName, RangeScript.JTAC.LaserCode, false)
+	end
 
 	env.info("Range Script is providing targets...")
 

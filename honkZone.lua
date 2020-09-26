@@ -5,10 +5,6 @@
 
 HonkZone = {
 	Sound = "honk.ogg",
-	Units = {
-		"Hawg1",
-		"Hawg2"
-	},
 	Zones = {
 		"Honk1",
 		"Honk2"

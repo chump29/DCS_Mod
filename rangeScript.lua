@@ -4,15 +4,15 @@
 --]]
 
 RangeScript = {
-	TargetGroupNames = {
-		"TargetBRDM",
-		"TargetBTR",
-		"TargetInfantry",
-		"TargetTank"
+	TargetGroupNames = { -- groupName & flag
+		{"TargetBRDM", 100},
+		{"TargetBTR", 101},
+		{"TargetInfantry", 102},
+		{"TargetTank", 103}
 	},
-	RareTargetGroupNames = {
-		"TargetHelo",
-		"TargetSAM"
+	RareTargetGroupNames = { -- groupName & flag
+		{"TargetHelo", 200},
+		{"TargetSAM", 201}
 	},
 	Sounds = { -- must be included in .miz via SOUND TO ALL trigger
 		Spawn = "incoming.ogg",
@@ -21,14 +21,9 @@ RangeScript = {
 	},
 	MaxSpawnCount = 0, -- 0 = no limit
 	WinFlag = 0, -- 0 for none
-	JTAC = { -- uses CTLD
-		GroupName = "JTAC", -- leave empty if not using JTAC
-		LaserCode = 1788 -- if UseFAC=true, cannot be 1688
-	},
-	FAC = {
-		UseFAC = true, -- use built-in FAC
-		Frequency = 30, -- in MHz
-		Modulation = 1 -- 0 = AM, 1 = FM
+	JTAC = {
+		GroupName = "JTAC", -- leave blank if not using JTAC
+		LaserCode = 1788
 	}
 }
 
@@ -47,47 +42,32 @@ do
 		env.info("RangeScript: " .. msg)
 	end
 
-	local function HandleJTAC(groupName)
-		local function Task(groupId)
-			local modulation = radio.modulation.FM
-			if RangeScript.FAC.Modulation == 0 then
-				modulation = radio.modulation.AM
-			end
-			local frequency = RangeScript.FAC.Frequency * 1000000
-			return {
-				number = 1,
-				auto = false,
-				id = "FAC_AttackGroup",
-				enabled = true,
-				params = {
-					number = 1,
-					designation = AI.Task.Designation.LASER,
-					modulation = modulation,
-					groupId = groupId,
-					frequency = frequency,
-					weaponType = Weapon.flag.AnyWeapon,
-					datalink = true,
-					callname = 12 -- Playboy
-				}
-			}
-		end
-
-		if RangeScript.FAC.UseFAC then
-			local group = Group.getByName(groupName)
-			if group then
-				local controller = group:getController()
-				if controller then
-					controller:pushTask(Task(group:getID()))
-				end
-			end
-		end
-	end
-
 	local function SpawnGroup(groupName)
 		local g = SPAWN
 			:NewWithAlias(groupName, "Target")
 			:Spawn()
-		HandleJTAC(groupName)
+
+		local flag = 0
+		local function SetFlag(arr, groupName)
+			for _, obj in ipairs(arr) do
+				if obj[1] == groupName then
+					trigger.action.setUserFlag(obj[2], true)
+					flag = obj[2]
+					return
+				end
+			end
+		end
+		if RangeScript.isRare then
+			SetFlag(RangeScript.RareTargetGroupNames, groupName)
+		else
+			SetFlag(RangeScript.TargetGroupNames, groupName)
+		end
+		if flag == 0 then
+			log(string.format("Error setting flag for %s", groupName))
+		else
+			log(string.format("Setting flag %d", flag))
+		end
+
 		RangeScript.unitCount = RangeScript.unitCount + #g:GetUnits()
 		RangeScript.spawnCount = RangeScript.spawnCount + 1
 		trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/" .. RangeScript.Sounds.Spawn)
@@ -98,16 +78,18 @@ do
 
 	local function PickGroup()
 		if #RangeScript.TargetGroupNames == 0 then
-			log("No Targets to choose from!")
+			log("No targets to choose from!")
 			return
 		end
 
 		local index = mist.random(#RangeScript.TargetGroupNames)
-		local groupName = RangeScript.TargetGroupNames[index]
+		local groupName = RangeScript.TargetGroupNames[index][1]
+		RangeScript.isRare = false
 
 		if #RangeScript.RareTargetGroupNames > 0 and mist.random(10) == 1 then -- 10%
 			index = mist.random(#RangeScript.RareTargetGroupNames)
-			groupName = RangeScript.RareTargetGroupNames[index]
+			groupName = RangeScript.RareTargetGroupNames[index][1]
+			RangeScript.isRare = true
 		end
 
 		mist.scheduleFunction(SpawnGroup, {groupName}, timer.getTime() + 10)
@@ -143,7 +125,9 @@ do
 		local unit = event.initiator
 		if not unit or not unit:getCategory() == Object.Category.UNIT then return end
 
-		if event.id == world.event.S_EVENT_DEAD and unit:getName():find("Target") then
+		local unitName = unit:getName()
+
+		if event.id == world.event.S_EVENT_DEAD and unitName:find("Target") then
 			RangeScript.unitCount = RangeScript.unitCount - 1
 
 			if RangeScript.unitCount == 0 then
@@ -181,7 +165,7 @@ do
 	PickGroup()
 
 	local jtacGroupName = RangeScript.JTAC.GroupName
-		if jtacGroupName then
+	if jtacGroupName then
 		ctld.JTACAutoLase(jtacGroupName, RangeScript.JTAC.LaserCode, false)
 	end
 

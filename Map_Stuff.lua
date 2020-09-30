@@ -5,22 +5,20 @@
 
 do
 
+	local debug = false
+
 	local assert = _G.assert
 	local string = _G.string
 
-	local failMsg = " must be loaded prior to this script!"
-	assert(BASE ~= nil, "MOOSE" .. failMsg)
-	assert(mist ~= nil, "MiST" .. failMsg)
+	assert(BASE ~= nil, "MOOSE must be loaded prior to this script!")
 
 	PSEUDOATC
 		:New()
 		:Start()
 
---[[
-	local Fox = FOX
+	local fox = FOX
 		:New()
 		:Start()
---]]
 
 	local function MapStuffEventHandler(event)
 		if not event or not event.initiator then return end
@@ -33,11 +31,19 @@ do
 
 		local function say(msg)
 			trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/static-short.ogg")
-			trigger.action.outText(msg, 10)
+			trigger.action.outTextForCoalition(coalition.side.BLUE, msg, 10)
 			env.info(msg)
 		end
 
-		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
+		if event.id == world.event.S_EVENT_BIRTH then
+			local g = UNIT:Find(unit):GetGroup()
+			fox:AddProtectedGroup(g)
+			local gID = g:GetID()
+			trigger.action.outSoundForGroup(gID, "l10n/DEFAULT/static-short.ogg")
+			trigger.action.outTextForGroup(gID, "Protected by FOX!", 5)
+			env.info(string.format("%s is protected by FOX!", playerName))
+
+		elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
 			say(string.format("%s just took control of an %s!", playerName, string.upper(unit:getDesc().typeName)))
 
 		elseif event.id == world.event.S_EVENT_PILOT_DEAD then
@@ -45,7 +51,7 @@ do
 
 		elseif event.id == world.event.S_EVENT_CRASH then
 			local category = unit:getGroup():getCategory()
-			local cat
+			local cat = "unknown"
 			if category == Group.Category.HELICOPTER then
 				cat = "helicopter"
 			elseif category == Group.Category.AIRPLANE then
@@ -54,15 +60,13 @@ do
 				cat = "vehicle"
 			elseif category == Group.Category.SHIP then
 				cat = "ship"
-			else
-				return
 			end
 			say(string.format("%s's %s has crashed!", playerName, cat))
 
 		end
 	end
 
-	mist.addEventHandler(MapStuffEventHandler)
+	SCHEDULER:New(nil, MapStuffEventHandler, nil, 0)
 
 	env.info("Map Stuff loaded.")
 

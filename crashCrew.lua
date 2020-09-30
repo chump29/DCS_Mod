@@ -52,7 +52,7 @@ do
 				local unitPos = {
 					heading = UNIT
 						:FindByName(unit:getName())
-						:GetHeading()
+						:GetHeading() or 0
 				}
 
 				local inM = mist.utils.feetToMeters(71) -- will end up ~100ft away (a²+b²=c²), facing wreck

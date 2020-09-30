@@ -141,7 +141,12 @@ do
 	end
 	beacons = nil
 
-	for _, airbase in ipairs(coalition.getAirbases(coalition.side.BLUE)) do
+	local airbases = coalition.getAirbases(coalition.side.BLUE)
+	if #airbases == 0 then
+		env.info("ATIS: No coalition airbases found!")
+	end
+
+	for _, airbase in ipairs(airbases) do
 		if airbase:getDesc().category == Airbase.Category.AIRDROME then
 			local callsign = airbase:getCallsign()
 			local name = "ATIS_" .. callsign

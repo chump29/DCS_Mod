@@ -5,8 +5,6 @@
 
 do
 
-	local debug = false
-
 	local assert = _G.assert
 	local string = _G.string
 
@@ -21,8 +19,6 @@ do
 	local fox = FOX
 		:New()
 		:Start()
-
-	local foxWho = {}
 
 	local function MapStuffEventHandler(event)
 		if not event or not event.initiator then return end

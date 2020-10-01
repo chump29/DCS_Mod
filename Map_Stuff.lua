@@ -10,7 +10,9 @@ do
 	local assert = _G.assert
 	local string = _G.string
 
-	assert(BASE ~= nil, "MOOSE must be loaded prior to this script!")
+	local failMsg = " must be loaded prior to this script!"
+	assert(BASE ~= nil, "MOOSE" .. failMsg)
+	assert(mist ~= nil, "MiST" .. failMsg)
 
 	PSEUDOATC
 		:New()
@@ -19,6 +21,8 @@ do
 	local fox = FOX
 		:New()
 		:Start()
+
+	local foxWho = {}
 
 	local function MapStuffEventHandler(event)
 		if not event or not event.initiator then return end
@@ -35,15 +39,8 @@ do
 			env.info(msg)
 		end
 
-		if event.id == world.event.S_EVENT_BIRTH then
-			local g = UNIT:Find(unit):GetGroup()
-			fox:AddProtectedGroup(g)
-			local gID = g:GetID()
-			trigger.action.outSoundForGroup(gID, "l10n/DEFAULT/static-short.ogg")
-			trigger.action.outTextForGroup(gID, "Protected by FOX!", 5)
-			env.info(string.format("%s is protected by FOX!", playerName))
-
-		elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
+		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
+			fox:AddProtectedGroup(UNIT:Find(unit):GetGroup())
 			say(string.format("%s just took control of an %s!", playerName, string.upper(unit:getDesc().typeName)))
 
 		elseif event.id == world.event.S_EVENT_PILOT_DEAD then
@@ -66,7 +63,7 @@ do
 		end
 	end
 
-	SCHEDULER:New(nil, MapStuffEventHandler, nil, 0)
+	mist.addEventHandler(MapStuffEventHandler)
 
 	env.info("Map Stuff loaded.")
 

@@ -20,7 +20,7 @@ local gettext       = require('i_18n')
 local dllWeather  = require('Weather')
 local minizip       = require('minizip')
 
-local MissionModule = require('me_mission')
+local TheatreOfWarData = require('Mission.TheatreOfWarData')
 
 function toDegrees(radians, raw)
   local degrees = radians * 180 / math.pi
@@ -43,23 +43,17 @@ function toPositiveDegrees(radians, raw)
 end
 
 function getMagneticDeclination(toStr)
-  --Caucasus +6 (East), year ~ 2011
-  --NTTR +12 (East), year ~ 2011
-  --Normandy -10 (West), year ~ 1944
-  --Persian Gulf +2 (East), year ~ 2011
-  --Syria +5 (East), year ~ 2020
+  -- Caucasus +6 (East), year ~ 2011
+  -- NTTR +12 (East), year ~ 2011
+  -- Normandy -10 (West), year ~ 1944
+  -- Persian Gulf +2 (East), year ~ 2011
+  -- Syria +5 (East), year ~ 2020
 
   local theatre
-  if MissionModule.mission then
-    theatre = MissionModule.mission.theatre
+  if TheatreOfWarData then
+    theatre = TheatreOfWarData.getName()
   elseif env then
     theatre = env.mission.theatre
-  elseif mist then -- MiST
-    theatre = mist.DBs.missionData.theatre
-  elseif UTILS then -- MOOSE
-    theatre = UTILS.GetDCSMap()
-  elseif get_terrain_related_data and get_terrain_related_data("name") then
-    theatre = get_terrain_related_data("name")
   end
 
   local dec

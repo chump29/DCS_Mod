@@ -16,10 +16,6 @@ do
 		:New()
 		:Start()
 
-	local fox = FOX
-		:New()
-		:Start()
-
 	local function MapStuffEventHandler(event)
 		if not event or not event.initiator then return end
 
@@ -36,7 +32,6 @@ do
 		end
 
 		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
-			fox:AddProtectedGroup(UNIT:Find(unit):GetGroup())
 			say(string.format("%s just took control of an %s!", playerName, string.upper(unit:getDesc().typeName)))
 
 		elseif event.id == world.event.S_EVENT_PILOT_DEAD then

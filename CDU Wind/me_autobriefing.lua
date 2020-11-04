@@ -39,6 +39,7 @@ local DialogLoader              = require('DialogLoader')
 local Gui                       = require('dxgui')
 local imagePreview              = require('imagePreview')
 local Analytics                 = require("Analytics")
+local ProductType               = require('me_ProductType')
 local CDUW = require('cdu_wind')
 
 i18n.setup(_M)
@@ -96,7 +97,7 @@ local cdata =
     noWeapon = _('No weapon'),
 }
 
-if base.LOFAC then
+if ProductType.getType() == "LOFAC" then
     cdata.mission_start = _('Mission start-LOFAC')
     cdata.mission_goal = _('MISSION GOAL-LOFAC')
     cdata.mission_data = _('MISSION DATA-LOFAC')
@@ -116,7 +117,7 @@ local window
 --создание окна
 local function create_()
 
-    if base.LOFAC == true then
+    if ProductType.getType() == "LOFAC" then
         cdata.rightBtn = _("START LOFAC", "START")
     end
 

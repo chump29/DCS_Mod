@@ -10,7 +10,6 @@ do
 
 	local failMsg = " must be loaded prior to this script!"
 	assert(BASE ~= nil, "MOOSE" .. failMsg)
-	assert(mist ~= nil, "MiST" .. failMsg)
 
 	PSEUDOATC
 		:New()
@@ -54,7 +53,11 @@ do
 		end
 	end
 
-	mist.addEventHandler(MapStuffEventHandler)
+	local eventHandler = { f = MapStuffEventHandler }
+	function eventHandler:onEvent(e)
+		self.f(e)
+	end
+	world.addEventHandler(eventHandler)
 
 	env.info("Map Stuff loaded.")
 

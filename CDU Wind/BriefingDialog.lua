@@ -514,7 +514,7 @@ function generateAutoBriefing()
         table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
     end
 
-    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. dataBrf.clouds_base))
+    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. CDUW.getClouds(dataBrf.clouds_base)))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,           UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
 
     if dec then

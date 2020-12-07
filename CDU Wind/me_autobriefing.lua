@@ -557,7 +557,7 @@ function generateAutoBriefing(mission)
             table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
         end
 
-        table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. mission.weather.clouds.base))
+        table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. CDUW.getClouds(mission.weather.clouds.base)))
         table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
 
         if dec then
@@ -600,7 +600,7 @@ function generateSimpleAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
     end
 
-    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. mission.weather.clouds.base))
+    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. CDUW.getClouds(mission.weather.clouds.base)))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
 
     if dec then

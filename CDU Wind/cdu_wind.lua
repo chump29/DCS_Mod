@@ -84,6 +84,10 @@ function getTempString(c)
   return string.format("%+d°C / %+d°F", c, c * 9 / 5 + 32)
 end
 
+function getClouds(m)
+  return string.format("%dm / %dft", m, math.floor(m * 3.281))
+end
+
 function cduWindToStr(wind, temperature)
   local speed = math.floor(wind.speed*1.94384 + 0.5)
 

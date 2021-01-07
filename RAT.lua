@@ -6,9 +6,9 @@
 RATPlanes = {
 	debug = false,
 	planes = {
-		{"Yak-52", "RAT_Yak"},
-		{"Christen Eagle II", "RAT_CE2"},
-		{"I-16", "RAT_I16"}
+		{"M-2000", "RAT_M2K"},
+		{"F-16", "RAT_F16"},
+		{"F-5", "RAT_F5"}
 	},
 	zones = {
 		"RAT1",
@@ -112,7 +112,7 @@ do
 		if RATPlanes.isOn then return end
 		local fromMenu = obj.fromMenu or false
 		for _, plane in ipairs(RATPlanes.planes) do
-			FromTo(plane, "Kobuleti", nil)
+			FromTo(plane, "Mozdok", nil)
 		end
 		RATPlanes.isOn = true
 		if RATPlanes.debug and fromMenu then
@@ -120,8 +120,8 @@ do
 		end
 	end
 
-	MENU_COALITION_COMMAND:New(BLUE, "RAT Off", nil, TurnOff)
-	MENU_COALITION_COMMAND:New(BLUE, "RAT On", nil, TurnOn, {fromMenu = true})
+	MENU_COALITION_COMMAND:New(coalition.side.BLUE, "RAT Off", nil, TurnOff)
+	MENU_COALITION_COMMAND:New(coalition.side.BLUE, "RAT On", nil, TurnOn, {fromMenu = true})
 
 	TurnOn()
 

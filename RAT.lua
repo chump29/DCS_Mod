@@ -6,9 +6,9 @@
 RATPlanes = {
 	debug = false,
 	planes = {
-		{"M-2000", "RAT_M2K"},
-		{"F-16", "RAT_F16"},
-		{"F-5", "RAT_F5"}
+		{"I-16", "RAT_I16"},
+		{"Yak", "RAT_Yak"},
+		{"CE2", "RAT_CE2"}
 	},
 	zones = {
 		"RAT1",
@@ -40,6 +40,8 @@ do
 			local plane = RAT:New(obj[2], alias)
 			plane:ATC_Messages(false)
 			plane:Commute(false)
+			plane:ContinueJourney()
+			plane:Invisible()
 
 			local planeType = allSkins.liveries[string.upper(obj[1])]
 			if planeType and #planeType > 0 then
@@ -48,6 +50,7 @@ do
 				plane:Livery(livery)
 			end
 
+			plane:RadioOFF()
 			plane:RespawnAfterCrashON()
 			plane:RespawnInAirNotAllowed()
 			plane:SetAISkill("Random")
@@ -93,37 +96,14 @@ do
 		return count
 	end
 
-	local function TurnOff()
-		if not RATPlanes.isOn then return end
-		for _, plane in pairs(RATPlanes.spawned) do
-			plane:destroy()
-		end
-		RATPlanes.spawned = nil
-		RATPlanes.isOn = false
-		env.info("RAT: Turned off!")
-	end
-
 	if not RATPlanes.planes or #RATPlanes.planes == 0 then
 		env.info("RAT: No planes to spawn!")
 		return
 	end
 
-	local function TurnOn(obj)
-		if RATPlanes.isOn then return end
-		local fromMenu = obj.fromMenu or false
-		for _, plane in ipairs(RATPlanes.planes) do
-			FromTo(plane, "Mozdok", nil)
-		end
-		RATPlanes.isOn = true
-		if RATPlanes.debug and fromMenu then
-			env.info("RAT: Turned on!")
-		end
+	for _, plane in ipairs(RATPlanes.planes) do
+		FromTo(plane, "Kobuleti", nil)
 	end
-
-	MENU_COALITION_COMMAND:New(coalition.side.BLUE, "RAT Off", nil, TurnOff)
-	MENU_COALITION_COMMAND:New(coalition.side.BLUE, "RAT On", nil, TurnOn, {fromMenu = true})
-
-	TurnOn()
 
 	env.info("RAT is running.")
 

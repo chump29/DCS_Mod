@@ -127,7 +127,7 @@ do
 
 		local unitName = unit:getName()
 
-		if event.id == world.event.S_EVENT_DEAD and unitName:find("Target") then
+		if event.id == world.event.S_EVENT_DEAD and unitName and unitName:find("Target") then
 			RangeScript.unitCount = RangeScript.unitCount - 1
 
 			if RangeScript.unitCount == 0 then

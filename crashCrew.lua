@@ -18,7 +18,7 @@ do
 		if not event or not event.initiator then return end
 
 		local unit = event.initiator
-		if not unit or not unit:getCategory() == Object.Category.UNIT or not unit:isActive() then return end
+		if not unit or unit:getCategory() ~= Object.Category.UNIT or not unit:isActive() then return end
 
 		local playerName = unit:getPlayerName()
 		if not playerName then return end
@@ -49,6 +49,11 @@ do
 			end
 
 			for index = 1, 3 do
+				if not unit then
+					env.info("crashCrew: Unit not found!")
+					return
+				end
+
 				local unitPos = {
 					heading = UNIT
 						:FindByName(unit:getName())

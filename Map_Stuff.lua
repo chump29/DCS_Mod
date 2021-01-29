@@ -19,7 +19,7 @@ do
 		if not event or not event.initiator then return end
 
 		local unit = event.initiator
-		if not unit or not unit:getCategory() == Object.Category.UNIT or not unit:isActive() then return end
+		if not unit or unit:getCategory() ~= Object.Category.UNIT or not unit:isActive() then return end
 
 		local playerName = unit:getPlayerName()
 		if not playerName then return end
@@ -30,7 +30,7 @@ do
 			env.info(msg)
 		end
 
-		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
+		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT or event.id == world.event.S_EVENT_BIRTH then
 			say(string.format("%s just took control of an %s!", playerName, string.upper(unit:getDesc().typeName)))
 
 		elseif event.id == world.event.S_EVENT_PILOT_DEAD then

@@ -215,6 +215,7 @@ function updatePict()
         fileName = base.tempMissionPath .. path
     end
 
+    Gui.ReloadTexture(fileName)
     imagePreviewWidget:setPicture(fileName)
 end
 
@@ -348,6 +349,7 @@ function update()
     end
 
     updateNumPict()
+    Gui.ReloadTexture(pictureFilename)
     imagePreviewWidget:setPicture(pictureFilename)
 
     -- обновляем окно с текстом автобрифинга

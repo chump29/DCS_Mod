@@ -36,6 +36,7 @@ do
 		return count
 	end
 
+	local oldRadio = radio
 	dofile(string.format("./Mods/terrains/%s/Radio.lua", env.mission.theatre))
 	if not radio then
 		env.info("ATIS: Could not load Radio data!")
@@ -54,7 +55,7 @@ do
 			end
 		end
 	end
-	radio = nil
+	radio = oldRadio
 
 	if CountArray(ATISfreqs) == 0 then
 		env.info("ATIS: No frequency data found!")

@@ -11,22 +11,19 @@ do
 
 	RESCUEHELO = RESCUEHELO -- NOTE: global on purpose!
 		:New(UNIT:FindByName("Carrier"), "CSAR")
-		:SetTakeoffAir()
+		:SetRescueOff()
 		:Start()
 
 	local Tanker = RECOVERYTANKER
 		:New(UNIT:FindByName("Carrier"), "Tanker")
-		:SetAltitude(6000) -- in ft
-		:SetRadio(243)
+		:SetSpeed(200)
 		:SetTACAN(79, "TEX")
-		:SetTakeoffAir()
 		:Start()
 
 	local AWACS = RECOVERYTANKER
 		:New(UNIT:FindByName("Carrier"), "AWACS")
 		:SetAltitude(20000) -- in ft
 		:SetAWACS()
-		:SetRadio(255)
 		:SetTACAN(55, "WAX")
 		:SetTakeoffAir()
 		:Start()

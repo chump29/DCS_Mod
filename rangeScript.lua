@@ -125,7 +125,10 @@ do
 		local unit = event.initiator
 		if not unit or not unit:getCategory() == Object.Category.UNIT then return end
 
-		local unitName = unit:getName()
+		local unitName
+		if unit then
+			unitName = unit:getName()
+		end
 
 		if event.id == world.event.S_EVENT_DEAD and unitName and unitName:find("Target") then
 			RangeScript.unitCount = RangeScript.unitCount - 1

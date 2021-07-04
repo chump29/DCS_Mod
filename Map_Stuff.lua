@@ -15,6 +15,8 @@ do
 		:New()
 		:Start()
 
+	-- TODO: https://wiki.hoggitworld.com/view/DCS_func_ctfColorTag
+
 	local function MapStuffEventHandler(event)
 		if not event or not event.initiator then return end
 

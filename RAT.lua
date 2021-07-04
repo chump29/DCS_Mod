@@ -6,9 +6,9 @@
 RATPlanes = {
 	debug = false,
 	planes = {
-		{"I-16", "RAT_I16"},
-		{"Yak", "RAT_Yak"},
-		{"CE2", "RAT_CE2"}
+		{"DC-10", "RAT_DC10"},
+		{"Cessna", "RAT_Cessna"},
+		{"Yak", "RAT_Yak"}
 	},
 	zones = {
 		"RAT1",

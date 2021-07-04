@@ -751,6 +751,8 @@ function cancelBtnOnChange()
 
     if (returnScreen == 'campaign') then
         panel_campaign.show(true)
+    elseif (returnScreen == 'mainmenu') then
+        base.mmw.show(true)
     elseif (returnScreen == 'editor') or returnToME == true then
         base.setPlannerMission(false)
         base.MapWindow.show(true)

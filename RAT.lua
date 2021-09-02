@@ -6,15 +6,17 @@
 RATPlanes = {
 	debug = false,
 	planes = {
-		{"DC-10", "RAT_DC10"},
-		{"Cessna", "RAT_Cessna"},
-		{"Yak", "RAT_Yak"}
+		{"F-117A", "RAT_F117"},
+		{"Ju 88", "RAT_Ju88"},
+		{"Osprey", "RAT_Osprey"}
 	},
 	zones = {
-		"RAT1",
-		"RAT2",
-		"RAT3"
-	}
+		"RAT_1",
+		"RAT_2",
+		"RAT_3"
+	},
+	from = "Kobuleti",
+	to = nil
 }
 
 do
@@ -79,13 +81,8 @@ do
 			if not RATPlanes.spawned then RATPlanes.spawned = {} end
 			table.insert(RATPlanes.spawned, {[alias] = plane})
 
-			if debug then env.info("RAT: Spawning " .. alias) end
+			if debug then env.info(string.format("RAT: Spawning %s - %s > %s", obj[1], from, to or "Zone"))	end
 		end
-	end
-
-	local function FromTo(obj, from, to)
-		CreatePlane(obj, from, to)
-		if debug then env.info(string.format("RAT: %s > %s", from, to or "Zone")) end
 	end
 
 	local function countArray(arr)
@@ -102,7 +99,22 @@ do
 	end
 
 	for _, plane in ipairs(RATPlanes.planes) do
-		FromTo(plane, "Kobuleti", nil)
+		if RATPlanes.from then
+			if Airbase.getByName(RATPlanes.from) then
+				if RATPlanes.to and not Airbase.getByName(RATPlanes.to) then
+					RATPlanes.to = nil
+					env.info(string.format("RAT: Airbase %s not found!", RATPlanes.to))
+					return
+				end
+				CreatePlane(plane, RATPlanes.from, RATPlanes.to)
+			else
+				env.info(string.format("RAT: Airbase %s not found!", RATPlanes.from))
+				return
+			end
+		else
+			env.info("RAT: Starting airbase not found!")
+			return
+		end
 	end
 
 	env.info("RAT is running.")

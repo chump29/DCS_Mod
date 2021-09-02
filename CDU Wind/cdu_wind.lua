@@ -43,11 +43,20 @@ function toPositiveDegrees(radians, raw)
 end
 
 function getMagneticDeclination(toStr)
-  -- Caucasus +6 (East), year ~ 2011
+ --[[
+  Caucasus
+    -6, 2015-2025
+    +1, 2006-2014
+    +2, 1981-2005
+    +3, 1954-1980
+    +4, 1940-1953
+
   -- NTTR +12 (East), year ~ 2011
   -- Normandy -10 (West), year ~ 1944
   -- Persian Gulf +2 (East), year ~ 2011
   -- Syria +5 (East), year ~ 2020
+  -- Mariana Islands
+--]]
 
   local theatre
   if TheatreOfWarData then
@@ -56,9 +65,28 @@ function getMagneticDeclination(toStr)
     theatre = env.mission.theatre
   end
 
+  local year
+  if env then
+    date = env.mission.date
+    if date then
+      year = date.Year or
+    end
+  end
+
+  -- NOTE: East=positive, West=negative
   local dec
   if theatre == "Caucasus" then
-    dec = 6
+    if year >= 2015 then
+      dec = 6
+    elseif year >= 2006 then
+      dec = -1
+    elseif year >= 1981 then
+      dec = -2
+    elseif year >= 1954 then
+      dec = -3
+    else
+      dec = -4
+    end
   elseif theatre == "Nevada" then
     dec = 12
   elseif theatre == "Normandy" then
@@ -67,6 +95,8 @@ function getMagneticDeclination(toStr)
     dec = 2
   elseif theatre == "Syria" then
     dec = 5
+  elseif theatre == "MarianaIslands" then
+    dec = -1
   else
     return dec
   end

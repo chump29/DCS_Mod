@@ -77,8 +77,8 @@ do
 
 				local g = SPAWN
 					:NewWithAlias("CrashCrew" .. ccType, string.format("Crash Crew %i-%i", CrashCrew.num, index))
-					:InitCoalition(coalition.side.BLUE)
-					:InitCountry(country.id.USA)
+					:InitCoalition(coalition.side.NEUTRAL)
+					:InitCountry(country.id.SWITZERLAND)
 					:InitHeading(unitPos.heading)
 					:SpawnFromVec2({x = unitPos.x, y = unitPos.y})
 
@@ -89,6 +89,15 @@ do
 			trigger.action.signalFlare(pos, trigger.flareColor.Red, 90)
 			trigger.action.signalFlare(pos, trigger.flareColor.White, 180)
 			trigger.action.signalFlare(pos, trigger.flareColor.Yellow, 270)
+
+			if unit:getCoalition() == coalition.side.BLUE then
+				trigger.action.smoke(pos, trigger.smokeColor.Blue)
+			else
+				trigger.action.smoke(pos, trigger.smokeColor.Red)
+			end
+
+			pos.y = pos.y + 1000
+			trigger.action.illuminationBomb(pos, 1000000)
 
 			CrashCrew.num = CrashCrew.num + 1
 			if CrashCrew.num > 10 then

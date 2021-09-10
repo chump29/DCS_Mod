@@ -6,9 +6,11 @@
 RATPlanes = {
 	debug = false,
 	planes = {
-		{"F-117A", "RAT_F117"},
-		{"Ju 88", "RAT_Ju88"},
-		{"Osprey", "RAT_Osprey"}
+		{"F-117A", "RAT_F117", 2},
+		{"Ju 88", "RAT_Ju88", 2},
+		{"Osprey", "RAT_Osprey", 2},
+		{"Cessna", "RAT_Cessna"},
+		{"A-320", "RAT_A320", 2}
 	},
 	zones = {
 		"RAT_1",
@@ -37,7 +39,8 @@ do
 		local debug = RATPlanes.debug or false
 		count = count + 1
 
-		for num = 1, mist.random(3) do
+		local max = obj[3] or mist.random(3)
+		for num = 1, max do
 			local alias = string.format("%s-%i-%i", obj[2], count, num)
 			local plane = RAT:New(obj[2], alias)
 			plane:ATC_Messages(false)

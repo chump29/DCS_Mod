@@ -711,13 +711,14 @@ end
 function composeWeaponsString()
     local weapons = {}
     for i,pylon in pairs(playerUnit.payload.pylons) do
-        --local item = playerUnit.payload.pylons[i].name
-        local launcherCLSID = pylon.CLSID
-        local item          = base.get_weapon_display_name_by_clsid(launcherCLSID)
-        if weapons[item] then
-            weapons[item] = weapons[item] + 1
-        else
-            weapons[item] = 1
+            if pylon.CLSID ~= "<CLEAN>" and pylon.CLSID ~= "<CLEAN-200.5>" then
+            local launcherCLSID = pylon.CLSID
+            local item          = base.get_weapon_display_name_by_clsid(launcherCLSID)
+            if weapons[item] then
+                weapons[item] = weapons[item] + 1
+            else
+                weapons[item] = 1
+            end
         end
     end
     local str = {}
@@ -750,7 +751,7 @@ function cancelBtnOnChange()
     end
 
     if (returnScreen == 'campaign') then
-        panel_campaign.show(true)
+        panel_campaign.returnFromAutobrief()
     elseif (returnScreen == 'mainmenu') then
         base.mmw.show(true)
     elseif (returnScreen == 'editor') or returnToME == true then

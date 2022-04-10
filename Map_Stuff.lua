@@ -32,8 +32,8 @@ do
 			env.info(msg)
 		end
 
-		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then -- or S_EVENT_PLAYER_ENTER_UNIT?
-			say(string.format("%s just took control of an %s!", playerName, string.upper(unit:getDesc().typeName)))
+		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
+			say(string.format("%s just took control of: %s!", playerName, string.upper(unit:getTypeName())))
 
 		elseif event.id == world.event.S_EVENT_PILOT_DEAD then
 			say(string.format("%s is dead!", playerName))

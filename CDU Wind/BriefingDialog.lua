@@ -473,9 +473,9 @@ function generateAutoBriefing()
         side = _(countryName)
     else
         if dataBrf.side == "red" then
-            side = _("Red")
+            side = _("Red coalition")
         elseif dataBrf.side == "blue" then
-            side = _("Blue")
+            side = _("Blue coalition")
         elseif dataBrf.side == "neutrals" then
             side = _("Neutrals")
         end
@@ -506,7 +506,7 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(cdata.specification))
     table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(dataBrf.temperature)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(dataBrf.temperature) .. '°' ))
     table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'),    string.format('%d / %0.2f', dataBrf.qnh or 0, (dataBrf.qnh or 0) / 25.4)))
 
     local dec = CDUW.getMagneticDeclination(true)
@@ -549,7 +549,7 @@ function generateSimpleAutoBriefing()
 
     table.insert(autoBriefing, composeEntry(cdata.description, nil,    dataBrf.descText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(dataBrf.temperature)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(dataBrf.temperature) .. '°' ))
     table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'),    string.format('%d / %0.2f', dataBrf.qnh or 0, (dataBrf.qnh or 0) / 25.4)))
 
     local dec = CDUW.getMagneticDeclination(true)

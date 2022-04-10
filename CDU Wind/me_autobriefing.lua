@@ -551,7 +551,7 @@ function generateAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(cdata.specification))
         table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
         table.insert(autoBriefing, composeEntry(cdata.weather))
-        table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(mission.weather.season.temperature)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(mission.weather.season.temperature) .. '°' ))
         table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'),    string.format('%d / %0.2f', mission.weather.qnh or 0, (mission.weather.qnh or 0) / 25.4)))
 
         local dec =  CDUW.getMagneticDeclination(true)
@@ -595,7 +595,7 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.start,      autobriefingutils.composeDateString(mission.start_time, true, mission.date)))
     table.insert(autoBriefing, composeEntry(cdata.description, nil,    mission.descriptionText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(mission.weather.season.temperature)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(mission.weather.season.temperature) .. '°' ))
 
     local dec = CDUW.getMagneticDeclination(true)
     if dec then

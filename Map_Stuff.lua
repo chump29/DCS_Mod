@@ -15,8 +15,6 @@ do
 		:New()
 		:Start()
 
-	-- TODO: https://wiki.hoggitworld.com/view/DCS_func_ctfColorTag
-
 	local function MapStuffEventHandler(event)
 		if not event or not event.initiator then return end
 
@@ -33,7 +31,7 @@ do
 		end
 
 		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
-			say(string.format("%s just took control of: %s!", playerName, string.upper(unit:getTypeName())))
+			say(string.format("%s just took control of: %s %s", playerName, string.upper(unit:getTypeName()), string.upper(unit:getGroup():getName())))
 
 		elseif event.id == world.event.S_EVENT_PILOT_DEAD then
 			say(string.format("%s is dead!", playerName))

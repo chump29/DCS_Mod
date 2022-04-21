@@ -123,7 +123,7 @@ do
 		if not event or not event.initiator then return end
 
 		local unit = event.initiator
-		if not unit or not unit:getCategory() == Object.Category.UNIT then return end
+		if not unit or unit:getDesc().category > 3 then return end -- NOTE: Unit.getCategory is broken, only testing for 0=airplane, 1=helicopter, 2=ground_unit, 3=ship
 
 		local unitName = ""
 		if unit then

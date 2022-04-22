@@ -3,24 +3,12 @@ local base = _G
 
 module('briefing_addons')
 
-local type          = base.type
-local require       = base.require
-local print         = base.print
-local assert        = base.assert
-local tostring      = base.tostring
-local pairs         = base.pairs
-local ipairs        = base.ipairs
-local tonumber      = base.tonumber
-local table         = base.table
-local math          = base.math
-local string        = base.string
-local clock         = base.os.clock
-
-local gettext       = require('i_18n')
-local dllWeather  = require('Weather')
-local minizip       = require('minizip')
-
-local TheatreOfWarData = require('Mission.TheatreOfWarData')
+local require           = base.require
+local math              = base.math
+local string            = base.string
+local dllWeather        = require('Weather')
+local TheatreOfWarData  = require('Mission.TheatreOfWarData')
+local MissionDate       = base.MissionDate
 
 function toDegrees(radians, raw)
   local degrees = radians * 180 / math.pi
@@ -43,21 +31,6 @@ function toPositiveDegrees(radians, raw)
 end
 
 function getMagneticDeclination(toStr)
- --[[
-  Caucasus
-    -6, 2015-2025
-    +1, 2006-2014
-    +2, 1981-2005
-    +3, 1954-1980
-    +4, 1940-1953
-
-  -- NTTR +12 (East), year ~ 2011
-  -- Normandy -10 (West), year ~ 1944
-  -- Persian Gulf +2 (East), year ~ 2011
-  -- Syria +5 (East), year ~ 2020
-  -- Mariana Islands
---]]
-
   local theatre
   if TheatreOfWarData then
     theatre = TheatreOfWarData.getName()
@@ -65,38 +38,104 @@ function getMagneticDeclination(toStr)
     theatre = env.mission.theatre
   end
 
-  local year
-  if env then
-    date = env.mission.date
-    if date then
-      year = date.Year or
-    end
-  end
+  local year = MissionDate.Year
 
   -- NOTE: East=positive, West=negative
-  local dec
+  local dec = 0
   if theatre == "Caucasus" then
     if year >= 2015 then
       dec = 6
     elseif year >= 2006 then
-      dec = -1
+      dec = 5
     elseif year >= 1981 then
-      dec = -2
+      dec = 4
     elseif year >= 1954 then
-      dec = -3
+      dec = 3
     else
-      dec = -4
+      dec = 2
     end
   elseif theatre == "Nevada" then
-    dec = 12
+    if year >= 2015 then
+      dec = 10
+    elseif year >= 2006 then
+      dec = 11
+    elseif year >= 1997 then
+      dec = 12
+    else
+      dec = 13
+    end
   elseif theatre == "Normandy" then
-    dec = -10
-  elseif theatre == "PersianGulf" then
-    dec = 2
+    if year >= 2010 then
+      dec = -1
+    elseif year >= 2005 then
+      dec = -2
+    elseif year >= 1995 then
+      dec = -3
+    elseif year >= 1990 then
+      dec = -4
+    elseif year >= 1980 then
+      dec = -5
+    elseif year >= 1975 then
+      dec = -6
+    elseif year >= 1970 then
+      dec = -7
+    elseif year >= 1965 then
+      dec = -8
+    elseif year >= 1960 then
+      dec = -9
+    elseif year >= 1950 then
+      dec = -10
+    else
+      dec = -11
+    end
+  elseif theatre == "PersianGulf" then -- NOTE: using Iran magvar
+    if year >= 2010 then
+      dec = 1
+    else
+      dec = 0
+    end
   elseif theatre == "Syria" then
-    dec = 5
+    if year >= 2016 then
+      dec = 4
+    elseif year >= 2010 then
+      dec = 3
+    elseif year >= 1985 then
+      dec = 2
+    elseif year >= 1960 then
+      dec = 1
+    else
+      dec = 0
+    end
   elseif theatre == "MarianaIslands" then
-    dec = -1
+    if year >= 2013 then
+      dec = -1
+    else
+      dec = 0
+    end
+  elseif theatre == "TheChannel" then
+    if year >= 2006 then
+      dec = 0
+    elseif year >= 2000 then
+      dec = -1
+    elseif year >= 1992 then
+      dec = -2
+    elseif year >= 1987 then
+      dec = -3
+    elseif year >= 1978 then
+      dec = -4
+    elseif year >= 1974 then
+      dec = -5
+    elseif year >= 1970 then
+      dec = -6
+    elseif year >= 1960 then
+      dec = -7
+    elseif year >= 1953 then
+      dec = -8
+    elseif year >= 1949 then
+      dec = -9
+    else
+      dec = -10
+    end
   else
     return dec
   end

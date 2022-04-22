@@ -1,7 +1,7 @@
 -- modified by Chump
 local base = _G
 
-module('cdu_wind')
+module('briefing_addons')
 
 local type          = base.type
 local require       = base.require

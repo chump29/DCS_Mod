@@ -40,7 +40,7 @@ local Gui                       = require('dxgui')
 local imagePreview              = require('imagePreview')
 local Analytics                 = require("Analytics")
 local ProductType               = require('me_ProductType')
-local CDUW = require('cdu_wind')
+local BA = require('briefing_addons')
 
 i18n.setup(_M)
 
@@ -551,19 +551,19 @@ function generateAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(cdata.specification))
         table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
         table.insert(autoBriefing, composeEntry(cdata.weather))
-        table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(mission.weather.season.temperature) .. '°' ))
+        table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTempString(mission.weather.season.temperature) .. '°' ))
         table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'),    string.format('%d / %0.2f', mission.weather.qnh or 0, (mission.weather.qnh or 0) / 25.4)))
 
-        local dec =  CDUW.getMagneticDeclination(true)
+        local dec =  BA.getMagneticDeclination(true)
         if dec then
             table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
         end
 
-        table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. CDUW.getClouds(mission.weather.clouds.base)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. BA.getClouds(mission.weather.clouds.base)))
         table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
 
         if dec then
-            table.insert(autoBriefing, composeEntry(nil, _("CDU Wind"), CDUW.cduWindString(mission.weather, humanPosition, mission.weather.season.temperature)))
+            table.insert(autoBriefing, composeEntry(nil, _("CDU Wind"), BA.cduWindString(mission.weather, humanPosition, mission.weather.season.temperature)))
         end
 
         table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,         turbulenceString))
@@ -595,18 +595,18 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.start,      autobriefingutils.composeDateString(mission.start_time, true, mission.date)))
     table.insert(autoBriefing, composeEntry(cdata.description, nil,    mission.descriptionText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, CDUW.getTempString(mission.weather.season.temperature) .. '°' ))
+    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTempString(mission.weather.season.temperature) .. '°' ))
 
-    local dec = CDUW.getMagneticDeclination(true)
+    local dec = BA.getMagneticDeclination(true)
     if dec then
         table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
     end
 
-    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. CDUW.getClouds(mission.weather.clouds.base)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. BA.getClouds(mission.weather.clouds.base)))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
 
     if dec then
-        table.insert(autoBriefing, composeEntry(nil, _("CDU Wind"), CDUW.cduWindString(mission.weather, nil, mission.weather.season.temperature)))
+        table.insert(autoBriefing, composeEntry(nil, _("CDU Wind"), BA.cduWindString(mission.weather, nil, mission.weather.season.temperature)))
     end
 
     table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,         turbulenceString))

@@ -150,15 +150,15 @@ function getMagneticDeclination(toStr)
   return dec
 end
 
-local function getTemp(c)
+function getTemp(c)
   return string.format("%d°F / %d°C", math.floor((c or 0) * 9 / 5 + 32), c or 0)
 end
 
-local function getQNH(qnh)
+function getQNH(qnh)
   return string.format("%0.2finHg / %dhPa", (qnh or 0) / 25.4, qnh or 0)
 end
 
-local function getClouds(m)
+function getClouds(m)
   return string.format("%dft / %dm", math.floor((m or 0) * 3.281), m or 0)
 end
 

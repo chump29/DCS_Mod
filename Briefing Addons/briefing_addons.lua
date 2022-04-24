@@ -9,6 +9,7 @@ local string            = base.string
 local dllWeather        = require('Weather')
 local TheatreOfWarData  = require('Mission.TheatreOfWarData')
 local MissionDate       = base.MissionDate
+local UC                = require('utils_common')
 
 function toDegrees(radians, raw)
   local degrees = radians * 180 / math.pi
@@ -149,12 +150,16 @@ function getMagneticDeclination(toStr)
   return dec
 end
 
-function getTempString(c)
-  return string.format("%+d°C / %+d°F", c, c * 9 / 5 + 32)
+local function getTemp(c)
+  return string.format("%d°F / %d°C", math.floor((c or 0) * 9 / 5 + 32), c or 0)
 end
 
-function getClouds(m)
-  return string.format("%dm / %dft", m, math.floor(m * 3.281))
+local function getQNH(qnh)
+  return string.format("%0.2finHg / %dhPa", (qnh or 0) / 25.4, qnh or 0)
+end
+
+local function getClouds(m)
+  return string.format("%dft / %dm", math.floor((m or 0) * 3.281), m or 0)
 end
 
 function cduWindToStr(wind, temperature)

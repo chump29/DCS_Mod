@@ -64,8 +64,6 @@ do
 		end
 		if flag == 0 then
 			log(string.format("Error setting flag for %s", groupName))
-		else
-			log(string.format("Setting flag %d", flag))
 		end
 
 		RangeScript.unitCount = RangeScript.unitCount + #g:GetUnits()

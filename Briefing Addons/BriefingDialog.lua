@@ -506,8 +506,8 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(cdata.specification))
     table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTempString(dataBrf.temperature) .. '°' ))
-    table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'),    string.format('%d / %0.2f', dataBrf.qnh or 0, (dataBrf.qnh or 0) / 25.4)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
+    table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(dataBrf.qnh)))
 
     local dec = BA.getMagneticDeclination(true)
     if dec then
@@ -549,15 +549,15 @@ function generateSimpleAutoBriefing()
 
     table.insert(autoBriefing, composeEntry(cdata.description, nil,    dataBrf.descText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTempString(dataBrf.temperature) .. '°' ))
-    table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'),    string.format('%d / %0.2f', dataBrf.qnh or 0, (dataBrf.qnh or 0) / 25.4)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
+    table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(dataBrf.qnh)))
 
     local dec = BA.getMagneticDeclination(true)
     if dec then
         table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
     end
 
-    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. dataBrf.clouds_base))
+    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. BA.getClouds(dataBrf.clouds_base)))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,           UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
 
     if dec then

@@ -23,6 +23,8 @@ do
 	assert(BASE ~= nil, "MOOSE" .. failMsg)
 	assert(require ~= nil, "REQUIRE" .. failMsg) -- for dofile()
 
+	local frequency_add = 250000 -- in Hz
+
 	local function HzToMHz(freq)
 		if not freq then return nil end
 		return freq / 1000000
@@ -46,7 +48,7 @@ do
 		if CountArray(obj.frequency) > 0 then
 			local vhf = obj.frequency[VHF_HI]
 			if vhf and vhf[2] then
-				local atisFreq = HzToMHz(vhf[2] + 50000)
+				local atisFreq = HzToMHz(vhf[2] + frequency_add)
 				local ATCfreqs = {}
 				for _, freqData in pairs(obj.frequency) do
 					table.insert(ATCfreqs, HzToMHz(freqData[2]))

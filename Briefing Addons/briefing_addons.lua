@@ -137,6 +137,8 @@ function getMagneticDeclination(toStr)
     else
       dec = -10
     end
+  elseif theatre == "Falklands" then
+    dec = 11 -- TODO: using Rio Grande
   else
     return dec
   end

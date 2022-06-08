@@ -8,10 +8,12 @@ allSkins = {
 	paths = { -- NOTE: path MUST end in slash
 		lfs.currentdir() .. "Bazar\\Liveries\\",
 		lfs.writedir() .. "Mods\\aircraft\\Civil Aircraft Mod\\Liveries\\",
-		"Y:\\DCS.Liveries\\",
-		"Y:\\DCS.229.Liveries\\",
+		"Z:\\Storage\\dcs\\Liveries\\DCS.Liveries\\",
+		"Z:\\Storage\\dcs\\Liveries\\DCS.229.Liveries\\",
 		 -- because some people have to be different:
 		 -- TODO: refactor to auto scan dir
+		lfs.currentdir() .. "CoreMods\\aircraft\\A-10\\Liveries\\",
+		lfs.currentdir() .. "CoreMods\\aircraft\\AH-64D\\Liveries\\",
 		lfs.currentdir() .. "CoreMods\\aircraft\\AJS37\\Liveries\\",
 		lfs.currentdir() .. "CoreMods\\aircraft\\AV8BNA\\Liveries\\",
 		lfs.currentdir() .. "CoreMods\\aircraft\\C-101\\Liveries\\",
@@ -26,6 +28,7 @@ allSkins = {
 		lfs.currentdir() .. "CoreMods\\aircraft\\I-16\\Liveries\\",
 		lfs.currentdir() .. "CoreMods\\aircraft\\L-39\\Liveries\\",
 		lfs.currentdir() .. "CoreMods\\aircraft\\M-2000C\\Liveries\\",
+		lfs.currentdir() .. "CoreMods\\aircraft\\Mi-24P\\Liveries\\",
 		lfs.currentdir() .. "CoreMods\\aircraft\\MiG-15bis\\Liveries\\",
 		lfs.currentdir() .. "CoreMods\\aircraft\\MiG-19P\\Liveries\\",
 		lfs.currentdir() .. "CoreMods\\aircraft\\MiG-21BIS\\Liveries\\",

@@ -26,7 +26,8 @@ do
 		if not event or not event.initiator then return end
 
 		local unit = event.initiator
-		if not unit or unit:getDesc().category > 3 or not unit:isActive() then return end -- NOTE: Unit.getCategory is broken, only testing for 0=airplane, 1=helicopter, 2=ground_unit, 3=ship
+		local unitCategory = unit:getDesc().category
+		if not unit or unitCategory > 3 or not unit:isActive() then return end -- NOTE: Unit.getCategory is broken, only testing for 0=airplane, 1=helicopter, 2=ground_unit, 3=ship
 
 		local playerName = unit:getPlayerName()
 		if not playerName then return end
@@ -38,7 +39,11 @@ do
 		end
 
 		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
-			say(string.format("%s just took control of: %s %s", playerName, string.upper(unit:getTypeName()), string.upper(unit:getGroup():getName())))
+			local unitTypeName = unit:getGroup():getName()
+			if unitCategory <= 1 then -- airplane/helicopter only
+				unitTypeName = UNIT:Find(unit):GetNatoReportingName()
+			end
+			say(string.format("%s just took control of: %s %s", playerName, string.upper(unit:getTypeName()), string.upper(unitTypeName)))
 
 		elseif event.id == world.event.S_EVENT_PILOT_DEAD then
 			say(string.format("%s is dead!", playerName))

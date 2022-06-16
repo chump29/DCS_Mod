@@ -138,7 +138,7 @@ function getMagneticDeclination(toStr)
       dec = -10
     end
   elseif theatre == "Falklands" then
-    dec = 11 -- TODO: using Rio Grande
+    dec = "See Kneeboard" -- NOTE: too much variant
   else
     return dec
   end

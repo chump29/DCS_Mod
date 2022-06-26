@@ -119,21 +119,23 @@ do
 		return wind
 	end
 
+	local function getATIS(name)
+		if ATISFREQS and ATISFREQS[name] then
+			return string.format("ATIS: %.2f MHz\n", ATISFREQS[name])
+		end
+		return ""
+	end
+
 	local function drawMarkers()
 		for i, base in ipairs(coalition.getAirbases(coalition.side.BLUE)) do
 			if base:getDesc().category == Airbase.Category.AIRDROME then
 				local point = base:getPoint()
 				--point.z = point.z + 10
-				local baseName = base:getDesc().displayName
-				if baseName then
-					baseName = baseName .. " / "
-				end
-				local baseCallsign = base:getCallsign()
 				local weather = env.mission.weather
 				local data = {
 					id = i,
 					pos = point,
-					text = string.format("%s%s\nWind: %s\nQNH: %s\nTemp: %s\nCloud Base: %s", baseName, baseCallsign, getGroundWind(weather, point), getQNH(weather.qnh), getTemp(weather.season.temperature), getClouds(weather.clouds.base)),
+					text = string.format("%sWind: %s\nQNH: %s\nTemp: %s\nCloud Base: %s", getATIS(base:getCallsign()), getGroundWind(weather, point), getQNH(weather.qnh), getTemp(weather.season.temperature), getClouds(weather.clouds.base)),
 					markForCoa = coalition.side.BLUE
 				}
 				mist.marker.add(data)

@@ -152,7 +152,7 @@ function getMagneticDeclination(toStr)
     end
   elseif theatre == "Falklands" then
     if toStr then
-      return "See Kneeboard" -- NOTE: too much variant
+      return "* See Kneeboard" -- NOTE: too much variant
     end
   end
 

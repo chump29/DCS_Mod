@@ -32,6 +32,10 @@ function toPositiveDegrees(radians, raw)
 end
 
 function getMagneticDeclination(toStr)
+  if MAGDEC_OVERRIDE then
+    return MAGDEC_OVERRIDE
+  end
+
   local theatre
   if TheatreOfWarData then
     theatre = TheatreOfWarData.getName()
@@ -138,7 +142,7 @@ function getMagneticDeclination(toStr)
       dec = -10
     end
   elseif theatre == "Falklands" then
-    dec = "See Kneeboard" -- NOTE: too much variant
+    return "See Kneeboard" -- NOTE: too much variant
   else
     return dec
   end

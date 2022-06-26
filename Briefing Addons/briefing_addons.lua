@@ -32,7 +32,16 @@ function toPositiveDegrees(radians, raw)
 end
 
 function getMagneticDeclination(toStr)
+  local function magDecToStr(dec)
+    local dir = "East"
+    if dec < 0 then dir = "West" end
+    dec = string.format("%i° %s (%+i)", dec, dir, dec * -1)
+  end
+
   if MAGDEC_OVERRIDE then
+    if toStr then
+      return magDecToStr(MAGDEC_OVERRIDE)
+    end
     return MAGDEC_OVERRIDE
   end
 
@@ -142,15 +151,13 @@ function getMagneticDeclination(toStr)
       dec = -10
     end
   elseif theatre == "Falklands" then
-    return "See Kneeboard" -- NOTE: too much variant
-  else
-    return dec
+    if toStr then
+      return "See Kneeboard" -- NOTE: too much variant
+    end
   end
 
   if toStr then
-    local dir = "East"
-    if dec < 0 then dir = "West" end
-    dec = string.format("%i° %s (%+i)", dec, dir, dec * -1)
+    dec = magDecToStr(dec)
   end
 
   return dec

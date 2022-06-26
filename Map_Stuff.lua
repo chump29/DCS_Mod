@@ -127,13 +127,11 @@ do
 	end
 
 	local function drawMarkers()
-		for i, base in ipairs(coalition.getAirbases(coalition.side.BLUE)) do
+		for _, base in ipairs(coalition.getAirbases(coalition.side.BLUE)) do
 			if base:getDesc().category == Airbase.Category.AIRDROME then
 				local point = base:getPoint()
-				--point.z = point.z + 10
 				local weather = env.mission.weather
 				local data = {
-					id = i,
 					pos = point,
 					text = string.format("%sWind: %s\nQNH: %s\nTemp: %s\nCloud Base: %s", getATIS(base:getCallsign()), getGroundWind(weather, point), getQNH(weather.qnh), getTemp(weather.season.temperature), getClouds(weather.clouds.base)),
 					markForCoa = coalition.side.BLUE

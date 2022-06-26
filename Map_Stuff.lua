@@ -5,6 +5,12 @@
 
 do
 
+	local config = {
+		announcements = false,
+		atc = true,
+		markers = true
+	}
+
 	local base = _G
 
 	local assert = base.assert
@@ -18,9 +24,11 @@ do
 	assert(BASE ~= nil, "MOOSE" .. failMsg)
 	assert(mist ~= nil, "MiST" .. failMsg)
 
-	PSEUDOATC
-		:New()
-		:Start()
+	if config.atc then
+		PSEUDOATC
+			:New()
+			:Start()
+	end
 
 	local function MapStuffEventHandler(event)
 		if not event or not event.initiator then return end
@@ -77,7 +85,7 @@ do
 	  	return string.format("%dft / %dm", math.floor((m or 0) * 3.281), m or 0)
 	end
 
-	-- TODO: refactor
+	-- TODO: refactor wind
 	local function revertWind(a_value)
 		a_value = a_value + 180
 		if a_value > 360 then
@@ -133,13 +141,17 @@ do
 		end
 	end
 
-	local eventHandler = { f = MapStuffEventHandler }
-	function eventHandler:onEvent(e)
-		self.f(e)
+	if config.announcements then
+		local eventHandler = { f = MapStuffEventHandler }
+		function eventHandler:onEvent(e)
+			self.f(e)
+		end
+		world.addEventHandler(eventHandler)
 	end
-	world.addEventHandler(eventHandler)
 
-	drawMarkers()
+	if config.markers then
+		drawMarkers()
+	end
 
 	env.info("Map Stuff loaded.")
 

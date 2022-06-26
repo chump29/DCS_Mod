@@ -152,52 +152,55 @@ do
 	for _, airbase in ipairs(airbases) do
 		if airbase:getDesc().category == Airbase.Category.AIRDROME then
 			local callsign = airbase:getCallsign()
-			local name = "ATIS_" .. callsign
-			if Group.getByName(name) then
-				local obj = GetObj(airbase:getID())
-				if obj then
-					local atis = ATIS
-						:New(callsign, obj.atisFreq)
-						:SetSoundfilesPath("ATIS/")
-						:SetRadioRelayUnitName(name)
-					if #obj.ATCfreqs > 0 then
-						atis:SetTowerFrequencies(obj.ATCfreqs)
-					end
-					if obj.tacan_channel then
-						atis:SetTACAN(obj.tacan_channel)
-					end
-					if obj.vor_freq then
-						atis:SetVOR(obj.vor_freq)
-					end
-					if obj.ils then
-						for _, ils in ipairs(obj.ils) do
-							atis:AddILS(ils.freq, ils.runway)
-						end
-					end
-					if obj.ndb then
-						for _, ndb in ipairs(obj.ndb) do
-							if ndb.isInner then
-								atis:AddNDBinner(ndb.freq, ndb.runway)
-							else
-								atis:AddNDBouter(ndb.freq, ndb.runway)
-							end
-						end
-					end
-					if obj.prmg then
-						for _, prmg in ipairs(obj.prmg) do
-							atis:AddPRMG(prmg.channel, prmg.runway)
-						end
-					end
-					if obj.rsbn_channel then
-						atis:SetRSBN(obj.rsbn_channel)
-					end
-					atis:Start()
-					env.info(string.format("ATIS: Broadcasting from %s on %.2f MHz", callsign, obj.atisFreq))
+			local obj = GetObj(airbase:getID())
+			if obj then
+				local atis = ATIS
+					:New(callsign, obj.atisFreq)
+					:SetSoundfilesPath("ATIS/")
+
+				local name = "ATIS_" .. callsign
+				if Group.getByName(name) then
+					atis:SetRadioRelayUnitName(name)
 				else
-					env.info("ATIS: Airfield Object not found!")
+					env.info(string.format("ATIS: ATIS Group (%s) not found! Subtitles are disabled.", name))
 				end
+
+				if #obj.ATCfreqs > 0 then
+					atis:SetTowerFrequencies(obj.ATCfreqs)
+				end
+				if obj.tacan_channel then
+					atis:SetTACAN(obj.tacan_channel)
+				end
+				if obj.vor_freq then
+					atis:SetVOR(obj.vor_freq)
+				end
+				if obj.ils then
+					for _, ils in ipairs(obj.ils) do
+						atis:AddILS(ils.freq, ils.runway)
+					end
+				end
+				if obj.ndb then
+					for _, ndb in ipairs(obj.ndb) do
+						if ndb.isInner then
+							atis:AddNDBinner(ndb.freq, ndb.runway)
+						else
+							atis:AddNDBouter(ndb.freq, ndb.runway)
+						end
+					end
+				end
+				if obj.prmg then
+					for _, prmg in ipairs(obj.prmg) do
+						atis:AddPRMG(prmg.channel, prmg.runway)
+					end
+				end
+				if obj.rsbn_channel then
+					atis:SetRSBN(obj.rsbn_channel)
+				end
+				atis:Start()
+				-- TODO: store data in global variable for Map_Stuff markers
+				env.info(string.format("ATIS: Broadcasting from %s on %.2f MHz", callsign, obj.atisFreq))
 			else
-				env.info(string.format("ATIS: ATIS Group (%s) not found!", name))
+				env.info("ATIS: Airfield Object not found!")
 			end
 		end
 	end

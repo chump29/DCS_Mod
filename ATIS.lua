@@ -3,9 +3,11 @@
 -- by Chump
 --]]
 
-local ATISfreqs = {}
+ATISFREQS = {} -- global for Map_Stuff
 
 do
+
+	local ATISfreqs = {}
 
 	local assert = _G.assert
 	local dofile = _G.dofile
@@ -197,13 +199,14 @@ do
 					atis:SetRSBN(obj.rsbn_channel)
 				end
 				atis:Start()
-				-- TODO: store data in global variable for Map_Stuff markers
-				env.info(string.format("ATIS: Broadcasting from %s on %.2f MHz", callsign, obj.atisFreq))
+				ATISFREQS[callsign] = obj.atisFreq
+				env.info(string.format("ATIS: Broadcasting from %s on %.2f MHz", callsign, ATISFREQS[callsign]))
 			else
 				env.info("ATIS: Airfield Object not found!")
 			end
 		end
 	end
+
 	airbases = nil
 	ATISfreqs = nil
 

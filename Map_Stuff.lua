@@ -5,24 +5,23 @@
 
 do
 
+	local failMsg = " must be loaded prior to this script!"
+	local assert = _G.assert
+	assert(BASE ~= nil, "MOOSE" .. failMsg)
+	assert(mist ~= nil, "MiST" .. failMsg)
+
+	local string = _G.string
+	local ipairs = _G.ipairs
+	local math = _G.math
+
+	local require = _G.require
+	local dllWeather = require("Weather")
+
 	local config = {
 		announcements = false,
 		atc = true,
 		markers = true
 	}
-
-	local base = _G
-
-	local assert = base.assert
-	local string = base.string
-	local ipairs = base.pairs
-	local math = base.math
-
-	local dllWeather = require("Weather")
-
-	local failMsg = " must be loaded prior to this script!"
-	assert(BASE ~= nil, "MOOSE" .. failMsg)
-	assert(mist ~= nil, "MiST" .. failMsg)
 
 	if config.atc then
 		PSEUDOATC
@@ -131,12 +130,11 @@ do
 			if base:getDesc().category == Airbase.Category.AIRDROME then
 				local point = base:getPoint()
 				local weather = env.mission.weather
-				local data = {
+				mist.marker.add({
 					pos = point,
 					text = string.format("%sWind: %s\nQNH: %s\nTemp: %s\nCloud Base: %s", getATIS(base:getCallsign()), getGroundWind(weather, point), getQNH(weather.qnh), getTemp(weather.season.temperature), getClouds(weather.clouds.base)),
 					markForCoa = coalition.side.BLUE
-				}
-				mist.marker.add(data)
+				})
 			end
 		end
 	end

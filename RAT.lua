@@ -23,15 +23,15 @@ RATPlanes = {
 
 do
 
-	local assert = _G.assert
-	local ipairs = _G.ipairs
-	local string = _G.string
-	local table = _G.table
-
 	local failMsg = " must be loaded prior to this script!"
+	local assert = _G.assert
 	assert(allSkins ~= nil, "allSkins" .. failMsg)
 	assert(BASE ~= nil, "MOOSE" .. failMsg)
 	assert(mist ~= nil, "MiST" .. failMsg)
+
+	local ipairs = _G.ipairs
+	local string = _G.string
+	local table = _G.table
 
 	local count = 0
 

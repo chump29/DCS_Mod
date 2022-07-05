@@ -7,12 +7,12 @@ CrashCrew = {}
 
 do
 
-	local assert = _G.assert
-	local string = _G.string
-
  	local failMsg = " must be loaded prior to this script!"
+	local assert = _G.assert
 	assert(BASE ~= nil, "MOOSE" .. failMsg)
 	assert(mist ~= nil, "MiST" .. failMsg)
+
+	local string = _G.string
 
 	local function CrashCrewEventHandler(event)
 		if not event or not event.initiator then return end

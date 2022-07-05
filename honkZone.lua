@@ -14,9 +14,9 @@ HonkZone = {
 do
 
 	local assert = _G.assert
-	local ipairs = _G.ipairs
-
 	assert(BASE ~= nil, "MOOSE must be loaded prior to this script!")
+
+	local ipairs = _G.ipairs
 
 	local function log(msg)
 		env.info("HonkZone: " .. msg)

@@ -9,15 +9,15 @@ zeusX = {
 
 do
 
-	local assert = _G.assert
-	local ipairs = _G.ipairs
-	local string = _G.string
-	local table = _G.table
-
 	local failMsg = " must be loaded prior to this script!"
+	local assert = _G.assert
 	assert(BASE ~= nil, "MOOSE" .. failMsg)
 	assert(ctld ~= nil, "CTLD" .. failMsg)
 	assert(mist ~= nil, "MiST" .. failMsg)
+
+	local ipairs = _G.ipairs
+	local string = _G.string
+	local table = _G.table
 
 	local debug = zeusX.debug or false
 

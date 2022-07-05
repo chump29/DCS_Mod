@@ -6,7 +6,6 @@
 do
 
 	local assert = _G.assert
-
 	assert(BASE ~= nil, "MOOSE must be loaded prior to this script!")
 
 	RESCUEHELO = RESCUEHELO -- NOTE: global on purpose!

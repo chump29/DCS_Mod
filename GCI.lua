@@ -8,7 +8,7 @@ do
 	local table = _G.table
 	local tonumber = _G.tonumber
 
-	local debug = true
+	local debug = false
 	local positions = {}
 	local count = 1000
 

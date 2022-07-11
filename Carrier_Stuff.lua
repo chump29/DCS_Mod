@@ -8,14 +8,16 @@ do
 	local assert = _G.assert
 	assert(BASE ~= nil, "MOOSE must be loaded prior to this script!")
 
+	local carrier_unit_name = "Carrier"
+
 	RESCUEHELO = RESCUEHELO -- NOTE: global on purpose!
-		:New(UNIT:FindByName("Carrier"), "CSAR")
+		:New(UNIT:FindByName(carrier_unit_name), "CSAR")
 		:SetRescueOff()
 		:SetTakeoffHot()
 		:Start()
 
 	local Tanker = RECOVERYTANKER
-		:New(UNIT:FindByName("Carrier"), "Tanker")
+		:New(UNIT:FindByName(carrier_unit_name), "Tanker")
 		:SetCallsign(CALLSIGN.Tanker.Texaco, 1)
 		:SetRadio(243)
 		:SetSpeed(200)
@@ -24,7 +26,7 @@ do
 		:Start()
 
 	local AWACS = RECOVERYTANKER
-		:New(UNIT:FindByName("Carrier"), "AWACS")
+		:New(UNIT:FindByName(carrier_unit_name), "AWACS")
 		:SetAltitude(20000) -- in ft
 		:SetAWACS()
 		:SetCallsign(CALLSIGN.AWACS.Darkstar, 1)

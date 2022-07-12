@@ -10,13 +10,14 @@ do
 	local debug = false
 
 	local positions = {}
-	local count = 100
+	local startingId = 100
 
-	local offsetUp = 800
-	local offsetRight = 600
-	local offsetLine = 600
+	local offsetUp = 500
+	local offsetRight = 400
+	local offsetLine = 200
 	local greenSpeed = 131 -- 150mph
 	local yellowSpeed = 174 -- 200mph
+	local maxHistory = 10
 
 	function log(msg)
 		env.info(string.format("GCI: %s", msg))
@@ -49,8 +50,8 @@ do
 	end
 
 	function getId()
-		count = count + 1
-		return count
+		startingId = startingId + 1
+		return startingId
 	end
 
 	function getColor(speed)
@@ -73,11 +74,11 @@ do
 
 	function moveOut2(pos, speed)
 		local function getLength(speed)
-			local length = 1000
+			local length = 300
 			if speed < greenSpeed then
-				length = 500
+				length = 100
 			elseif speed < yellowSpeed then
-				length = 750
+				length = 200
 			end
 			return length
 		end
@@ -95,7 +96,7 @@ do
 						local pos = unit:getPoint()
 						local speed = mist.utils.mpsToKnots(mist.vec.mag(unit:getVelocity()))
 						local heading = mist.getHeading(unit)
-						local txt = string.format(" %s / %s \n %i ft\n %i kts\n%i°", unit:getTypeName(), groupName, mist.utils.metersToFeet(pos.y), speed, heading)
+						local txt = string.format(" %s \n %i ft \n %i kts \n %i° ", groupName, mist.utils.metersToFeet(pos.y), speed, heading)
 
 						local id = positions[groupName].infoId
 						if id then
@@ -152,7 +153,8 @@ do
 					if not positions[groupName] then
 						positions[groupName] = {
 							lastPosition = pos,
-							currentPosition = pos
+							currentPosition = pos,
+							history = {}
 						}
 					else
 						positions[groupName].lastPosition = positions[groupName].currentPosition
@@ -162,9 +164,14 @@ do
 					local lastPos = positions[groupName].lastPosition
 					local curPos = positions[groupName].currentPosition
 					if lastPos ~= curPos then
+						local id = getId()
+						table.insert(positions[groupName].history, 1, id)
+						if #positions[groupName].history > maxHistory then
+							trigger.action.removeMark(table.remove(positions[groupName].history))
+						end
 						trigger.action.lineToAll(
 							coalition.side.BLUE,
-							getId(),
+							id,
 							lastPos,
 							curPos,
 							{0, 0, 0, 1},

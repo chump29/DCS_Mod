@@ -25,3 +25,21 @@ Uses **MOOSE** and **MiST** to add the following to a carrier:
 - [AWACS](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Darkstar, 255MHz, 20,000ft, 55Y, in-air*)
 
 Set carrier unit name by modifying `carrier_unit_name` variable
+
+# <u>Map_Stuff</u>
+Uses **MOOSE** and **MiST** to add the following to a map:
+- Announce when a player joins/dies/crashes
+- Blue airfield data
+  - [Pseudo ATC](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Functional.PseudoATC.html)
+  - Imports [ATIS](https://github.com/chump29/DCS_Mod/edit/master/README.md#atis) data, if available
+
+Configuration settings:
+```
+local config = {
+  announcements = false,
+  atc = true,
+  markers = true,
+  sound = "l10n/DEFAULT/static-short.ogg",
+  startingId = 10000
+}
+```

@@ -20,7 +20,9 @@ do
 	local config = {
 		announcements = false,
 		atc = true,
-		markers = true
+		markers = true,
+		sound = "l10n/DEFAULT/static-short.ogg",
+		startingId = 10000
 	}
 
 	if config.atc then
@@ -40,7 +42,9 @@ do
 		if not playerName then return end
 
 		local function say(msg)
-			trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/static-short.ogg")
+			if config.sound then
+				trigger.action.outSoundForCoalition(coalition.side.BLUE, config.sound)
+			end
 			trigger.action.outTextForCoalition(coalition.side.BLUE, msg, 10)
 			env.info(msg)
 		end
@@ -107,9 +111,11 @@ do
 		return degrees
 	end
 	local function getGroundWind(weather, pos)
-		local wind = "N/A"
+		local wind = "CALM"
 		if weather.atmosphere_type == 0 then
-			wind = string.format("From %d° @ %dmph / %dkts", revertWind(weather.wind.atGround.dir), math.floor(weather.wind.atGround.speed * 2.23694), math.floor(mist.utils.mpsToKnots(weather.wind.atGround.speed)))
+			if weather.wind.atGround.speed > 0 then
+				wind = string.format("From %d° @ %dmph / %dkts", revertWind(weather.wind.atGround.dir), math.floor(weather.wind.atGround.speed * 2.23694), math.floor(mist.utils.mpsToKnots(weather.wind.atGround.speed)))
+			end
 		else
 			dllWeather.initAtmospere(weather)
 			local res = dllWeather.getGroundWindAtPoint({position = pos or {x = 0, y = 0, z = 0}})
@@ -120,21 +126,26 @@ do
 
 	local function getATIS(name)
 		if ATISFREQS and ATISFREQS[name] then
-			return string.format("ATIS: %.2f MHz\n", ATISFREQS[name])
+			return string.format(" ATIS: %.2f MHz \n", ATISFREQS[name])
 		end
 		return ""
 	end
 
 	local function drawMarkers()
-		for _, base in ipairs(coalition.getAirbases(coalition.side.BLUE)) do
+		for i, base in ipairs(coalition.getAirbases(coalition.side.BLUE)) do
 			if base:getDesc().category == Airbase.Category.AIRDROME then
 				local point = base:getPoint()
 				local weather = env.mission.weather
-				mist.marker.add({
-					pos = point,
-					text = string.format("%sWind: %s\nQNH: %s\nTemp: %s\nCloud Base: %s", getATIS(base:getCallsign()), getGroundWind(weather, point), getQNH(weather.qnh), getTemp(weather.season.temperature), getClouds(weather.clouds.base)),
-					markForCoa = coalition.side.BLUE
-				})
+				trigger.action.textToAll(
+					coalition.side.BLUE,
+					config.startingId + i,
+					{x = point.x + 500, y = point.y, z = point.z + 500},
+					{1, 1, 1, 1},
+					{0, 0, 0, 0.33},
+					10,
+					true,
+					string.format("%s Wind: %s \n QNH: %s \n Temp: %s \n Cloud Base: %s ", getATIS(base:getCallsign()), getGroundWind(weather, point), getQNH(weather.qnh), getTemp(weather.season.temperature), getClouds(weather.clouds.base))
+				)
 			end
 		end
 	end

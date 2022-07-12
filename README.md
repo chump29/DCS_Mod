@@ -26,6 +26,12 @@ Uses **MOOSE** and **MiST** to add the following to a carrier:
 
 Set carrier unit name by modifying `carrier_unit_name` variable
 
+# <u>GCI</u>
+Uses **MiST** to add F10 data to blue flights: *(WIP/POC)*
+- Flight path history
+  - Turning on *Show All Routes* helps draw in real-time
+- Group velocity/name/altitude/speed/heading
+
 # <u>Map_Stuff</u>
 Uses **MOOSE** and **MiST** to add the following to a map:
 - Announce when a player joins/dies/crashes

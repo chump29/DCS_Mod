@@ -19,7 +19,7 @@ Adds the following to the generated briefings:
 - `[DCS Directory]\Scripts\briefing_addons.lua`
 
 # <u>Carrier_Stuff</u>
-Uses **MOOSE** to add the following to a carrier:
+Uses **MOOSE** and **MiST** to add the following to a carrier:
 - [CSAR](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RescueHelo.html) (*non-rescue, hot start*)
 - [Tanker](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Texaco, 243MHz, 200kts, 79Y, in-air*)
 - [AWACS](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Darkstar, 255MHz, 20,000ft, 55Y, in-air*)

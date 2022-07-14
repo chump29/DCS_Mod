@@ -1,11 +1,13 @@
-# <u>ATIS</u>
+# [ATIS](ATIS.lua)
 Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) to create an [ATIS](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.Atis.html) radio frequency at each blue airbase.
 - Place aircraft with name of **ATIS_[airbase callsign]** (*ATIS_Kobuleti*, for example) to get subtitles
   - Uses [MOOSE sound files](https://github.com/FlightControl-Master/MOOSE_SOUND/releases)
 - Frequency is **VHF + modifier** (*Kobuleti=133MHz, ATIS=133.25MHz*, for example)
   - Can be changed by modifying `frequency_add` variable
 
-# <u>Briefing Addons</u>
+---
+
+# [Briefing Addons](https://github.com/chump29/DCS_Mod/tree/master/Briefing%20Addons)
 Adds the following to the generated briefings:
 - Temperature (*F & C*)
 - QNH (*inHg & hPa*)
@@ -19,7 +21,9 @@ Adds the following to the generated briefings:
 - `[DCS Directory]\Scripts\UI\BriefingDialog.lua`
 - `[DCS Directory]\Scripts\briefing_addons.lua`
 
-# <u>Carrier_Stuff</u>
+---
+
+# [Carrier_Stuff](Carrier_Stuff.lua)
 Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add the following to a carrier:
 - [CSAR](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RescueHelo.html) (*non-rescue, hot start*)
 - [Tanker](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Texaco, 243MHz, 200kts, 79Y, in-air*)
@@ -27,7 +31,9 @@ Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](
 
 Set carrier unit name by modifying `carrier_unit_name` variable
 
-# <u>GCI</u>
+---
+
+# [GCI](GCI.lua)
 Uses [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add F10 data to blue flights:
 - Unit flight path history
   - Color-coded based on altitude
@@ -49,7 +55,9 @@ Configuration settings:
   }
 ```
 
-# <u>Map_Stuff</u>
+---
+
+# [Map_Stuff](Map_Stuff.lua)
 Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add the following to a map:
 - Announce when a player joins/dies/crashes
 - Blue airfield data

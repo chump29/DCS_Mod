@@ -37,9 +37,9 @@ Set carrier unit name by modifying `carrier_unit_name` variable
 Uses [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add F10 data to blue flights:
 - Unit flight path history
   - Color-coded based on altitude
-    - < 1000ft: ![Green](https://via.placeholder.com/15/00ff00/00ff00.png) Green
-    - < 2500ft: ![Yellow](https://via.placeholder.com/15/ffff00/ffff00.png) Yellow
-    - \>= 2500ft: ![Red](https://via.placeholder.com/15/ff0000/ff0000.png) Red
+    - < 1000ft: ![Green](https://via.placeholder.com/15/00ff00/00ff00.png)
+    - < 2500ft: ![Yellow](https://via.placeholder.com/15/ffff00/ffff00.png)
+    - \>= 2500ft: ![Red](https://via.placeholder.com/15/ff0000/ff0000.png)
   - *NOTE: Turning on **Show All Routes** helps draw in real-time*
 - Group name/altitude/speed/heading
 

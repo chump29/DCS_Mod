@@ -27,8 +27,12 @@ Uses **MOOSE** and **MiST** to add the following to a carrier:
 Set carrier unit name by modifying `carrier_unit_name` variable
 
 # <u>GCI</u>
-Uses **MiST** to add F10 data to blue flights: *(WIP/POC)*
+Uses **MiST** to add F10 data to blue flights:
 - Flight path history
+  - Based on altitude
+    - < 1000ft: `#00FF00`green
+    - < 2500ft: `#FFFF00`yellow
+    - >= 2500ft: `#FF0000`red
   - Turning on *Show All Routes* helps draw in real-time
 - Group velocity/name/altitude/speed/heading
 

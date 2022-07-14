@@ -34,7 +34,7 @@ Uses **MiST** to add F10 data to blue flights:
     - < 2500ft: ![Yellow](https://via.placeholder.com/15/ffff00/ffff00.png) Yellow
     - \>= 2500ft: ![Red](https://via.placeholder.com/15/ff0000/ff0000.png) Red
   - Turning on *Show All Routes* helps draw in real-time
-- Group velocity/name/altitude/speed/heading
+- Group name/altitude/speed/heading
 
 Configuration settings:
 ```lua

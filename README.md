@@ -74,8 +74,3 @@ local config = {
   startingId = 10000
 }
 ```
-
----
-
-## ~[Archive](https://github.com/chump29/DCS_Mod/tree/master/Archive)~ ```Deprecated```
-Archived scripts. Old and busted stuff. Probably doesn't work.

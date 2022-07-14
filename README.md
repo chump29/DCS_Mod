@@ -30,11 +30,23 @@ Set carrier unit name by modifying `carrier_unit_name` variable
 Uses **MiST** to add F10 data to blue flights:
 - Flight path history
   - Based on altitude
-    - < 1000ft: `#00FF00`green
-    - < 2500ft: `#FFFF00`yellow
-    - >= 2500ft: `#FF0000`red
+    - < 1000ft: ![Green](https://via.placeholder.com/15/00ff00/00ff00.png) Green
+    - < 2500ft: ![Yellow](https://via.placeholder.com/15/ffff00/ffff00.png) Yellow
+    - \>= 2500ft: ![Red](https://via.placeholder.com/15/ff0000/ff0000.png) Red
   - Turning on *Show All Routes* helps draw in real-time
 - Group velocity/name/altitude/speed/heading
+
+Configuration settings:
+```lua
+  local config = {
+    offsetUp = 800,
+    offsetRight = 400,
+    greenHeight = 1000, -- 305m
+    yellowHeight = 2500, -- 762m
+    maxHistory = 3, -- 30s
+    debug = false
+  }
+```
 
 # <u>Map_Stuff</u>
 Uses **MOOSE** and **MiST** to add the following to a map:
@@ -44,7 +56,7 @@ Uses **MOOSE** and **MiST** to add the following to a map:
   - Imports [ATIS](https://github.com/chump29/DCS_Mod/edit/master/README.md#atis) data, if available
 
 Configuration settings:
-```
+```lua
 local config = {
   announcements = false,
   atc = true,

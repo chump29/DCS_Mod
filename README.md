@@ -23,13 +23,18 @@ Adds the following to the generated briefings:
 
 ---
 
-# [Carrier_Stuff](Carrier_Stuff.lua)
+# [Carrier Stuff](Carrier_Stuff.lua)
 Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add the following to a carrier:
 - [CSAR](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RescueHelo.html) (*non-rescue, hot start*)
 - [Tanker](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Texaco, 243MHz, 200kts, 79Y, in-air*)
 - [AWACS](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Darkstar, 255MHz, 20,000ft, 55Y, in-air*)
 
 Set carrier unit name by modifying `carrier_unit_name` variable
+
+---
+
+# [Crash Crew](Crash_Crew.lua)
+```TODO```
 
 ---
 
@@ -57,7 +62,7 @@ Configuration settings:
 
 ---
 
-# [Map_Stuff](Map_Stuff.lua)
+# [Map Stuff](Map_Stuff.lua)
 Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add the following to a map:
 - Announce when a player joins/dies/crashes
 - Blue airfield data

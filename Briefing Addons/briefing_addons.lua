@@ -1,4 +1,9 @@
--- modified by Chump
+--[[
+-- Briefing Addons
+-- Modified by Chump
+-- Originally by BManx2000 @ https://www.digitalcombatsimulator.com/en/files/2080541/
+--]]
+
 local base = _G
 
 module('briefing_addons')

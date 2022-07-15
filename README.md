@@ -29,7 +29,7 @@ Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](
 - [Tanker](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Texaco, 243MHz, 200kts, 79Y, in-air*)
 - [AWACS](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Darkstar, 255MHz, 20,000ft, 55Y, in-air*)
 
-Set carrier unit name by modifying `carrier_unit_name` variable
+Set carrier unit name by modifying the `carrierUnitName` variable
 
 ---
 

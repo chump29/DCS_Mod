@@ -96,14 +96,14 @@ do
 		end
 		return a_value
 	end
-	function toDegrees(radians, raw)
+	local function toDegrees(radians, raw)
 		local degrees = radians * 180 / math.pi
 		if not raw then
 			degrees = math.floor(degrees + 0.5)
 		end
 		return degrees
 	end
-	function toPositiveDegrees(radians, raw)
+	local function toPositiveDegrees(radians, raw)
 		local degrees = toDegrees(radians, raw)
 		if degrees < 0 then
 			degrees = degrees + 360

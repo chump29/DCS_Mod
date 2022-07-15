@@ -26,11 +26,11 @@ do
 	local cachedGroups = {}
 	local startingId = 100
 
-	function log(msg)
+	local function log(msg)
 		env.info(string.format("GCI: %s", msg))
 	end
 
-	function getGroups()
+	local function getGroups()
 		local groups = {}
 
 		for _, group in ipairs(coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)) do
@@ -49,20 +49,20 @@ do
 		return groups
 	end
 
-	function isValidGroup(group)
+	local function isValidGroup(group)
 		return group ~= nil and group:isExist() and #group:getUnits() > 0
 	end
 
-	function isValidUnit(unit)
+	local function isValidUnit(unit)
 		return unit ~= nil and unit:isExist() and unit:isActive() and unit:getLife() > 1 and unit:inAir()
 	end
 
-	function getId()
+	local function getId()
 		startingId = startingId + 1
 		return startingId
 	end
 
-	function getColor(height)
+	local function getColor(height)
 		local color = {1, 0, 0, 1}
 		if height <= config.greenHeight then
 			color = {0, 1, 0, 1}
@@ -72,11 +72,11 @@ do
 		return color
 	end
 
-	function moveOver(pos)
+	local function moveOver(pos)
 		return {x = pos.x + config.offsetUp, y = pos.y, z = pos.z + config.offsetRight}
 	end
 
-	function drawInfo()
+	local function drawInfo()
 		for _, group in ipairs(cachedGroups) do
 			if isValidGroup(group) then
 				local foundLeader = false
@@ -126,7 +126,7 @@ do
 		end
 	end
 
-	function drawLine()
+	local function drawLine()
 		for _, group in ipairs(getGroups()) do
 			if isValidGroup(group) then
 				for _, unit in ipairs(group:getUnits()) do

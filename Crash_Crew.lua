@@ -3,120 +3,217 @@
 -- by Chump
 --]]
 
-CrashCrew = {}
-
 do
 
- 	local failMsg = " must be loaded prior to this script!"
 	local assert = _G.assert
-	assert(BASE ~= nil, "MOOSE" .. failMsg)
-	assert(mist ~= nil, "MiST" .. failMsg)
+	assert(mist ~= nil, "MiST must be loaded prior to this script!")
 
+	local math = _G.math
 	local string = _G.string
+	local tostring = _G.tostring
 
-	local function CrashCrewEventHandler(event)
+	local config = {
+		maxCrews = 10,
+		minTime = 60, -- in seconds
+		maxTime = 120, -- in seconds
+		useFlares = true,
+		useSmoke = true,
+		useIllumination = true,
+		sound = "l10n/DEFAULT/siren.ogg",
+		message = true,
+		units = {
+			land = {
+				type = "HEMTT TFFT",
+				livery = ""
+			},
+			water = {
+				type  = "speedboat",
+				livery = ""
+			}
+		},
+		debug = false
+	}
+
+	local CrashCrew = {	num = 0	}
+
+	local function crashCrewEventHandler(event)
 		if not event or not event.initiator then return end
 
 		local unit = event.initiator
-		if not unit or unit:getDesc().category > 3 or not unit:isActive() then return end -- NOTE: Unit.getCategory is broken, only testing for 0=airplane, 1=helicopter, 2=ground_unit, 3=ship
+		if not unit or unit:getDesc().category > 2 or not unit:isActive() then return end -- NOTE: Unit.getCategory is broken, only testing for 0=airplane, 1=helicopter, 2=ground_unit
 
 		local playerName = unit:getPlayerName()
 		if not playerName then return end
 
 		if event.id == world.event.S_EVENT_CRASH then
 
-			local function DestroyCrashCrew(g)
-				local group = g:GetDCSObject()
-				if group then
-					group:destroy()
-				end
+			if CrashCrew.num == config.maxCrews then return end
+			CrashCrew.num = CrashCrew.num + 1
+
+			local function log(msg)
+				env.info(string.format("CrashCrew: %s", msg))
 			end
 
-			local function AddToHeading(heading, num)
+			local function destroyCrashCrew(group)
+				group:destroy()
+				CrashCrew.num = CrashCrew.num - 1
+				if config.debug then log(string.format("%s destroyed.", group:getName())) end
+			end
+
+			local function addToHeading(heading, num)
 				local newHeading = heading + num
 				if newHeading >= 360 then
     				newHeading = newHeading - 360
   				end
-				return newHeading
+				return newHeading * math.pi / 180
 			end
 
-			local pos = unit:getPosition().p
+			local function setOptions(group)
+				local controller = group:getController()
+				if not controller then return end
+				controller:setCommand({
+					id = "SetInvisible",
+					params = {
+						value = true
+					}
+				})
+				controller:setCommand({
+					id = "SetImmortal",
+					params = {
+						value = true
+					}
+				})
+			end
 
-			local ccType = "Land"
+			local groupData = {
+			    visible = false,
+			    lateActivation = false,
+			    tasks = {},
+			    uncontrollable = false,
+			    task = "Ground Nothing",
+			    hiddenOnMFD = true,
+			    taskSelected = true,
+			    route = {},
+			    hidden = true,
+			    units = {
+			        [1] = {
+			            type = config.units.land.type,
+						transportable = {
+							randomTransportable = false
+						},
+			            livery_id = config.units.land.livery,
+			            skill = "Random",
+			            name = "CrashCrewUnit1-",
+			            playerCanDrive = false
+			        },
+			        [2] = {
+			            type = config.units.land.type,
+						transportable = {
+							randomTransportable = false
+						},
+			            livery_id = config.units.land.livery,
+			            skill = "Random",
+			            name = "CrashCrewUnit2-",
+			            playerCanDrive = false
+			        },
+			        [3] = {
+			            type = config.units.land.type,
+						transportable = {
+							randomTransportable = false
+						},
+			            livery_id = config.units.land.livery,
+			            skill = "Random",
+			            name = "CrashCrewUnit3-",
+			            playerCanDrive = false
+			        }
+			    },
+			    y = 0,
+			    x = 0,
+			    name = "CrashCrew",
+			    start_time = 0,
+			    hiddenOnPlanner = true
+			}
+
+			local groupCategory = Group.Category.GROUND
+			local heading = mist.getHeading(unit) * 180 / math.pi
+			local inM = mist.utils.feetToMeters(71) -- will end up ~100ft away (a²+b²=c²)
+			local pos = unit:getPosition().p
 			local surface = land.getSurfaceType({x = pos.x, y = pos.z})
 			if surface == land.SurfaceType.SHALLOW_WATER or surface == land.SurfaceType.WATER then
-				ccType = "Water"
+				groupCategory = Group.Category.SHIP
+				groupData.task = nil
+				groupData.units[1].type = config.units.water.type
+				groupData.units[1].livery_id = config.units.water.livery
+				groupData.units[2].type = config.units.water.type
+				groupData.units[2].livery_id = config.units.water.livery
+				groupData.units[3].type = config.units.water.type
+				groupData.units[3].livery_id = config.units.water.livery
 			end
 
-			for index = 1, 3 do
-				if not unit then
-					env.info("crashCrew: Unit not found!")
-					return
+			groupData.name = groupData.name .. tostring(CrashCrew.num)
+
+			groupData.units[1].y = pos.z + inM
+			groupData.units[1].x = pos.x + inM
+			groupData.units[1].heading = addToHeading(heading, -135)
+			groupData.units[1].name = groupData.units[1].name .. tostring(CrashCrew.num)
+
+			groupData.units[2].y = pos.z + inM
+			groupData.units[2].x = pos.x - inM
+			groupData.units[2].heading = addToHeading(heading, -45)
+			groupData.units[2].name = groupData.units[2].name .. tostring(CrashCrew.num)
+
+			groupData.units[3].y = pos.z - inM
+			groupData.units[3].x = pos.x
+			groupData.units[3].heading = addToHeading(heading, 90)
+			groupData.units[3].name = groupData.units[3].name .. tostring(CrashCrew.num)
+
+			local group = coalition.addGroup(
+				country.id.SWITZERLAND,
+				groupCategory,
+				groupData
+			)
+			if not group then return end
+
+			mist.scheduleFunction(setOptions, {group}, timer.getTime() + 1)
+
+			mist.scheduleFunction(destroyCrashCrew, {group}, timer.getTime() + mist.random(config.minTime, config.maxTime))
+
+			if config.useFlares then
+				trigger.action.signalFlare(pos, trigger.flareColor.Green, 1)
+				trigger.action.signalFlare(pos, trigger.flareColor.Red, 90)
+				trigger.action.signalFlare(pos, trigger.flareColor.White, 180)
+				trigger.action.signalFlare(pos, trigger.flareColor.Yellow, 270)
+			end
+
+			local coa = unit:getCoalition()
+
+			if config.useSmoke then
+				if coa == coalition.side.BLUE then
+					trigger.action.smoke(pos, trigger.smokeColor.Blue)
+				else
+					trigger.action.smoke(pos, trigger.smokeColor.Red)
 				end
-
-				local unitPos = {
-					heading = 0
-				}
-
-				local mUnit = UNIT:FindByName(unit:getName())
-				if mUnit then
-					unitPos.heading = mUnit:GetHeading()
-				end
-
-				local inM = mist.utils.feetToMeters(71) -- will end up ~100ft away (a²+b²=c²), facing wreck
-				if index == 1 then -- 45°
-					unitPos.y = pos.z + inM
-					unitPos.x = pos.x + inM
-					unitPos.heading = AddToHeading(unitPos.heading, 45)
-				elseif index == 2 then -- 135°
-					unitPos.y = pos.z + inM
-					unitPos.x = pos.x - inM
-					unitPos.heading = AddToHeading(unitPos.heading, 135)
-				else -- 270°
-					unitPos.y = pos.z - mist.utils.feetToMeters(100)
-					unitPos.x = pos.x
-					unitPos.heading = AddToHeading(unitPos.heading, 270)
-				end
-
-				local g = SPAWN
-					:NewWithAlias("CrashCrew" .. ccType, string.format("Crash Crew %i-%i", CrashCrew.num, index))
-					:InitCoalition(coalition.side.NEUTRAL)
-					:InitCountry(country.id.SWITZERLAND)
-					:InitHeading(unitPos.heading)
-					:SpawnFromVec2({x = unitPos.x, y = unitPos.y})
-
-				mist.scheduleFunction(DestroyCrashCrew, {g}, timer.getTime() + mist.random(60, 120))
 			end
 
-			trigger.action.signalFlare(pos, trigger.flareColor.Green, 0)
-			trigger.action.signalFlare(pos, trigger.flareColor.Red, 90)
-			trigger.action.signalFlare(pos, trigger.flareColor.White, 180)
-			trigger.action.signalFlare(pos, trigger.flareColor.Yellow, 270)
-
-			if unit:getCoalition() == coalition.side.BLUE then
-				trigger.action.smoke(pos, trigger.smokeColor.Blue)
-			else
-				trigger.action.smoke(pos, trigger.smokeColor.Red)
+			if config.useIllumination then
+				pos.y = pos.y + 1000
+				trigger.action.illuminationBomb(pos, 1000000)
 			end
 
-			pos.y = pos.y + 1000
-			trigger.action.illuminationBomb(pos, 1000000)
-
-			CrashCrew.num = CrashCrew.num + 1
-			if CrashCrew.num > 10 then
-				CrashCrew.num = 1
+			if config.sound then
+				trigger.action.outSoundForCoalition(coa, config.sound)
 			end
 
-			trigger.action.outSoundForCoalition(coalition.side.BLUE, "l10n/DEFAULT/siren.ogg")
-			local msg = string.format("Crash Crew dispatched to %s!", playerName)
-			trigger.action.outText(msg, 10)
-			env.info(msg)
+			if config.message then
+				trigger.action.outTextForCoalition(coa, string.format("%s has crashed! Crash Crew dispatched.", playerName), 10)
+			end
+
+			if config.debug then log(string.format("%s spawned for %s.", group:getName(), playerName)) end
+
 		end
 	end
 
-	CrashCrew.num = 1
-
-	mist.addEventHandler(CrashCrewEventHandler)
+	mist.addEventHandler(crashCrewEventHandler)
 
 	env.info("Crash Crew waiting to respond...")
 

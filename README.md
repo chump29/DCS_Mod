@@ -34,7 +34,32 @@ Set carrier unit name by modifying the `carrierUnitName` variable
 ---
 
 # [Crash Crew](Crash_Crew.lua)
-```TODO```
+Uses [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add a crash crew to crashed player planes/helicopters/ground units.
+
+Configuration settings:
+```lua
+  local config = {
+    maxCrews = 10,
+    minTime = 60, -- in seconds
+    maxTime = 120, -- in seconds
+    useFlares = true,
+    useSmoke = true,
+    useIllumination = true,
+    sound = "l10n/DEFAULT/siren.ogg",
+    message = true,
+    units = {
+      land = {
+        type = "HEMTT TFFT",
+        livery = ""
+      },
+      water = {
+        type  = "speedboat",
+        livery = ""
+      }
+    },
+    debug = false
+  }
+```
 
 ---
 

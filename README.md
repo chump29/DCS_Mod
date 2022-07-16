@@ -53,9 +53,12 @@ Configuration settings:
   local config = {
     offsetUp = 800,
     offsetRight = 400,
-    greenHeight = 1000, -- 305m
-    yellowHeight = 2500, -- 762m
+    greenHeight = 1000, -- in ft
+    yellowHeight = 2500, -- in ft
     maxHistory = 3, -- 30s
+    fontColor = {0, 0, 1, 1}, -- RGBA
+    fontSize = 10,
+    backgroundColor = {0, 0, 0, 0.1}, -- RGBA
     debug = false
   }
 ```

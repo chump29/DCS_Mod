@@ -5,16 +5,6 @@
 
 do
 
-	local failMsg = " must be loaded prior to this script!"
-	local assert = _G.assert
-	assert(BASE ~= nil, "MOOSE" .. failMsg)
-	assert(mist ~= nil, "MiST" .. failMsg)
-
-	local string = _G.string
-	local ipairs = _G.ipairs
-	local math = _G.math
-
-	local require = _G.require
 	local dllWeather = require("Weather")
 
 	local config = {
@@ -26,6 +16,8 @@ do
 	}
 
 	if config.atc then
+		assert(BASE ~= nil, "MOOSE must be loaded prior to this script!")
+
 		PSEUDOATC
 			:New()
 			:Start()
@@ -111,15 +103,19 @@ do
 		return degrees
 	end
 	local function getGroundWind(weather, pos)
+		local function mpsToKts(mps)
+			return mps * 1.943844
+		end
+
 		local wind = "CALM"
 		if weather.atmosphere_type == 0 then
 			if weather.wind.atGround.speed > 0 then
-				wind = string.format("From %d° @ %dmph / %dkts", revertWind(weather.wind.atGround.dir), math.floor(weather.wind.atGround.speed * 2.23694), math.floor(mist.utils.mpsToKnots(weather.wind.atGround.speed)))
+				wind = string.format("From %d° @ %dmph / %dkts", revertWind(weather.wind.atGround.dir), math.floor(weather.wind.atGround.speed * 2.23694), math.floor(mpsToKts(weather.wind.atGround.speed)))
 			end
 		else
 			dllWeather.initAtmospere(weather)
 			local res = dllWeather.getGroundWindAtPoint({position = pos or {x = 0, y = 0, z = 0}})
-			wind = string.format("From %d° @ %dmph / %dkts", toPositiveDegrees(res.a + math.pi), math.floor(res.v * 2.23694), math.floor(mist.utils.mpsToKnots(res.v)))
+			wind = string.format("From %d° @ %dmph / %dkts", toPositiveDegrees(res.a + math.pi), math.floor(res.v * 2.23694), math.floor(mpsToKts(res.v)))
 		end
 		return wind
 	end

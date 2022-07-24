@@ -5,12 +5,7 @@
 
 do
 
-	local assert = _G.assert
 	assert(mist ~= nil, "MiST must be loaded prior to this script!")
-
-	local math = _G.math
-	local string = _G.string
-	local tostring = _G.tostring
 
 	local config = {
 		maxCrews = 10,
@@ -24,7 +19,7 @@ do
 		units = {
 			land = {
 				type = "HEMTT TFFT",
-				livery = ""
+				livery = "Fire Truck 1"
 			},
 			water = {
 				type  = "speedboat",

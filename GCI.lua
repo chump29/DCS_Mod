@@ -5,13 +5,7 @@
 
 do
 
-	local assert = _G.assert
 	assert(mist ~= nil, "MiST must be loaded prior to this script!")
-
-	local ipairs = _G.ipairs
-	local math = _G.math
-	local string = _G.string
-	local table = _G.table
 
 	local config = {
 		offsetUp = 800,

@@ -5,10 +5,7 @@
 
 do
 
-	local assert = _G.assert
 	assert(BASE ~= nil, "MOOSE must be loaded prior to this script!")
-
-	local string = _G.string
 
 	local carrierUnitName = "Carrier"
 

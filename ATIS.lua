@@ -8,20 +8,8 @@ ATISFREQS = {} -- global for Map_Stuff
 do
 
 	local failMsg = " must be loaded prior to this script!"
-	local assert = _G.assert
 	assert(BASE ~= nil, "MOOSE" .. failMsg)
-	local require = _G.require
 	assert(require ~= nil, "REQUIRE" .. failMsg) -- for dofile()
-
-	local dofile = _G.dofile
-	local ipairs = _G.ipairs
-	local math = _G.math
-	local next = _G.next
-	local pairs = _G.pairs
-	local string = _G.string
-	local table = _G.table
-	local tonumber = _G.tonumber
-	local tostring = _G.tostring
 
 	local ATISfreqs = {}
 

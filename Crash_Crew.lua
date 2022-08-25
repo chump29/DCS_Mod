@@ -58,8 +58,8 @@ do
 			local function addToHeading(heading, num)
 				local newHeading = heading + num
 				if newHeading >= 360 then
-    				newHeading = newHeading - 360
-  				end
+					newHeading = newHeading - 360
+				end
 				return newHeading * math.pi / 180
 			end
 
@@ -81,52 +81,52 @@ do
 			end
 
 			local groupData = {
-			    visible = false,
-			    lateActivation = false,
-			    tasks = {},
-			    uncontrollable = false,
-			    task = "Ground Nothing",
-			    hiddenOnMFD = true,
-			    taskSelected = true,
-			    route = {},
-			    hidden = true,
-			    units = {
-			        [1] = {
-			            type = config.units.land.type,
+				visible = false,
+				lateActivation = false,
+				tasks = {},
+				uncontrollable = false,
+				task = "Ground Nothing",
+				hiddenOnMFD = true,
+				taskSelected = true,
+				route = {},
+				hidden = true,
+				units = {
+					[1] = {
+						type = config.units.land.type,
 						transportable = {
 							randomTransportable = false
 						},
-			            livery_id = config.units.land.livery,
-			            skill = "Random",
-			            name = "CrashCrewUnit1-",
-			            playerCanDrive = false
-			        },
-			        [2] = {
-			            type = config.units.land.type,
+						livery_id = config.units.land.livery,
+						skill = "Random",
+						name = "CrashCrewUnit1-",
+						playerCanDrive = false
+					},
+					[2] = {
+						type = config.units.land.type,
 						transportable = {
 							randomTransportable = false
 						},
-			            livery_id = config.units.land.livery,
-			            skill = "Random",
-			            name = "CrashCrewUnit2-",
-			            playerCanDrive = false
-			        },
-			        [3] = {
-			            type = config.units.land.type,
+						livery_id = config.units.land.livery,
+						skill = "Random",
+						name = "CrashCrewUnit2-",
+						playerCanDrive = false
+					},
+					[3] = {
+						type = config.units.land.type,
 						transportable = {
 							randomTransportable = false
 						},
-			            livery_id = config.units.land.livery,
-			            skill = "Random",
-			            name = "CrashCrewUnit3-",
-			            playerCanDrive = false
-			        }
-			    },
-			    y = 0,
-			    x = 0,
-			    name = "CrashCrew",
-			    start_time = 0,
-			    hiddenOnPlanner = true
+						livery_id = config.units.land.livery,
+						skill = "Random",
+						name = "CrashCrewUnit3-",
+						playerCanDrive = false
+					}
+				},
+				y = 0,
+				x = 0,
+				name = "CrashCrew",
+				start_time = 0,
+				hiddenOnPlanner = true
 			}
 
 			local groupCategory = Group.Category.GROUND

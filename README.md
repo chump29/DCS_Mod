@@ -121,7 +121,7 @@ Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](
 - Announce when a player joins/dies/crashes
 - Blue airfield data
   - [Pseudo ATC](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Functional.PseudoATC.html)
-  - Imports [ATIS](https://github.com/chump29/DCS_Mod/edit/master/README.md#atis) data, if available
+  - Imports [ATIS](ATIS.lua) data, if available
 
 Configuration settings:
 ```lua

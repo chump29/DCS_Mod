@@ -8,7 +8,7 @@ do
 	local dllWeather = require("Weather")
 
 	local config = {
-		announcements = true,
+		announcements = false,
 		atc = true,
 		markers = true,
 		sound = "l10n/DEFAULT/static-short.ogg",

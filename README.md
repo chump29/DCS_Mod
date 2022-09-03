@@ -91,20 +91,20 @@ Configuration settings:
 ---
 
 # [JTAC Priority](JTAC_Priority.lua)
-Replaces **findNearestVisibleEnemy** in JTAC script to target red ground units with priority:
-*(highest to lowest)*
+Replaces `findNearestVisibleEnemy` in JTAC script to target red ground units with priority *(highest to lowest)*:
 - SAM
 - AAA
 - Tank
 - Armed ground unit
 - Unarmed ground unit
 
-**NOTE: Original JTAC script *must* include the following methods:**
+Original JTAC script ***must*** include the following methods:
 - alreadyTarget
 - isVehicle
 - isInfantry
 - getDistance
-*Works with [CTLD](https://github.com/ciribob/DCS-CTLD)*
+
+*NOTE: Works with [CTLD](https://github.com/ciribob/DCS-CTLD)*
 
 Configuration settings:
 ```lua

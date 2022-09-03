@@ -90,6 +90,32 @@ Configuration settings:
 
 ---
 
+# [JTAC Priority](JTAC_Priority.lua)
+Replaces **findNearestVisibleEnemy** in JTAC script to target red ground units with priority:
+*(highest to lowest)*
+- SAM
+- AAA
+- Tank
+- Armed ground unit
+- Unarmed ground unit
+
+**NOTE: Original JTAC script *must* include the following methods:**
+- alreadyTarget
+- isVehicle
+- isInfantry
+- getDistance
+*Works with [CTLD](https://github.com/ciribob/DCS-CTLD)*
+
+Configuration settings:
+```lua
+  local config = {
+    maxDistance = 5000, -- in m
+    debug = false
+  }
+```
+
+---
+
 # [Map Stuff](Map_Stuff.lua)
 Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add the following to a map:
 - Announce when a player joins/dies/crashes

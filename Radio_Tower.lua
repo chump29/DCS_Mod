@@ -8,31 +8,15 @@ do
 	local config = {
 		stations = {
 			{
-				name = "RadioX", -- zone
+				name = "Music", -- zone
 				music = "Radio X.ogg", -- mp3/ogg
 				frequency = 40, -- in MHz
 				modulation = 1, -- 0=AM, 1=FM
 				power = 1000, -- in W
 				loop = true
-			},
-			{
-				name = "VROCK",
-				music = "VROCK.ogg",
-				frequency = .75,
-				modulation = 0,
-				power = 1000,
-				loop = true
-			},
-			{
-				name = "CCR",
-				music = "CCR.ogg",
-				frequency = 123.475,
-				modulation = 0,
-				power = 1000,
-				loop = true
 			}
 		},
-		debug = true
+		debug = false
 	}
 
 	local function log(msg)

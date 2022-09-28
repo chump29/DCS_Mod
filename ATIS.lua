@@ -188,7 +188,7 @@ do
 				end
 				atis:Start()
 				ATISFREQS[callsign] = obj.atisFreq
-				env.info(string.format("ATIS: Broadcasting from %s on %.2f MHz", callsign, ATISFREQS[callsign]))
+				env.info(string.format("ATIS: Broadcasting from %s on %.3f MHz", callsign, ATISFREQS[callsign]))
 			else
 				env.info("ATIS: Airfield Object not found!")
 			end

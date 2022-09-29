@@ -137,27 +137,34 @@ local config = {
 ---
 
 # [Radio Tower](Radio_Tower.lua)
-Creates a radio tower static object and transmission from zones with matching `name`. When destroyed, stops transmission.
+Creates a radio tower static object and transmission from zones with matching `name`.
+Handles multiple stations per tower.
+When destroyed, stops transmitting.
+
+*NOTE: Must include sound files via trigger*
 
 Configuration settings:
 ```lua
   local config = {
-    stations = {
+    towers = {
       {
-        name = "Radio1", -- zone
-        music = "Radio1.ogg", -- mp3/ogg
-        frequency = 40, -- in MHz
-        modulation = 1, -- 0=AM, 1=FM
-        power = 1000, -- in W
-        loop = true
-      },
-      {
-        name = "Radio2",
-        music = "Radio2.mp3",
-        frequency = .6,
-        modulation = 0,
-        power = 1000,
-        loop = true
+        name = "Music", -- zone
+        stations = {
+          {
+            name = "Radio X.ogg", -- mp3/ogg
+            frequency = 40, -- in MHz
+            modulation = 1, -- 0=AM, 1=FM
+            power = 1000, -- in W
+            loop = true
+          },
+          {
+            name = "VROCK.ogg",
+            frequency = 41,
+            modulation = 1,
+            power = 1000,
+            loop = true
+          }
+        }
       }
     },
     debug = false

@@ -11,14 +11,16 @@ do
 				name = "Music", -- zone
 				stations = {
 					{
-						name = "Radio X.ogg", -- mp3/ogg
+						name = "Radio X",
+						file = "Radio X.ogg", -- mp3/ogg
 						frequency = 40, -- in MHz
 						modulation = 1, -- 0=AM, 1=FM
 						power = 1000, -- in W
 						loop = true
 					},
 					{
-						name = "VROCK.ogg",
+						name = "V-Rock",
+						file = "VROCK.ogg",
 						frequency = 41,
 						modulation = 1,
 						power = 1000,
@@ -27,11 +29,15 @@ do
 				}
 			}
 		},
-		debug = false
+		enableMarks = true, -- show on F10 map
+		messages = false -- show status messages
 	}
 
 	local function log(msg)
 		env.info(string.format("RadioTower: %s", msg))
+	end
+	local function say(msg)
+		trigger.action.outText(msg, 10)
 	end
 
 	local function getFrequency(frequency)
@@ -58,13 +64,14 @@ do
 				y = zone.point.z,
 				x = zone.point.x,
 				name = tower.name,
-				heading = 0
+				heading = math.random(360),
+				--hidden = true
 			})
 			if obj then
 				for i, station in ipairs(tower.stations) do
 					local name = string.format("%s-%d", tower.name, i)
 					trigger.action.radioTransmission(
-						string.format("l10n/DEFAULT/%s", station.name),
+						string.format("l10n/DEFAULT/%s", station.file),
 						zone.point,
 						radio.modulation[getModulation(station.modulation)],
 						station.loop,
@@ -72,22 +79,36 @@ do
 						station.power,
 						name
 					)
+					local str = string.format("%s started transmitting %s (%s) on %.3f %s %s", tower.name, station.name, station.file, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation))
+					log(str)
+					if config.messages then	say(str) end
 					local handler = {}
 					function handler:onEvent(event)
 						if event.id == world.event.S_EVENT_DEAD and event.initiator and event.initiator:getName() == tower.name then
 							trigger.action.stopRadioTransmission(name)
-							local str = string.format("%s stopped transmitting %s on %.3f %s %s", tower.name, station.name, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation))
+							local str = string.format("%s stopped transmitting %s (%s) on %.3f %s %s", tower.name, station.name, station.file, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation))
 							log(str)
-							if config.debug then trigger.action.outText(str, 10) end
+							if config.messages then say(str) end
+							if config.enableMarks then
+								trigger.action.removeMark(tower.id)
+							end
 						end
 					end
 					world.addEventHandler(handler)
-					local str = string.format("%s is transmitting %s on %.3f %s %s", tower.name, station.name, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation))
-					log(str)
-					if config.debug then trigger.action.outText(str, 10) end
 				end
 			else
 				log(string.format("Unable to spawn static object for %s", tower.name))
+			end
+			if config.enableMarks then
+				local stations = ""
+				for i, station in ipairs(tower.stations) do
+					if i > 1 then stations = string.format("%s\n", stations) end
+					stations = string.format("%s%s - %.3f %s %s", stations, station.name, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation))
+				end
+				if string.len(stations) > 0 then
+					tower.id = math.random(1, 1000000)
+					trigger.action.markToAll(tower.id, string.format("%s stations:\n%s", tower.name, stations), zone.point, true)
+				end
 			end
 		else
 			log(string.format("Zone %s not found", tower.name))

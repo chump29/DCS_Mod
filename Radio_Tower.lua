@@ -61,16 +61,16 @@ do
 					station.power,
 					station.name
 				)
-				world.addEventHandler({
-					onEvent = function(event)
-						if event.id == world.event.EVENT_DEAD and event.target and event.target:getName() == station.name then
-							trigger.action.stopRadioTransmission(station.name)
-							local str = string.format("%s stopped transmitting on %.3f %s %s", station.name, getFrequency(), getHertz(), getModulation())
-							log(str)
-							if config.debug then trigger.action.outText(str) end
-						end
+				local handler = {}
+				function handler:onEvent(event)
+					if event.id == world.event.S_EVENT_DEAD and event.initiator and event.initiator:getName() == station.name then
+						trigger.action.stopRadioTransmission(station.name)
+						local str = string.format("%s stopped transmitting on %.3f %s %s", station.name, getFrequency(), getHertz(), getModulation())
+						log(str)
+						if config.debug then trigger.action.outText(str, 10) end
 					end
-				})
+				end
+				world.addEventHandler(handler)
 				local str = string.format("%s is transmitting on %.3f %s %s", station.name, getFrequency(), getHertz(), getModulation())
 				log(str)
 				if config.debug then trigger.action.outText(str, 10) end

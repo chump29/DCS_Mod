@@ -14,7 +14,8 @@ Adds the following to the generated briefings:
 - Magnetic declination
   - Based on year
 - Cloud base (*ft & m*)
-- A-10 CDU wind data
+- A-10C CDU wind data
+- Wind shown in METAR standards
 
 *Install to:*
 - `[DCS Directory]\MissionEditor\modules\me_autobriefing.lua`

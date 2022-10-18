@@ -131,7 +131,7 @@ Original JTAC script ***must*** include the following methods:
 - isInfantry
 - getDistance
 
-*NOTE: Works with [CTLD](https://github.com/ciribob/DCS-CTLD) and TTI*
+*NOTE: Works with [CTLD](https://github.com/ciribob/DCS-CTLD) and [Through The Inferno](https://throughtheinferno.com/single-player-missions/)*
 
 Configuration settings:
 ```lua

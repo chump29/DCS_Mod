@@ -87,6 +87,8 @@ Configuration settings:
 ---
 
 # [GCI](GCI.lua)
+*NOTE: This is a proof-of-concept only.*
+
 Uses [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add F10 data to blue flights:
 - Unit flight path history
   - Color-coded based on altitude

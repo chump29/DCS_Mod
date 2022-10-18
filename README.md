@@ -59,6 +59,8 @@ Configuration settings:
 # [Crash Crew](Crash_Crew.lua)
 Uses [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add a crash crew to crashed player planes/helicopters/ground units.
 
+*NOTE: Must include `sound` file via trigger in editor*
+
 Configuration settings:
 ```lua
   local config = {
@@ -129,7 +131,7 @@ Original JTAC script ***must*** include the following methods:
 - isInfantry
 - getDistance
 
-*NOTE: Works with [CTLD](https://github.com/ciribob/DCS-CTLD)*
+*NOTE: Works with [CTLD](https://github.com/ciribob/DCS-CTLD) and TTI*
 
 Configuration settings:
 ```lua
@@ -148,6 +150,8 @@ Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](
   - [Pseudo ATC](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Functional.PseudoATC.html)
   - Imports [ATIS](ATIS.lua) data, if available
 
+*NOTE: Must include `sound` file via trigger in editor*
+
 Configuration settings:
 ```lua
 local config = {
@@ -164,7 +168,7 @@ local config = {
 # [Radio Tower](Radio_Tower.lua)
 Creates a radio tower static object and transmission from zones with matching `name`. Handles multiple stations per tower. When destroyed, stops transmitting.
 
-*NOTE: Must include sound `file` via trigger in editor*
+*NOTE: Must include `sound` file via trigger in editor*
 
 Configuration settings:
 ```lua
@@ -175,7 +179,7 @@ Configuration settings:
         stations = {
           {
             name = "Radio X",
-            file = "Radio X.ogg", -- mp3/ogg
+            sound = "Radio X.ogg", -- mp3/ogg
             frequency = 40, -- in MHz
             modulation = 1, -- 0=AM, 1=FM
             power = 1000, -- in W
@@ -183,7 +187,7 @@ Configuration settings:
           },
           {
             name = "V-Rock",
-            file = "VROCK.ogg",
+            sound = "VROCK.ogg",
             frequency = 41,
             modulation = 1,
             power = 1000,

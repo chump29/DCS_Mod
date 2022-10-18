@@ -26,12 +26,33 @@ Adds the following to the generated briefings:
 ---
 
 # [Carrier Stuff](Carrier_Stuff.lua)
-Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add the following to a carrier:
+Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) to add the following to a carrier:
 - [CSAR](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RescueHelo.html) (*non-rescue, hot start*)
-- [Tanker](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Texaco, 243MHz, 200kts, 79Y, in-air*)
-- [AWACS](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Darkstar, 255MHz, 20,000ft, 55Y, in-air*)
+- [Tanker](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Texaco, in-air start*)
+- [AWACS](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.RecoveryTanker.html) (*Overlord, in-air start*)
 
-Set carrier unit name by modifying the `carrierUnitName` variable
+Configuration settings:
+```lua
+  local config = {
+    carrierUnitName = "Carrier",
+    tanker = {
+      radio = 243, -- in MHz
+      speed = 200, -- in kts
+      tacan = {
+        channel = 79, -- Y
+        id = "TEX"
+      }
+    },
+    awacs = {
+      altitude = 20000, -- in ft
+      radio = 255, -- in MHz
+      tacan = {
+        channel = 55, -- Y
+        id = "WAX"
+      }
+    }
+  }
+```
 
 ---
 

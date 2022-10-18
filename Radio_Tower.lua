@@ -12,7 +12,7 @@ do
 				stations = {
 					{
 						name = "Radio X",
-						file = "Radio X.ogg", -- mp3/ogg
+						sound = "Radio X.ogg", -- mp3/ogg
 						frequency = 40, -- in MHz
 						modulation = 1, -- 0=AM, 1=FM
 						power = 1000, -- in W
@@ -20,7 +20,7 @@ do
 					},
 					{
 						name = "V-Rock",
-						file = "VROCK.ogg",
+						sound = "VROCK.ogg",
 						frequency = 41,
 						modulation = 1,
 						power = 1000,
@@ -71,7 +71,7 @@ do
 				for i, station in ipairs(tower.stations) do
 					local name = string.format("%s-%d", tower.name, i)
 					trigger.action.radioTransmission(
-						string.format("l10n/DEFAULT/%s", station.file),
+						string.format("l10n/DEFAULT/%s", station.sound),
 						zone.point,
 						radio.modulation[getModulation(station.modulation)],
 						station.loop,
@@ -79,14 +79,14 @@ do
 						station.power,
 						name
 					)
-					local str = string.format("%s started transmitting %s (%s) on %.3f %s %s", tower.name, station.name, station.file, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation))
+					local str = string.format("%s started transmitting %s (%s) on %.3f %s %s", tower.name, station.name, station.sound, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation))
 					log(str)
 					if config.messages then	say(str) end
 					local handler = {}
 					function handler:onEvent(event)
 						if event.id == world.event.S_EVENT_DEAD and event.initiator and event.initiator:getName() == tower.name then
 							trigger.action.stopRadioTransmission(name)
-							local str = string.format("%s stopped transmitting %s (%s) on %.3f %s %s", tower.name, station.name, station.file, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation))
+							local str = string.format("%s stopped transmitting %s (%s) on %.3f %s %s", tower.name, station.name, station.sound, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation))
 							log(str)
 							if config.messages then say(str) end
 							if config.enableMarks then

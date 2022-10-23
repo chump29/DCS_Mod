@@ -68,7 +68,7 @@ local cdata =
     package = _('Package'),
     weather = _('WEATHER'),
     temperature = _('Temperature'),
-    cloud_cover = _('Cloud cover'),
+    --cloud_cover = _('Cloud cover'),
     wind = _('Wind'),
     turbulence = _('Turbulence'),
     take_off_and_departure = _('TAKE OFF AND DEPARTURE'),
@@ -85,7 +85,7 @@ local cdata =
     --wind_at_ground = _('At GRND'),
     --wind_at_2000 = _('At 2000m'),
     --wind_at_8000 = _('At 8000m'),
-    cloud_cover_base = _('base'),
+    --cloud_cover_base = _('base'),
 
     BACK = _('CANCEL'),
     middleBtn = _('MISSION PLANNER'),
@@ -559,7 +559,7 @@ function generateAutoBriefing(mission)
             table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
         end
 
-        table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. BA.getClouds(mission.weather.clouds.base)))
+        table.insert(autoBriefing, composeEntry(nil, _("Cloud Base"), BA.getClouds(mission.weather.clouds.base)))
         table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
 
         if dec then
@@ -603,7 +603,7 @@ function generateSimpleAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
     end
 
-    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. BA.getClouds(mission.weather.clouds.base)))
+    table.insert(autoBriefing, composeEntry(nil, _("Cloud Base"), BA.getClouds(mission.weather.clouds.base)))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
 
     if dec then

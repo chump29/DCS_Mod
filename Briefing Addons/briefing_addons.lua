@@ -157,16 +157,23 @@ function getMagneticDeclination(toStr)
 	return dec
 end
 
+local function round(n)
+	return math.floor(n + 0.5)
+end
+
 function getTemp(c)
-	return string.format("%d°F / %d°C", math.floor((c or 0) * 9 / 5 + 32), c or 0)
+	if not c then return 0 end
+	return string.format("%d°F / %d°C", round(c * 9 / 5 + 32), c)
 end
 
 function getQNH(qnh)
-	return string.format("%0.2finHg / %dhPa", (qnh or 0) / 25.4, qnh or 0)
+	if not qnh then return 0 end
+	return string.format("%0.2finHg / %dmmHg / %dhPa", qnh / 25.4, qnh, round(qnh * 1.332894736842105))
 end
 
 function getClouds(m)
-	return string.format("%dft / %dm", math.floor((m or 0) * 3.281), m or 0)
+	if not m then return 0 end
+	return string.format("%dft / %dm", round(m * 3.281 / 1000) * 1000, round(m / 1000) * 1000)
 end
 
 local function normalizeWind(angle)

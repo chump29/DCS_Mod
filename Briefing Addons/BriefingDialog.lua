@@ -80,7 +80,7 @@ local cdata = {
         package = _('Package'),
         weather = _('WEATHER'),
         temperature = _('Temperature'),
-        cloud_cover = _('Cloud cover'),
+        --cloud_cover = _('Cloud cover'),
         wind = _('Wind'),
         turbulence = _('Turbulence'),
         take_off_and_departure = _('TAKE OFF AND DEPARTURE'),
@@ -94,7 +94,7 @@ local cdata = {
         allies_flight = _('Allies flight'),
 
         km_unit = _('km'),
-        cloud_cover_base = _('base'),
+        --cloud_cover_base = _('base'),
         NA = _('N/A'),
     }
 
@@ -514,7 +514,7 @@ function generateAutoBriefing()
         table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
     end
 
-    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. BA.getClouds(dataBrf.clouds_base)))
+    table.insert(autoBriefing, composeEntry(nil, _("Cloud Base"), BA.getClouds(dataBrf.clouds_base)))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,           UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
 
     if dec then
@@ -557,7 +557,7 @@ function generateSimpleAutoBriefing()
         table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
     end
 
-    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_cover,    cdata.cloud_cover_base .. ' ' .. BA.getClouds(dataBrf.clouds_base)))
+    table.insert(autoBriefing, composeEntry(nil, _("Cloud Base"), BA.getClouds(dataBrf.clouds_base)))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,           UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
 
     if dec then

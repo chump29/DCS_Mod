@@ -168,12 +168,23 @@ end
 
 function getQNH(qnh)
 	if not qnh then return 0 end
-	return string.format("%0.2finHg / %dmmHg / %dhPa", qnh / 25.4, qnh, round(qnh * 1.332894736842105))
+	return string.format("%0.2finHg / %dmmHg / %0.2dhPa", qnh / 25.4, qnh, qnh * 1.332894736842105)
 end
 
 function getClouds(m)
 	if not m then return 0 end
-	return string.format("%dft / %dm", round(m * 3.281 / 1000) * 1000, round(m / 1000) * 1000)
+-- removed since cloud base is maxed at 8268ft
+--[[
+	local mTrim = 100
+	local ftTrim = 1000
+	if m < 3048 then
+		mTrim = 50
+		ftTrim = 100
+	end
+--]]
+local mTrim = 50
+local ftTrim = 100
+	return string.format("%dft / %dm", round(m * 3.281 / ftTrim) * ftTrim, round(m / mTrim) * mTrim)
 end
 
 local function normalizeWind(angle)
@@ -186,7 +197,7 @@ local function normalizeWind(angle)
 end
 
 function cduWindToStr(wind, temperature)
-	local speed = math.floor(wind.speed*1.94384 + 0.5)
+	local speed = math.floor(wind.speed * 1.943844 + 0.5)
 
 	local angle = normalizeWind(wind.dir - getMagneticDeclination())
 

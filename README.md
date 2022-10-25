@@ -9,6 +9,7 @@ Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) to create a
 
 # [Briefing Addons](https://github.com/chump29/DCS_Mod/tree/master/Briefing%20Addons)
 Adds the following to the generated briefings:
+- METAR
 - Temperature (*F & C*)
 - QNH (*inHg & mmHg & hPa*)
 - Magnetic declination
@@ -21,6 +22,7 @@ Adds the following to the generated briefings:
 - `[DCS Directory]\MissionEditor\modules\me_autobriefing.lua`
 - `[DCS Directory]\Scripts\UI\BriefingDialog.lua`
 - `[DCS Directory]\Scripts\briefing_addons.lua`
+- `[DCS Directory]\Scripts\metar.lua`
 - `[DCS Directory]\Scripts\utils_common.lua`
 
 ---

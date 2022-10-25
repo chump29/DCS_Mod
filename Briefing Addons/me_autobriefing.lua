@@ -40,7 +40,8 @@ local Gui                       = require('dxgui')
 local imagePreview              = require('imagePreview')
 local Analytics                 = require("Analytics")
 local ProductType               = require('me_ProductType')
-local BA = require('briefing_addons')
+local BA = require("briefing_addons")
+local METAR = require("metar")
 
 i18n.setup(_M)
 
@@ -79,13 +80,13 @@ local cdata =
     landing_time = _('Landing time'),
     allies_flight_title = _('ALLIES FLIGHT'),
     allies_flight = _('Allies flight'),
-
     --speed_unit = _('m/s'),
     km_unit = _('km'),
     --wind_at_ground = _('At GRND'),
     --wind_at_2000 = _('At 2000m'),
     --wind_at_8000 = _('At 8000m'),
     --cloud_cover_base = _('base'),
+    metar = _("METAR"),
 
     BACK = _('CANCEL'),
     middleBtn = _('MISSION PLANNER'),
@@ -551,6 +552,9 @@ function generateAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(cdata.specification))
         table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
         table.insert(autoBriefing, composeEntry(cdata.weather))
+
+        table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(mission)))
+
         table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
         table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(mission.weather.qnh)))
 
@@ -595,6 +599,9 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.start,      autobriefingutils.composeDateString(mission.start_time, true, mission.date)))
     table.insert(autoBriefing, composeEntry(cdata.description, nil,    mission.descriptionText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
+
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(mission)))
+
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
     table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(mission.weather.qnh)))
 

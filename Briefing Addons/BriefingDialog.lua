@@ -32,7 +32,8 @@ local Terrain           = require('terrain')
 local i18n              = require('i18n')
 local DB                = require('me_db_api')
 local imagePreview      = require('imagePreview')
-local BA = require('briefing_addons')
+local BA = require("briefing_addons")
+local METAR = require("metar")
 
 base.setmetatable(base.dxgui, {__index = base.dxguiWin})
 
@@ -92,10 +93,10 @@ local cdata = {
         mission_start = _('Mission start'),
         allies_flight_title = _('ALLIES FLIGHT'),
         allies_flight = _('Allies flight'),
-
         km_unit = _('km'),
         --cloud_cover_base = _('base'),
         NA = _('N/A'),
+        metar = _("METAR"),
     }
 
     if base.LOFAC then
@@ -506,6 +507,9 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(cdata.specification))
     table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
     table.insert(autoBriefing, composeEntry(cdata.weather))
+
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(dataBrf)))
+
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(dataBrf.qnh)))
 
@@ -549,6 +553,9 @@ function generateSimpleAutoBriefing()
 
     table.insert(autoBriefing, composeEntry(cdata.description, nil,    dataBrf.descText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
+
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(dataBrf)))
+
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(dataBrf.qnh)))
 

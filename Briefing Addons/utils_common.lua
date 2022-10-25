@@ -89,12 +89,8 @@ local function revertWind(a_value)
 	return a_value
 end
 
-local function round10(num)
-	return math.floor(num / 10 + 0.5) * 10
-end
-
 local function toKts(mps)
-	return mps * 1.943844
+	return math.floor(mps * 1.943844 + 0.5)
 end
 
 -------------------------------------------------------------------------------
@@ -107,7 +103,7 @@ function windToStr(wind)
     end
     return str
     --]]
-    return string.format("%.3d° @ %.1d%s", revertWind(round10(wind.dir)), toKts(wind.speed), cdata.speed_unit_kts) -- direction wind blows FROM, in kts
+    return string.format("%.3d° @ %.1d%s", revertWind(wind.dir), toKts(wind.speed), cdata.speed_unit_kts) -- direction wind blows FROM, in kts
 end
 
 -------------------------------------------------------------------------------

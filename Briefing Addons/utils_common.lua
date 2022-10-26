@@ -31,8 +31,8 @@ local cdata =
 {
     speed_unit = _('m/s'),
     wind_at_ground = _('At GRND'),
-    wind_at_2000 = _('At 2000m'),
-    wind_at_8000 = _('At 8000m'),
+    wind_at_2000 = _('At 6600ft / 2000m'),
+    wind_at_8000 = _('At 26000ft / 8000m'),
 	Meteo		 = _('Meteo'),
 	speed_unit_kts = _("kts")
 }
@@ -82,9 +82,9 @@ end
 
 
 local function revertWind(a_value)
-	a_value = a_value + 180
+	local a_value = a_value + 180
 	if a_value > 360 then
-		a_value = a_value - 360
+		return a_value - 360
 	end
 	return a_value
 end
@@ -115,11 +115,13 @@ function composeTurbulenceString(a_weather)
     if  a_weather.turbulence then
         local t = a_weather.turbulence
         local turbulence = {}
-        turbulence[1] = math.floor(t.atGround + 0.5)/10 .. ' ' .. cdata.speed_unit 
+        --turbulence[1] = math.floor(t.atGround + 0.5)/10 .. ' ' .. cdata.speed_unit
+        turbulence[1] = math.floor(t.atGround + 0.5)/10 .. ' ' .. cdata.speed_unit_kts
         return turbulence
     else
         local turbulence = {}
-        turbulence[1] = math.floor(a_weather.groundTurbulence + 0.5)/10 .. ' ' .. cdata.speed_unit 
+        --turbulence[1] = math.floor(a_weather.groundTurbulence + 0.5)/10 .. ' ' .. cdata.speed_unit
+        turbulence[1] = math.floor(a_weather.groundTurbulence * 1.943844 + 0.5) / 10 .. cdata.speed_unit_kts
         return turbulence
     end    
 end

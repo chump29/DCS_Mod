@@ -158,33 +158,31 @@ function getMagneticDeclination(toStr)
 end
 
 local function round(n)
+	if n < 0 then
+		return math.ceil(n - 0.5)
+	end
 	return math.floor(n + 0.5)
 end
 
 function getTemp(c)
 	if not c then return 0 end
-	return string.format("%d°F / %d°C", round(c * 9 / 5 + 32), c)
+	return string.format("%d°F / %d°C", round(c * 9 / 5 + 32), round(c))
 end
 
 function getQNH(qnh)
 	if not qnh then return 0 end
-	return string.format("%0.2finHg / %dmmHg / %0.2dhPa", qnh / 25.4, qnh, qnh * 1.332894736842105)
+	return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(qnh / 25.4 * 100) / 100, qnh, math.floor(qnh * 1.33322))
 end
 
 function getClouds(m)
 	if not m then return 0 end
--- removed since cloud base is maxed at 8268ft
---[[
 	local mTrim = 100
 	local ftTrim = 1000
 	if m < 3048 then
 		mTrim = 50
 		ftTrim = 100
 	end
---]]
-local mTrim = 50
-local ftTrim = 100
-	return string.format("%dft / %dm", round(m * 3.281 / ftTrim) * ftTrim, round(m / mTrim) * mTrim)
+	return string.format("%dft / %dm", round(m * 3.28084 / ftTrim) * ftTrim, round(m / mTrim) * mTrim)
 end
 
 local function normalizeWind(angle)
@@ -196,10 +194,14 @@ local function normalizeWind(angle)
 	return angle
 end
 
+local function roundTo10(d)
+	return math.floor(d / 10 + 0.5) * 10
+end
+
 function cduWindToStr(wind, temperature)
 	local speed = math.floor(wind.speed * 1.943844 + 0.5)
 
-	local angle = normalizeWind(wind.dir - getMagneticDeclination())
+	local angle = normalizeWind(roundTo10(wind.dir))
 
 	local str = string.format("%.3d/%.2d  %+.2d", angle, speed, temperature)
 	return str

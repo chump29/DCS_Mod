@@ -7,34 +7,21 @@ local base = _G
 
 module("metar")
 
---[[
-local io = base.io
-local require = base.require
-local lfs = require("lfs")
-local serializer = require("Serializer")
---]]
-
 local math = base.math
 local string = base.string
 
--- METAR resource used @ https://mediawiki.ivao.aero/index.php?title=METAR_explanation
-
 --[[
-local function log(o)
-	local file, _ = io.open(lfs.writedir() .. "Logs/metar.log", "a")
-	if file then
-		local s = serializer.new(file)
-		s:serialize("log", o)
-		file:close()
-	end
-end
+METAR resources used:
+* https://mediawiki.ivao.aero/index.php?title=METAR_explanation
+* https://metar-taf.com/explanation
 --]]
 
 local function normalizeData(data)
 	-- checking DCS.getPlayerBriefing(), then env.mission
 	return {
 		date = data.mission_date or data.date,
-		startTime = data.mission_start_time or data.start_time,
+		time = data.mission_start_time or data.start_time,
+		atmosphere = data.weather.atmosphere_type,
 		wind = data.weather.wind,
 		visibility = data.weather.visibility.distance, -- doesn't seem to change, always 80000
 		precipitation = data.weather.clouds.iprecptns,
@@ -44,7 +31,7 @@ local function normalizeData(data)
 		dust_visibility = data.weather.dust_density,
 		clouds = data.weather.clouds,
 		temp = data.weather.season.temperature,
-		qnh = data.weather.qnh * 1.33322
+		qnh = data.weather.qnh
 	}
 end
 
@@ -60,6 +47,7 @@ local function getWindDirection(d, s)
 	if s < 1 then
 		return 0
 	end
+	local d = math.floor(d / 10 + 0.5) * 10
 	return reverseWind(d)
 end
 
@@ -130,7 +118,7 @@ end
 
 local function getClouds(c)
 	local str
-	-- instead of using octas, splitting into ten parts
+	-- instead of using octals, split into ten parts
 	if c.density == 0 then
 		return "CLR"
 	elseif c.density > 0 and c.density < 3 then -- 1-2
@@ -142,16 +130,18 @@ local function getClouds(c)
 	elseif c.density > 8 then -- 9-10
 		str = "OVC"
 	end
-	-- lowest cloud base setting is 984ft
-	return string.format("%s%0.3d", str, math.floor(c.base * 3.28084 / 100))
+	local m = 1000
+	if c.base < 3048 then
+		m = 100
+	end
+	return string.format("%s%0.3d", str, math.floor(c.base * 3.28084 / m + 0.5) * m)
 end
 
 local function getTemp(t)
-	local str = string.format("%0.2d", math.abs(math.floor(t + 0.5)))
 	if t < 0 then
-		return "M" .. str
+		return "M" .. string.format("%0.2d", math.abs(math.ceil(t - 0.5)))
 	end
-	return str
+	return string.format("%0.2d", math.abs(math.floor(t + 0.5)))
 end
 
 local function getDewPoint(t, c)
@@ -159,19 +149,18 @@ local function getDewPoint(t, c)
 end
 
 function getMETAR(data)
-	--log(data)
-	if data.weather.atmosphere_type > 0 then
-		return "N/A" -- not generating METAR for dynamic weather
-	end
 	local data = normalizeData(data)
-	local metar = "ZZZZ" -- cannot get nearest airbase callsign
-	metar = string.format("%s %0.2d%0.2d%0.2dZ", metar, data.date.Day, math.floor(data.startTime / 60 / 60), data.startTime / 60 % 60)
+	local metar = "ZZZZ" -- nearest airbase callsign not available
+	metar = string.format("%s %0.2d%0.2d%0.2dL", metar, data.date.Day, math.floor(data.time / 60 / 60), data.time / 60 % 60)
+	if data.atmosphere > 0 then
+		return string.format("%s NIL", metar)
+	end
+	metar = string.format("%s AUTO", metar)
 	metar = string.format("%s %0.3d%sKT", metar, getWindDirection(data.wind.atGround.dir, data.wind.atGround.speed * 1.943844), getWindSpeed(data.wind.atGround.speed * 1.943844))
 	metar = string.format("%s %0.4d", metar, getVisibility(data))
 	metar = string.format("%s%s", metar, getWeather(data.precipitation, data.fog, data.fog_visibility, data.dust))
 	metar = string.format("%s %s", metar, getClouds(data.clouds))
 	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.temp, data.clouds.base * 3.28084))
-	metar = string.format("%s Q%0.4d", metar, data.qnh)
-	--log(metar)
+	metar = string.format("%s A%0.4d", metar, math.floor(data.qnh / 25.4 * 100))
 	return metar
 end

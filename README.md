@@ -13,10 +13,11 @@ Adds the following to the generated briefings:
 - Temperature (*F & C*)
 - QNH (*inHg & mmHg & hPa*)
 - Magnetic declination
-  - Based on year
-- Cloud base (*ft & m*), rounded to nearest thousand
+  - Based on terrain/year
+- Cloud base (*ft & m*)
 - A-10C CDU wind data
-- Wind shown in METAR standards
+- Wind (blows FROM)
+- Turbulence (*kts*)
 
 *Install to:*
 - `[DCS Directory]\MissionEditor\modules\me_autobriefing.lua`

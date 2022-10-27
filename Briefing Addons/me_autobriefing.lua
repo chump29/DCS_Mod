@@ -95,7 +95,7 @@ local cdata =
     NA = _('N/A'),
     details = _('Details'),
     BRIEFING = _('BRIEFING'),
-    noWeapon = _('No weapon'),
+    noWeapon = _('No weapon')
 }
 
 if ProductType.getType() == "LOFAC" then
@@ -398,6 +398,7 @@ function getDataUnit(unit)
                 if airdrome then
                     airdromeName = airdrome.name
                     airdromeHeight = airdrome.height
+                    airdromeCode = airdrome.code
                     --frequency
                     local unitTypeDesc = DB.unit_by_type[unitType]
                     if unitTypeDesc and unitTypeDesc.HumanRadio then
@@ -417,7 +418,7 @@ function getDataUnit(unit)
                     positionAirdrome = {x = 0, y = 0, z = 0}
                 end
                 return {name = name, airdromeName = airdromeName, frequency = frequency,
-                        position = positionAirdrome}
+                        position = positionAirdrome, code = airdromeCode}
             end
 
             if vv.helipadId ~= nil or vv.grassAirfieldId ~= nil then
@@ -553,21 +554,21 @@ function generateAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
         table.insert(autoBriefing, composeEntry(cdata.weather))
 
-        table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(mission)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(mission, tblStartGroups[1].code)))
 
         table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
         table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(mission.weather.qnh)))
 
         local dec =  BA.getMagneticDeclination(true)
         if dec then
-            table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
+            table.insert(autoBriefing, composeEntry(nil, _("Magnetic Variation"), dec))
         end
 
         table.insert(autoBriefing, composeEntry(nil, _("Cloud Base"), BA.getClouds(mission.weather.clouds.base)))
         table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
 
         if dec then
-            table.insert(autoBriefing, composeEntry(nil, _("CDU Wind"), BA.cduWindString(mission.weather, humanPosition, mission.weather.season.temperature)))
+            table.insert(autoBriefing, composeEntry(nil, _("A-10 CDU Wind"), BA.cduWindString(mission.weather, humanPosition, mission.weather.season.temperature)))
         end
 
         table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,         turbulenceString))
@@ -607,14 +608,14 @@ function generateSimpleAutoBriefing(mission)
 
     local dec = BA.getMagneticDeclination(true)
     if dec then
-        table.insert(autoBriefing, composeEntry(nil, _("Magnetic Declination"), dec))
+        table.insert(autoBriefing, composeEntry(nil, _("Magnetic Variation"), dec))
     end
 
     table.insert(autoBriefing, composeEntry(nil, _("Cloud Base"), BA.getClouds(mission.weather.clouds.base)))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
 
     if dec then
-        table.insert(autoBriefing, composeEntry(nil, _("CDU Wind"), BA.cduWindString(mission.weather, nil, mission.weather.season.temperature)))
+        table.insert(autoBriefing, composeEntry(nil, _("A-10 CDU Wind"), BA.cduWindString(mission.weather, nil, mission.weather.season.temperature)))
     end
 
     table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,         turbulenceString))

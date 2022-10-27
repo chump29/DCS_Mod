@@ -166,7 +166,7 @@ end
 
 function getTemp(c)
 	if not c then return 0 end
-	return string.format("%d°F / %d°C", round(c * 9 / 5 + 32), round(c))
+	return string.format("%d°C (%d°F)", round(c), round(c * 9 / 5 + 32))
 end
 
 function getQNH(qnh)
@@ -185,23 +185,18 @@ function getClouds(m)
 	return string.format("%dft / %dm", round(m * 3.28084 / ftTrim) * ftTrim, round(m / mTrim) * mTrim)
 end
 
-local function normalizeWind(angle)
-	if angle >= 360 then
-		return angle - 360
-	elseif angle < 0 then
-		return angle + 360
+local function reverseWind(dir)
+	local dir = dir + 180
+	if dir > 360 then
+		return dir - 360
 	end
-	return angle
-end
-
-local function roundTo10(d)
-	return math.floor(d / 10 + 0.5) * 10
+	return dir
 end
 
 function cduWindToStr(wind, temperature)
 	local speed = math.floor(wind.speed * 1.943844 + 0.5)
 
-	local angle = normalizeWind(roundTo10(wind.dir))
+	local angle = reverseWind(wind.dir)
 
 	local str = string.format("%.3d/%.2d  %+.2d", angle, speed, temperature)
 	return str

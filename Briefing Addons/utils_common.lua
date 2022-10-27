@@ -34,7 +34,8 @@ local cdata =
     wind_at_2000 = _('At 6600ft / 2000m'),
     wind_at_8000 = _('At 26000ft / 8000m'),
 	Meteo		 = _('Meteo'),
-	speed_unit_kts = _("kts")
+	speed_unit_kts = _("kts"),
+	NA = _("N/A")
 }
 
 local missionTheatreCache
@@ -93,35 +94,38 @@ local function toKts(mps)
 	return math.floor(mps * 1.943844 + 0.5)
 end
 
+local function roundTo10(d)
+	return math.floor(d / 10 + 0.5) * 10
+end
+
 -------------------------------------------------------------------------------
 -- convert wind structure to wind string
 function windToStr(wind)
-	--[[
-    local str = string.format("%0.1d %s", wind.speed, cdata.speed_unit)
-    if 0 < wind.speed then
-        str = string.format("%s, %0.2d° %s %0.2d°", str, wind.dir, cdata.Meteo, revertWind(wind.dir))
-    end
-    return str
-    --]]
-    return string.format("%.3d° @ %.1d%s", revertWind(wind.dir), toKts(wind.speed), cdata.speed_unit_kts) -- direction wind blows FROM, in kts
+    return string.format("%.3d° @ %.1d%s", revertWind(roundTo10(wind.dir)), toKts(wind.speed), cdata.speed_unit_kts) -- direction wind blows FROM, in kts
 end
 
 -------------------------------------------------------------------------------
 -- формирование массива строк с данными о турбулентности
 function composeTurbulenceString(a_weather)
 	if not a_weather then 
-		return {'0'}
+		return {cdata.NA}
 	end
     if  a_weather.turbulence then
         local t = a_weather.turbulence
         local turbulence = {}
-        --turbulence[1] = math.floor(t.atGround + 0.5)/10 .. ' ' .. cdata.speed_unit
-        turbulence[1] = math.floor(t.atGround + 0.5)/10 .. ' ' .. cdata.speed_unit_kts
+        if t == 0 then
+        	turbulence[1] = "NIL"
+        else
+        	turbulence[1] = string.format("%0.1f%s (%0.1f%s)", math.floor(t.atGround * 1.943844 + 0.5) / 10, cdata.speed_unit_kts, math.floor(t.atGround + 0.5) / 10, cdata.speed_unit)
+        end
         return turbulence
     else
         local turbulence = {}
-        --turbulence[1] = math.floor(a_weather.groundTurbulence + 0.5)/10 .. ' ' .. cdata.speed_unit
-        turbulence[1] = math.floor(a_weather.groundTurbulence * 1.943844 + 0.5) / 10 .. cdata.speed_unit_kts
+        if a_weather.groundTurbulence == 0 then
+        	turbulence[1] = "NIL"
+        else
+        	turbulence[1] = string.format("%0.1f%s (%0.1f%s)", math.floor(a_weather.groundTurbulence * 1.943844 + 0.5) / 10, cdata.speed_unit_kts, math.floor(a_weather.groundTurbulence + 0.5) / 10, cdata.speed_unit)
+        end
         return turbulence
     end    
 end

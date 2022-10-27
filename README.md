@@ -9,18 +9,20 @@ Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) to create a
 
 # [Briefing Addons](https://github.com/chump29/DCS_Mod/tree/master/Briefing%20Addons)
 Adds the following to the generated briefings:
-- METAR
-- Temperature (*F & C*)
+- METAR (w/ICAO, if available)
+- Temperature (*C & F*)
 - QNH (*inHg & mmHg & hPa*)
-- Magnetic declination
+- Magnetic variation
   - Based on terrain/year
 - Cloud base (*ft & m*)
-- A-10C CDU wind data
 - Wind (blows FROM)
-- Turbulence (*kts*)
+- A-10 CDU wind
+- Turbulence (*kts & mps*)
 
 *Install to:*
 - `[DCS Directory]\MissionEditor\modules\me_autobriefing.lua`
+- `[DCS Directory]\MissionEditor\modules\Mission\Airdrome.lua`
+- `[DCS Directory]\MissionEditor\modules\Mission\AirdromeData.lua`
 - `[DCS Directory]\Scripts\UI\BriefingDialog.lua`
 - `[DCS Directory]\Scripts\briefing_addons.lua`
 - `[DCS Directory]\Scripts\metar.lua`

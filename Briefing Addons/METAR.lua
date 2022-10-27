@@ -35,6 +35,13 @@ local function normalizeData(data)
 	}
 end
 
+local function getCallsign(code)
+	if not code then
+		return "ZZZZ"
+	end
+	return code
+end
+
 local function reverseWind(dir)
 	local dir = dir + 180
 	if dir > 360 then
@@ -148,9 +155,9 @@ local function getDewPoint(t, c)
 	return getTemp(t - c / 400)
 end
 
-function getMETAR(data)
+function getMETAR(data, code)
 	local data = normalizeData(data)
-	local metar = "ZZZZ" -- nearest airbase callsign not available
+	local metar = getCallsign(code)
 	metar = string.format("%s %0.2d%0.2d%0.2dL", metar, data.date.Day, math.floor(data.time / 60 / 60), data.time / 60 % 60)
 	if data.atmosphere > 0 then
 		return string.format("%s NIL", metar)

@@ -1,6 +1,7 @@
 --[[
 -- METAR
 -- by Chump
+-- Many thanks to HILOK for the ideas and testing!
 --]]
 
 local base = _G

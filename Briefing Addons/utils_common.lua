@@ -35,7 +35,8 @@ local cdata =
     wind_at_8000 = _('At 26000ft / 8000m'),
 	Meteo		 = _('Meteo'),
 	speed_unit_kts = _("kts"),
-	NA = _("N/A")
+	NA = _("N/A"),
+	NIL = _("NIL")
 }
 
 local missionTheatreCache
@@ -114,7 +115,7 @@ function composeTurbulenceString(a_weather)
         local t = a_weather.turbulence
         local turbulence = {}
         if t == 0 then
-        	turbulence[1] = "NIL"
+        	turbulence[1] = cdata.NIL
         else
         	turbulence[1] = string.format("%0.1f%s (%0.1f%s)", math.floor(t.atGround * 1.943844 + 0.5) / 10, cdata.speed_unit_kts, math.floor(t.atGround + 0.5) / 10, cdata.speed_unit)
         end
@@ -122,7 +123,7 @@ function composeTurbulenceString(a_weather)
     else
         local turbulence = {}
         if a_weather.groundTurbulence == 0 then
-        	turbulence[1] = "NIL"
+        	turbulence[1] = cdata.NIL
         else
         	turbulence[1] = string.format("%0.1f%s (%0.1f%s)", math.floor(a_weather.groundTurbulence * 1.943844 + 0.5) / 10, cdata.speed_unit_kts, math.floor(a_weather.groundTurbulence + 0.5) / 10, cdata.speed_unit)
         end
@@ -138,16 +139,26 @@ function composeWindString(a_weather, a_humanPosition)
 	end
 	
 	local wind = {}
-	dllWeather.initAtmospere(a_weather)		
+	dllWeather.initAtmospere(a_weather)
  
     if a_weather.atmosphere_type == 0 then
-        local w = a_weather.wind        
+        local w = a_weather.wind
+
+		if w.atGround == 0 and w.at2000 == 0 and w.at8000 == 0 then
+			return { cdata.NIL }
+		end
+
         wind[1] = cdata.wind_at_ground .. ' ' .. windToStr(w.atGround)
         wind[2] = cdata.wind_at_2000 .. ' ' .. windToStr(w.at2000)
-        wind[3] = cdata.wind_at_8000 .. ' ' .. windToStr(w.at8000) 
+        wind[3] = cdata.wind_at_8000 .. ' ' .. windToStr(w.at8000)
     else
-       local res = dllWeather.getGroundWindAtPoint({position = a_humanPosition or {x=0, y=0, z=0}})    
-        wind[1] = cdata.wind_at_ground .. ' ' ..windToStr({speed=res.v, dir = toPositiveDegrees(res.a+math.pi)}) 
+		local res = dllWeather.getGroundWindAtPoint({position = a_humanPosition or {x=0, y=0, z=0}})
+
+		if res.v == 0 then
+			return { cdata.NIL }
+		end
+
+        wind[1] = cdata.wind_at_ground .. ' ' ..windToStr({speed=res.v, dir = toPositiveDegrees(res.a+math.pi)})
     end
     return wind
 end

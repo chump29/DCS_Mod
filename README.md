@@ -9,13 +9,12 @@ Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) to create a
 
 # [Briefing Addons](https://github.com/chump29/DCS_Mod/tree/master/Briefing%20Addons)
 Adds the following to the generated briefings:
-- METAR (w/ICAO, if available)
+- METAR
 - Temperature (*C & F*)
 - QNH (*inHg & mmHg & hPa*)
 - Magnetic variation
-  - Based on terrain/year
 - Cloud base (*ft & m*)
-- Wind (blows FROM)
+- Wind (*blows FROM*)
 - A-10 CDU wind
 - Turbulence (*kts & mps*)
 

@@ -15,6 +15,8 @@ local dllWeather        = require('Weather')
 local TheatreOfWarData  = require('Mission.TheatreOfWarData')
 local MissionDate       = base.MissionDate
 local UC                = require('utils_common')
+local MapWindow			= require('me_map_window')
+local magvar			= require("magvar")
 
 function toDegrees(radians, raw)
 	local degrees = radians * 180 / math.pi
@@ -36,125 +38,15 @@ function toPositiveDegrees(radians, raw)
 	return degrees
 end
 
-function getMagneticDeclination(toStr)
-	local theatre
-	if TheatreOfWarData then
-		theatre = TheatreOfWarData.getName()
-	elseif env then
-		theatre = env.mission.theatre
+function getMV(d, p)
+	magvar.init(d.Month, d.Year)
+	local lat, long = MapWindow.convertMetersToLatLon(p.x, p.z)
+	local magVar = UC.toDegrees(magvar.get_mag_decl(lat, long), true)
+	local dir = "East"
+	if magVar < 0 then
+		dir = "West"
 	end
-
-	local year = MissionDate.Year
-
-	-- NOTE: East=positive, West=negative
-	local dec = 0
-	if theatre == "Caucasus" then
-		if year >= 2015 then
-			dec = 6
-		elseif year >= 2006 then
-			dec = 5
-		elseif year >= 1981 then
-			dec = 4
-		elseif year >= 1954 then
-			dec = 3
-		else
-			dec = 2
-		end
-	elseif theatre == "Nevada" then
-		if year >= 2015 then
-			dec = 10
-		elseif year >= 2006 then
-			dec = 11
-		elseif year >= 1997 then
-			dec = 12
-		else
-			dec = 13
-		end
-	elseif theatre == "Normandy" then
-		if year >= 2010 then
-			dec = -1
-		elseif year >= 2005 then
-			dec = -2
-		elseif year >= 1995 then
-			dec = -3
-		elseif year >= 1990 then
-			dec = -4
-		elseif year >= 1980 then
-			dec = -5
-		elseif year >= 1975 then
-			dec = -6
-		elseif year >= 1970 then
-			dec = -7
-		elseif year >= 1965 then
-			dec = -8
-		elseif year >= 1960 then
-			dec = -9
-		elseif year >= 1950 then
-			dec = -10
-		else
-			dec = -11
-		end
-	elseif theatre == "PersianGulf" then -- NOTE: using Iran magvar
-		if year >= 2010 then
-			dec = 1
-		else
-			dec = 0
-		end
-	elseif theatre == "Syria" then
-		if year >= 2016 then
-			dec = 4
-		elseif year >= 2010 then
-			dec = 3
-		elseif year >= 1985 then
-			dec = 2
-		elseif year >= 1960 then
-			dec = 1
-		else
-			dec = 0
-		end
-	elseif theatre == "MarianaIslands" then
-		if year >= 2013 then
-			dec = -1
-		else
-			dec = 0
-		end
-	elseif theatre == "TheChannel" then
-		if year >= 2006 then
-			dec = 0
-		elseif year >= 2000 then
-			dec = -1
-		elseif year >= 1992 then
-			dec = -2
-		elseif year >= 1987 then
-			dec = -3
-		elseif year >= 1978 then
-			dec = -4
-		elseif year >= 1974 then
-			dec = -5
-		elseif year >= 1970 then
-			dec = -6
-		elseif year >= 1960 then
-			dec = -7
-		elseif year >= 1953 then
-			dec = -8
-		elseif year >= 1949 then
-			dec = -9
-		else
-			dec = -10
-		end
-	elseif theatre == "Falklands" then
-		if toStr then
-			return "* See Kneeboard" -- NOTE: too much variant
-		end
-	end
-
-	if toStr then
-		local dir = "East"
-		if dec < 0 then dir = "West" end
-		dec = string.format("%i° %s (%+i)", dec, dir, dec * -1)
-	end
-
-	return dec
+	return string.format("%0.1f° %s (%+0.1d)", math.abs(magVar), dir, math.floor(magVar * -1 + 0.5))
 end
 
 local function round(n)

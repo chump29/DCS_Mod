@@ -15,6 +15,9 @@ local string = base.string
 METAR resources used:
 * https://mediawiki.ivao.aero/index.php?title=METAR_explanation
 * https://metar-taf.com/explanation
+* https://www.dwd.de/EN/specialusers/aviation/download/products/metar_taf/metar_taf_download.pdf?__blob=publicationFile&v=3
+* https://met.nps.edu/~bcreasey/mr3222/files/helpful/DecodeMETAR-TAF.html
+* https://meteocentre.com/doc/metar.html
 --]]
 
 local function normalizeData(data)
@@ -24,6 +27,7 @@ local function normalizeData(data)
 		time = data.mission_start_time or data.start_time,
 		atmosphere = data.weather.atmosphere_type,
 		wind = data.weather.wind,
+		turbulence = data.weather.groundTurbulence,
 		visibility = data.weather.visibility.distance, -- doesn't seem to change, always 80000
 		precipitation = data.weather.clouds.iprecptns,
 		fog = data.weather.enable_fog,
@@ -36,19 +40,19 @@ local function normalizeData(data)
 	}
 end
 
-local function getCallsign(code)
-	if not code then
+local function getCallsign(c)
+	if not c then
 		return "ZZZZ"
 	end
-	return code
+	return c
 end
 
-local function reverseWind(dir)
-	local dir = dir + 180
-	if dir > 360 then
-		return dir - 360
+local function reverseWind(d)
+	local d = d + 180
+	if d > 360 then
+		return d - 360
 	end
-	return dir
+	return d
 end
 
 local function getWindDirection(d, s)
@@ -59,10 +63,20 @@ local function getWindDirection(d, s)
 	return reverseWind(d)
 end
 
-local function getWindSpeed(s)
-	local s =  math.floor(s + 0.5)
+local function getWindSpeed(s, t)
+	local s = math.floor(s + 0.5)
 	if s >= 100 then
 		return "ABV99"
+	elseif s > 0 and t > 25 then
+		if t <= 197 then
+			return string.format("%0.2dG%0.2d", s, s * 1.5) -- TODO: need equation for multiplier
+		end
+		return "/////"
+	elseif s == 0 and t > 25 then
+		if t <= 125 then
+			return string.format("VRB%0.2d", math.floor(0.48 * t / 10 + 0.5))
+		end
+		return "/////"
 	end
 	return string.format("%0.2d", s)
 end
@@ -156,19 +170,79 @@ local function getDewPoint(t, c)
 	return getTemp(t - c / 400)
 end
 
+local function getColor(v, c)
+	if v < 0.8 then
+		return "RED"
+	elseif v < 1.6 then
+		if c < 200 then
+			return "RED"
+		else
+			return "AMB"
+		end
+	elseif v < 3.7 then
+		if c < 200 then
+			return "RED"
+		elseif c < 300 then
+			return "AMB"
+		else
+			return "YLO"
+		end
+	elseif v < 5 then
+		if c < 200 then
+			return "RED"
+		elseif c < 300 then
+			return "AMB"
+		elseif c < 700 then
+			return "YLO"
+		else
+			return "GRN"
+		end
+	elseif v < 8 then
+		if c < 200 then
+			return "RED"
+		elseif c < 300 then
+			return "AMB"
+		elseif c < 700 then
+			return "YLO"
+		elseif c < 1500 then
+			return "GRN"
+		else
+			return "WHT"
+		end
+	else
+		if c < 200 then
+			return "RED"
+		elseif c < 300 then
+			return "AMB"
+		elseif c < 700 then
+			return "YLO"
+		elseif c < 1500 then
+			return "GRN"
+		elseif c < 2500 then
+			return "WHT"
+		elseif c < 20000 then
+			return "BLU"
+		else
+			return "BLU+" -- DCS only allows 16,404ft set in ME
+		end
+	end
+end
+
 function getMETAR(data, code)
 	local data = normalizeData(data)
 	local metar = getCallsign(code)
-	metar = string.format("%s %0.2d%0.2d%0.2dL", metar, data.date.Day, math.floor(data.time / 60 / 60), data.time / 60 % 60)
+	metar = string.format("%s %0.2d%0.2d%0.2d", metar, data.date.Day, math.floor(data.time / 60 / 60), data.time / 60 % 60)
 	if data.atmosphere > 0 then
 		return string.format("%s NIL", metar)
 	end
 	metar = string.format("%s AUTO", metar)
-	metar = string.format("%s %0.3d%sKT", metar, getWindDirection(data.wind.atGround.dir, data.wind.atGround.speed * 1.943844), getWindSpeed(data.wind.atGround.speed * 1.943844))
-	metar = string.format("%s %0.4d", metar, getVisibility(data))
+	metar = string.format("%s %0.3d%sKT", metar, getWindDirection(data.wind.atGround.dir, data.wind.atGround.speed * 1.943844), getWindSpeed(data.wind.atGround.speed * 1.943844, data.turbulence * 1.943844))
+	local vis = getVisibility(data)
+	metar = string.format("%s %0.4d", metar, vis)
 	metar = string.format("%s%s", metar, getWeather(data.precipitation, data.fog, data.fog_visibility, data.dust))
 	metar = string.format("%s %s", metar, getClouds(data.clouds))
 	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.temp, data.clouds.base * 3.28084))
 	metar = string.format("%s A%0.4d", metar, math.floor(data.qnh / 25.4 * 100))
+	metar = string.format("%s %s=", metar, getColor(vis / 1000, data.clouds.base * 3.28084))
 	return metar
 end

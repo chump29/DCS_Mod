@@ -41,7 +41,7 @@ local function normalizeData(data)
 end
 
 local function getCallsign(c)
-	if not c then
+	if not c or string.len(c) == 0 then
 		return "ZZZZ"
 	end
 	return c
@@ -63,6 +63,8 @@ local function getWindDirection(d, s)
 	return reverseWind(d)
 end
 
+local metar_rmk = ""
+
 local function getWindSpeed(s, t)
 	local s = math.floor(s + 0.5)
 	if s >= 100 then
@@ -76,9 +78,21 @@ local function getWindSpeed(s, t)
 		if t <= 125 then
 			return string.format("VRB%0.2d", math.floor(0.48 * t / 10 + 0.5))
 		end
+		metar_rmk = "WS"
 		return "/////"
 	end
 	return string.format("%0.2d", s)
+end
+
+local function getWind(w, t)
+	local wd = getWindDirection(w.dir, w.speed * 1.943844)
+	local ws = getWindSpeed(w.speed * 1.943844, t)
+	if string.find(ws, "VRB") then
+		wd = ""
+	else
+		wd = string.format("%0.3d", wd)
+	end
+	return string.format("%s%sKT", wd, ws)
 end
 
 local function getVisibility(data)
@@ -240,13 +254,16 @@ function getMETAR(data, code)
 		return string.format("%s NIL", metar)
 	end
 	metar = string.format("%s AUTO", metar)
-	metar = string.format("%s %0.3d%sKT", metar, getWindDirection(data.wind.atGround.dir, data.wind.atGround.speed * 1.943844), getWindSpeed(data.wind.atGround.speed * 1.943844, data.turbulence * 1.943844))
+	metar = string.format("%s %s", metar, getWind(data.wind.atGround, data.turbulence * 3.28084))
 	local vis = getVisibility(data)
 	metar = string.format("%s %0.4d", metar, vis)
 	metar = string.format("%s%s", metar, getWeather(data.precipitation, data.fog, data.fog_visibility, data.dust))
 	metar = string.format("%s %s", metar, getClouds(data.clouds))
 	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.temp, data.clouds.base * 3.28084))
 	metar = string.format("%s A%0.4d", metar, math.floor(data.qnh / 25.4 * 100))
+	if string.len(metar_rmk) > 0 then
+		metar = string.format("%s RMK %s", metar, metar_rmk)
+	end
 	metar = string.format("%s %s", metar, getColor(vis / 1000, data.clouds.base * 3.28084))
 	return metar
 end

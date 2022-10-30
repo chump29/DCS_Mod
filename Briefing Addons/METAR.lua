@@ -69,7 +69,7 @@ local function getWindSpeed(s, t)
 		return "ABV99"
 	elseif s > 0 and t > 25 then
 		if t <= 197 then
-			return string.format("%0.2dG%0.2d", s, s * 1.5) -- TODO: need equation for multiplier
+			return string.format("%0.2dG%0.2d", s, math.floor(s * 1.5 + 0.5)) -- TODO: need equation for multiplier
 		end
 		return "/////"
 	elseif s == 0 and t > 25 then

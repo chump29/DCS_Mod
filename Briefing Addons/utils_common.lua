@@ -144,7 +144,7 @@ function composeWindString(a_weather, a_humanPosition)
     if a_weather.atmosphere_type == 0 then
         local w = a_weather.wind
 
-		if w.atGround == 0 and w.at2000 == 0 and w.at8000 == 0 then
+		if w.atGround.speed == 0 and w.at2000.speed == 0 and w.at8000.speed == 0 then
 			return { cdata.NIL }
 		end
 

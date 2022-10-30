@@ -553,10 +553,14 @@ function generateAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(cdata.specification))
         table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
         table.insert(autoBriefing, composeEntry(cdata.weather))
-        table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(mission, tblStartGroups[1].code)))
+        if #tblStartGroups > 0 then
+            table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(mission, tblStartGroups[1].code)))
+        end
         table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
         table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(mission.weather.qnh)))
-        table.insert(autoBriefing, composeEntry(nil, _("Magnetic Variation"), BA.getMV(mission.date, tblStartGroups[1].position)))
+        if #tblStartGroups > 0 then
+            table.insert(autoBriefing, composeEntry(nil, _("Magnetic Variation"), BA.getMV(mission.date, tblStartGroups[1].position)))
+        end
         table.insert(autoBriefing, composeEntry(nil, _("Cloud Base"), BA.getClouds(mission.weather.clouds.base)))
         table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
         table.insert(autoBriefing, composeEntry(nil, _("A-10 CDU Wind"), BA.cduWindString(mission.weather, humanPosition, mission.weather.season.temperature)))

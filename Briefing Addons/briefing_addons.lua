@@ -39,6 +39,9 @@ function toPositiveDegrees(radians, raw)
 end
 
 function getMV(d, p)
+	if not magvar or not p then
+		return "N/A"
+	end
 	magvar.init(d.Month, d.Year)
 	local lat, long = MapWindow.convertMetersToLatLon(p.x, p.z)
 	local magVar = UC.toDegrees(magvar.get_mag_decl(lat, long), true)

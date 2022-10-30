@@ -167,7 +167,11 @@ local function getTemp(t)
 end
 
 local function getDewPoint(t, c)
-	return getTemp(t - c / 400)
+	local dp = t - c / 400
+	if dp < -15 then
+		dp = -15
+	end
+	return getTemp(dp)
 end
 
 local function getColor(v, c)
@@ -231,7 +235,7 @@ end
 function getMETAR(data, code)
 	local data = normalizeData(data)
 	local metar = getCallsign(code)
-	metar = string.format("%s %0.2d%0.2d%0.2d", metar, data.date.Day, math.floor(data.time / 60 / 60), data.time / 60 % 60)
+	metar = string.format("%s %0.2d%0.2d%0.2dL", metar, data.date.Day, math.floor(data.time / 60 / 60), data.time / 60 % 60)
 	if data.atmosphere > 0 then
 		return string.format("%s NIL", metar)
 	end
@@ -243,6 +247,6 @@ function getMETAR(data, code)
 	metar = string.format("%s %s", metar, getClouds(data.clouds))
 	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.temp, data.clouds.base * 3.28084))
 	metar = string.format("%s A%0.4d", metar, math.floor(data.qnh / 25.4 * 100))
-	metar = string.format("%s %s=", metar, getColor(vis / 1000, data.clouds.base * 3.28084))
+	metar = string.format("%s %s", metar, getColor(vis / 1000, data.clouds.base * 3.28084))
 	return metar
 end

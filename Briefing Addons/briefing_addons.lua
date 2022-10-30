@@ -12,11 +12,19 @@ local require           = base.require
 local math              = base.math
 local string            = base.string
 local dllWeather        = require('Weather')
-local TheatreOfWarData  = require('Mission.TheatreOfWarData')
-local MissionDate       = base.MissionDate
 local UC                = require('utils_common')
-local MapWindow			= require('me_map_window')
-local magvar			= require("magvar")
+
+-- for < DCS 2.8
+local function handleRequire(m)
+	local s, o = base.pcall(require, m)
+	if s then return o end
+	return nil
+end
+local magvar			= handleRequire("magvar")
+local MapWindow
+if magvar then
+	MapWindow			= require("me_map_window")
+end
 
 function toDegrees(radians, raw)
 	local degrees = radians * 180 / math.pi

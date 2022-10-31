@@ -96,19 +96,27 @@ local function reverseWind(dir)
 	return dir
 end
 
+local function toKts(mps)
+	return math.floor(mps * 1.943844 + 0.5)
+end
+
 function cduWindToStr(wind, temperature)
-	local speed = math.floor(wind.speed * 1.943844 + 0.5)
-
-	local angle = reverseWind(wind.dir)
-
-	local str = string.format("%.3d/%.2d  %+.2d", angle, speed, temperature)
-	return str
+	return string.format("%0.3d/%0.2d  %+0.2d", reverseWind(wind.dir), wind.speed, temperature)
 end
 
 function cduWindString(a_weather, a_humanPosition, temperature)
 	local wind = {}
 	if a_weather.atmosphere_type == 0 then
 			local w = a_weather.wind
+
+			w.atGround.speed = toKts(w.atGround.speed)
+			w.at2000.speed = toKts(w.at2000.speed)
+			w.at8000.speed = toKts(w.at8000.speed)
+
+			if w.atGround.speed == 0 and w.at2000.speed == 0 and w.at8000.speed == 0 then
+				return { "NIL" }
+			end
+
 			wind[1] = '00  ' .. cduWindToStr(w.atGround, temperature)
 
 			--if w.atGround.speed + w.at2000.speed + w.at8000.speed == 0 then return wind end
@@ -124,6 +132,12 @@ function cduWindString(a_weather, a_humanPosition, temperature)
 			local res = dllWeather.getGroundWindAtPoint(param)
 		--  param.agl = 1000
 		--  local res = dllWeather.getWindAtPoint(param)
+
+			res.v = toKts(res.v)
+
+			if res.v == 0 then
+				return { "NIL" }
+			end
 
 			wind[1] = '00  ' .. cduWindToStr({speed=res.v, dir = toPositiveDegrees(res.a+math.pi)}, temperature)
 	end

@@ -26,7 +26,7 @@ local function normalizeData(data)
 		date = data.mission_date or data.date,
 		time = data.mission_start_time or data.start_time,
 		atmosphere = data.weather.atmosphere_type,
-		wind = data.weather.wind,
+		wind = data.weather.wind.atGround,
 		turbulence = data.weather.groundTurbulence,
 		visibility = data.weather.visibility.distance, -- doesn't seem to change, always 80000
 		precipitation = data.weather.clouds.iprecptns,
@@ -55,44 +55,36 @@ local function reverseWind(d)
 	return d
 end
 
-local function getWindDirection(d, s)
+local function getWindDirectionAndSpeed(w, t)
+	-- NOTE: max settings in ME are s=97 & t=197
+	local d = reverseWind(math.floor(w.dir / 10 + 0.5) * 10)
+	local s = math.floor(w.speed * 1.943844 + 0.5)
 	if s < 1 then
-		return 0
-	end
-	local d = math.floor(d / 10 + 0.5) * 10
-	return reverseWind(d)
-end
-
-local metar_rmk = ""
-
-local function getWindSpeed(s, t)
-	local s = math.floor(s + 0.5)
-	if s >= 100 then
-		return "ABV99"
-	elseif s > 0 and t > 25 then
-		if t <= 197 then
-			return string.format("%0.2dG%0.2d", s, math.floor(s * 1.5 + 0.5)) -- TODO: need equation for multiplier
+		if t < 36 then -- s: 0, t: 0-35
+			return "00000KT"
+		else -- s: 0, t: 36-197
+			return "/////KT"
 		end
-		return "/////"
-	elseif s == 0 and t > 25 then
-		if t <= 125 then
-			return string.format("VRB%0.2d", math.floor(0.48 * t / 10 + 0.5))
+	elseif s < 8 and t >= 36 and t < 126 then -- s: 2-7, t: 36-125
+		return string.format("VRB%0.2dKT", math.floor(t * 0.48 / 10 + 0.5)) -- min: 2, max: 6
+	elseif s < 8 and t >= 126 then -- s: 2-7, t: 126-197
+		return "/////KT"
+	elseif s < 46 and t >= 36 then -- s: 8-45, t: 36-197
+	 	local g = math.floor(s * (t * 0.0025 + 1.3) + 0.5)
+	 	if g < 17 then
+	 		v = 17
+	 	elseif g > 68 then
+	 		g = 68
+	 	end
+		return string.format("%0.3d%0.2dG%0.2dKT", d, s, g) -- g = min: 17, max: 68
+	elseif s >= 46 and t >= 36 then -- s: 46-97, t: 36-197
+		local g = math.floor(s * (t * 0.0025 + 1.3) - s / 3 + 0.5)
+		if t >= 126 then
+			g = math.floor(s * (t * 0.0025 + 1.3) - s / 2 + 0.5)
 		end
-		metar_rmk = "WS"
-		return "/////"
+		return string.format("%0.3d%0.2dG%0.2dKT", d, s, g) -- g = (3) - min: 6, max: 26    (2) - min: 9, max: 38
 	end
-	return string.format("%0.2d", s)
-end
-
-local function getWind(w, t)
-	local wd = getWindDirection(w.dir, w.speed * 1.943844)
-	local ws = getWindSpeed(w.speed * 1.943844, t)
-	if string.find(ws, "VRB") then
-		wd = ""
-	else
-		wd = string.format("%0.3d", wd)
-	end
-	return string.format("%s%sKT", wd, ws)
+	return string.format("%0.3d%0.2dKT", d, s) -- s: 2-97, t: 0-35
 end
 
 local function getVisibility(data)
@@ -248,21 +240,21 @@ end
 
 function getMETAR(data, code)
 	local data = normalizeData(data)
-	local metar = getCallsign(code)
-	metar = string.format("%s %0.2d%0.2d%0.2dL", metar, data.date.Day, math.floor(data.time / 60 / 60), data.time / 60 % 60)
+	local metar = string.format("%s %0.2d%0.2d%0.2dL", getCallsign(code), data.date.Day, math.floor(data.time / 60 / 60), data.time / 60 % 60)
 	if data.atmosphere > 0 then
 		return string.format("%s NIL", metar)
 	end
 	metar = string.format("%s AUTO", metar)
-	metar = string.format("%s %s", metar, getWind(data.wind.atGround, data.turbulence * 3.28084))
+	local wind = getWindDirectionAndSpeed(data.wind, data.turbulence * 3.28084)
+	metar = string.format("%s %s", metar, wind)
 	local vis = getVisibility(data)
 	metar = string.format("%s %0.4d", metar, vis)
 	metar = string.format("%s%s", metar, getWeather(data.precipitation, data.fog, data.fog_visibility, data.dust))
 	metar = string.format("%s %s", metar, getClouds(data.clouds))
 	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.temp, data.clouds.base * 3.28084))
 	metar = string.format("%s A%0.4d", metar, math.floor(data.qnh / 25.4 * 100))
-	if string.len(metar_rmk) > 0 then
-		metar = string.format("%s RMK %s", metar, metar_rmk)
+	if wind == "/////KT" then
+		metar = string.format("%s RMK WS", metar)
 	end
 	metar = string.format("%s %s", metar, getColor(vis / 1000, data.clouds.base * 3.28084))
 	return metar

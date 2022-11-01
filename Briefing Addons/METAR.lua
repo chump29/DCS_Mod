@@ -169,7 +169,17 @@ local function getClouds(c)
 	elseif c.density > 8 then -- 9-10
 		str = "OVC"
 	end
-	return string.format("%s%0.3d", str, math.floor((c.base * 3.28084 + 50) / 100))
+	-- cloud base min: 984ft/300m, max: 16404ft/5000m
+	local r = 50
+	local i = 100
+	local m = 1
+	local ft = c.base * 3.28084
+	if ft > 10000 then
+		r = 500
+		i = 1000
+		m = 10
+	end
+	return string.format("%s%0.3d", str, math.floor((ft + r) / i) * m)
 end
 
 local function getTemp(t)

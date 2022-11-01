@@ -77,9 +77,19 @@ function getQNH(qnh)
 	return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(qnh / 25.4 * 100) / 100, qnh, math.floor(qnh * 1.33322))
 end
 
-function getClouds(m)
-	if not m then return 0 end
-	return string.format("%dft / %dm", math.floor((m * 3.28084 + 50) / 100) * 100, math.floor((m + 100 / 3.28084) / 100) * 100)
+function getClouds(c)
+	if not c then return 0 end
+	-- cloud base min: 984ft/300m, max: 16404ft/5000m
+	local r = 50
+	local i = 100
+	local ft = c * 3.28084
+	if ft > 10000 then
+		r = 500
+		i = 1000
+	end
+	local inFt = math.floor((ft + r) / i) * i
+	local inM = math.floor(inFt / 3.28084 + 0.5)
+	return string.format("%dft / %dm", inFt, inM)
 end
 
 local function reverseWind(dir)

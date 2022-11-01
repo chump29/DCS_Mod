@@ -79,13 +79,7 @@ end
 
 function getClouds(m)
 	if not m then return 0 end
-	local mTrim = 100
-	local ftTrim = 1000
-	if m < 3048 then
-		mTrim = 50
-		ftTrim = 100
-	end
-	return string.format("%dft / %dm", round(m * 3.28084 / ftTrim) * ftTrim, round(m / mTrim) * mTrim)
+	return string.format("%dft / %dm", math.floor((m * 3.28084 + 50) / 100) * 100, math.floor((m + 100 / 3.28084) / 100) * 100)
 end
 
 local function reverseWind(dir)

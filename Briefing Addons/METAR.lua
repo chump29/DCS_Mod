@@ -10,13 +10,13 @@ module("metar")
 
 local math = base.math
 local string = base.string
+local TheatreOfWarData = base.require("Mission.TheatreOfWarData")
 
 --[[
 METAR resources used:
 * https://mediawiki.ivao.aero/index.php?title=METAR_explanation
 * https://metar-taf.com/explanation
 * https://www.dwd.de/EN/specialusers/aviation/download/products/metar_taf/metar_taf_download.pdf?__blob=publicationFile&v=3
-* https://met.nps.edu/~bcreasey/mr3222/files/helpful/DecodeMETAR-TAF.html
 * https://meteocentre.com/doc/metar.html
 --]]
 
@@ -42,7 +42,18 @@ end
 
 local function getCallsign(c)
 	if not c or string.len(c) == 0 then
-		return "ZZZZ"
+		local theatreCallsigns = {
+			["Caucasus"] = "UGGG",
+			["Falklands"] = "SAVF",
+			["MarianaIslands"] = "KZAK",
+			["Nevada"] = "KZLA",
+			["Normandy"] = nil,
+			["PersianGulf"] = "OMAE",
+			["Syria"] = "LCCC",
+			["TheChannel"] = nil
+		}
+		local theatre = TheatreOfWarData.getName() or env.mission.theatre
+		return theatreCallsigns[theatre] or "ZZZZ"
 	end
 	return c
 end
@@ -158,11 +169,7 @@ local function getClouds(c)
 	elseif c.density > 8 then -- 9-10
 		str = "OVC"
 	end
-	local m = 1000
-	if c.base < 3048 then
-		m = 100
-	end
-	return string.format("%s%0.3d", str, math.floor(c.base * 3.28084 / m + 0.5) * m)
+	return string.format("%s%0.3d", str, math.floor((c.base * 3.28084 + 50) / 100))
 end
 
 local function getTemp(t)
@@ -240,6 +247,9 @@ end
 
 function getMETAR(data, code)
 	local data = normalizeData(data)
+	if data.date.Year < 1968 then
+		return "N/A"
+	end
 	local metar = string.format("%s %0.2d%0.2d%0.2dL", getCallsign(code), data.date.Day, math.floor(data.time / 60 / 60), data.time / 60 % 60)
 	if data.atmosphere > 0 then
 		return string.format("%s NIL", metar)

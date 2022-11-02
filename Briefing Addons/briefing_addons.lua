@@ -78,18 +78,11 @@ function getQNH(qnh)
 end
 
 function getClouds(c)
-	if not c then return 0 end
-	-- cloud base min: 984ft/300m, max: 16404ft/5000m
-	local r = 50
-	local i = 100
-	local ft = c * 3.28084
-	if ft > 10000 then
-		r = 500
-		i = 1000
+	if not c or not c.density or not c.base then return 0 end
+	if c.density == 0 then
+		return "NIL"
 	end
-	local inFt = math.floor((ft + r) / i) * i
-	local inM = math.floor(inFt / 3.28084 + 0.5)
-	return string.format("%dft / %dm", inFt, inM)
+	return string.format("%dft / %dm", math.floor(c.base * 3.28084 + 0.5), c.base)
 end
 
 local function reverseWind(dir)

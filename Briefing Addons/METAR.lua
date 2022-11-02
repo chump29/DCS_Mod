@@ -53,9 +53,16 @@ local function getCallsign(c)
 			["TheChannel"] = nil
 		}
 		local theatre = TheatreOfWarData.getName() or env.mission.theatre
-		return theatreCallsigns[theatre] or "ZZZZ"
+		if theatre then
+			return theatreCallsigns[theatre]
+		end
+		return "ZZZZ"
 	end
 	return c
+end
+
+local function toFt(m)
+	return m * 3.28084
 end
 
 local function reverseWind(d)
@@ -155,25 +162,33 @@ local function getWeather(p, f, fv, d)
 	return str
 end
 
-local function getClouds(c)
+local function getClouds(c, f)
+	local ft = toFt(c.base)
 	local str
 	-- instead of using octals, split into ten parts
 	if c.density == 0 then
-		return "CLR"
+		if f or (ft > 5000 and ft < 12000) then
+			return "NSC"
+		end
+		if ft >= 12000 then
+			return "CLR"
+		end
 	elseif c.density > 0 and c.density < 3 then -- 1-2
 		str = "FEW"
 	elseif c.density > 2 and c.density < 6 then -- 3-5
 		str = "SCT"
 	elseif c.density > 5 and c.density < 9 then -- 6-8
 		str = "BKN"
-	elseif c.density > 8 then -- 9-10
+	else -- 9-10
 		str = "OVC"
+	end
+	if f and ft > 5000 then
+		return "NSC"
 	end
 	-- cloud base min: 984ft/300m, max: 16404ft/5000m
 	local r = 50
 	local i = 100
 	local m = 1
-	local ft = c.base * 3.28084
 	if ft > 10000 then
 		r = 500
 		i = 1000
@@ -189,10 +204,22 @@ local function getTemp(t)
 	return string.format("%0.2d", math.abs(math.floor(t + 0.5)))
 end
 
-local function getDewPoint(t, c)
-	local dp = t - c / 400
-	if dp < -15 then
-		dp = -15
+local function getDewPoint(c, f, t, v)
+	local dp
+	ft = toFt(c.base)
+	if f and c.density > 0 and ft < 5000 then
+		dp = t - ft / 400
+		if dp < -15 then
+			dp = -15
+		end
+	else
+		local v = toFt(v)
+		dp = t - 2
+		if v < 3000 then
+			dp = t
+		elseif v < 10000 then
+			dp = t - 1
+		end
 	end
 	return getTemp(dp)
 end
@@ -265,17 +292,17 @@ function getMETAR(data, code)
 		return string.format("%s NIL", metar)
 	end
 	metar = string.format("%s AUTO", metar)
-	local wind = getWindDirectionAndSpeed(data.wind, data.turbulence * 3.28084)
+	local wind = getWindDirectionAndSpeed(data.wind, toFt(data.turbulence))
 	metar = string.format("%s %s", metar, wind)
 	local vis = getVisibility(data)
 	metar = string.format("%s %0.4d", metar, vis)
 	metar = string.format("%s%s", metar, getWeather(data.precipitation, data.fog, data.fog_visibility, data.dust))
-	metar = string.format("%s %s", metar, getClouds(data.clouds))
-	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.temp, data.clouds.base * 3.28084))
+	metar = string.format("%s %s", metar, getClouds(data.clouds, data.fog))
+	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.clouds, data.fog, data.temp, vis))
 	metar = string.format("%s A%0.4d", metar, math.floor(data.qnh / 25.4 * 100))
 	if wind == "/////KT" then
 		metar = string.format("%s RMK WS", metar)
 	end
-	metar = string.format("%s %s", metar, getColor(vis / 1000, data.clouds.base * 3.28084))
+	metar = string.format("%s %s", metar, getColor(vis / 1000, toFt(data.clouds.base)))
 	return metar
 end

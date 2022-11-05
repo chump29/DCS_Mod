@@ -81,15 +81,15 @@ local function getWindDirectionAndSpeed(w, t)
 	-- NOTE: max settings in ME are s=97 & t=197
 	local d = reverseWind(math.floor(w.dir / 10 + 0.5) * 10)
 	local s = math.floor(toKts(w.speed) + 0.5)
-	if s < 1 then
-		if t < 36 then -- s: 0, t: 0-35
+	if s < 3 then
+		if t < 36 then -- s: 0-2, t: 0-35
 			return "00000KT"
-		else -- s: 0, t: 36-197
+		else -- s: 0-2, t: 36-197
 			return "/////KT"
 		end
-	elseif s < 8 and t >= 36 and t < 126 then -- s: 2-7, t: 36-125
+	elseif s < 8 and t >= 36 and t < 126 then -- s: 3-7, t: 36-125
 		return string.format("VRB%0.2dKT", math.floor(t * 0.048 + 0.5)) -- min: 2, max: 6
-	elseif s < 8 and t >= 126 then -- s: 2-7, t: 126-197
+	elseif s < 8 and t >= 126 then -- s: 3-7, t: 126-197
 		return "/////KT"
 	elseif s < 46 and t >= 36 then -- s: 8-45, t: 36-197
 	 	local g = math.floor(s * (t * 0.0025 + 1.3) + 0.5)
@@ -109,7 +109,7 @@ local function getWindDirectionAndSpeed(w, t)
 		end
 		return string.format("%0.3d%0.2dG%0.2dKT", d, s, g)
 	end
-	return string.format("%0.3d%0.2dKT", d, s) -- s: 2-97, t: 0-35
+	return string.format("%0.3d%0.2dKT", d, s) -- s: 3-97, t: 0-35
 end
 
 local function getVisibility(data)
@@ -174,12 +174,16 @@ local function getClouds(c, f)
 	local str
 	-- instead of using octals, split into ten parts
 	if c.density == 0 then
-		if f or (ft > 5000 and ft < 12000) then
+		if f then
 			return "NSC"
 		end
-		if ft >= 12000 then
-			return "CLR"
-		end
+		return "CLR"
+	elseif f and c.density > 0 and ft > 5000 then
+		return "NSC"
+	elseif c.density > 0 and ft > 12000 then
+		return "CLR"
+	elseif c.density > 0 and ft > 5000 then
+		return "NSC"
 	elseif c.density > 0 and c.density < 3 then -- 1-2
 		str = "FEW"
 	elseif c.density > 2 and c.density < 6 then -- 3-5
@@ -188,9 +192,6 @@ local function getClouds(c, f)
 		str = "BKN"
 	else -- 9-10
 		str = "OVC"
-	end
-	if f and ft > 5000 then
-		return "NSC"
 	end
 	-- cloud base min: 984ft/300m, max: 16404ft/5000m
 	local r = 50

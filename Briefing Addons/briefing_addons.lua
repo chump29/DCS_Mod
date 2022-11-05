@@ -99,8 +99,8 @@ local function toKts(mps)
 	return math.floor(mps * 1.943844 + 0.5)
 end
 
-function cduWindToStr(wind, temperature)
-	return string.format("%0.3d/%0.2d  %+0.2d", reverseWind(wind.dir), wind.speed, temperature)
+function cduWindToStr(d, s, t)
+	return string.format("%0.3d/%0.2d  %+0.2d", reverseWind(d), s, t)
 end
 
 function cduWindString(a_weather, a_humanPosition, temperature)
@@ -108,22 +108,22 @@ function cduWindString(a_weather, a_humanPosition, temperature)
 	if a_weather.atmosphere_type == 0 then
 			local w = a_weather.wind
 
-			w.atGround.speed = toKts(w.atGround.speed)
-			w.at2000.speed = toKts(w.at2000.speed)
-			w.at8000.speed = toKts(w.at8000.speed)
+			local atGroundSpeed = toKts(w.atGround.speed)
+			local at2000Speed = toKts(w.at2000.speed)
+			local at8000Speed = toKts(w.at8000.speed)
 
-			if w.atGround.speed == 0 and w.at2000.speed == 0 and w.at8000.speed == 0 then
+			if atGroundSpeed == 0 and at2000Speed == 0 and at8000Speed == 0 then
 				return { "NIL" }
 			end
 
-			wind[1] = '00  ' .. cduWindToStr(w.atGround, temperature)
+			wind[1] = '00  ' .. cduWindToStr(w.atGround.dir, atGroundSpeed, temperature)
 
 			--if w.atGround.speed + w.at2000.speed + w.at8000.speed == 0 then return wind end
 
-			local interpolatedWind = {speed = w.atGround.speed*2, dir = w.atGround.dir}
-			wind[2] = '02  ' .. cduWindToStr(interpolatedWind, temperature-4)
-			wind[3] = '07  ' .. cduWindToStr(w.at2000, temperature-14)
-			wind[4] = '26  ' .. cduWindToStr(w.at8000, temperature-52)
+			local interpolatedWind = {speed = atGroundSpeed*2, dir = w.atGround.dir}
+			wind[2] = '02  ' .. cduWindToStr(interpolatedWind.dir, interpolatedWind.speed, temperature-4)
+			wind[3] = '07  ' .. cduWindToStr(w.at2000.dir, at2000Speed, temperature-14)
+			wind[4] = '26  ' .. cduWindToStr(w.at8000.dir, at8000Speed, temperature-52)
 	else
 			local position = a_humanPosition or {x=0, y=0, z=0}
 
@@ -138,7 +138,7 @@ function cduWindString(a_weather, a_humanPosition, temperature)
 				return { "NIL" }
 			end
 
-			wind[1] = '00  ' .. cduWindToStr({speed=res.v, dir = toPositiveDegrees(res.a+math.pi)}, temperature)
+			wind[1] = '00  ' .. cduWindToStr(toPositiveDegrees(res.a+math.pi), res.v, temperature)
 	end
 	return wind
 end

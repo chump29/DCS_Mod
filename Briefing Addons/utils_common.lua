@@ -31,9 +31,9 @@ end
 local cdata =
 {
     speed_unit = _('m/s'),
-    wind_at_ground = _('At GRND'),
-    wind_at_2000 = _('At 6600ft / 2000m'),
-    wind_at_8000 = _('At 26000ft / 8000m'),
+    wind_at_ground = _('GRND'),
+    wind_at_2000 = _('6600ft / 2000m'),
+    wind_at_8000 = _('26000ft / 8000m'),
 	Meteo		 = _('Meteo'),
 	speed_unit_kts = _("kts"),
 	NA = _("N/A"),
@@ -110,8 +110,8 @@ end
 
 -------------------------------------------------------------------------------
 -- convert wind structure to wind string
-function windToStr(wind)
-    return string.format("%.3d° @ %.1d%s", revertWind(roundTo10(wind.dir)), wind.speed, cdata.speed_unit_kts) -- direction wind blows FROM, in kts
+function windToStr(d, s)
+    return string.format("%.3d° @ %.1d%s", revertWind(roundTo10(d)), s, cdata.speed_unit_kts) -- direction wind blows FROM, in kts
 end
 
 -------------------------------------------------------------------------------
@@ -153,17 +153,17 @@ function composeWindString(a_weather, a_humanPosition)
     if a_weather.atmosphere_type == 0 then
         local w = a_weather.wind
 
-		w.atGround.speed = toKts(w.atGround.speed)
-		w.at2000.speed = toKts(w.at2000.speed)
-		w.at8000.speed = toKts(w.at8000.speed)
+		local atGroundSpeed = toKts(w.atGround.speed)
+		local at2000Speed = toKts(w.at2000.speed)
+		local at8000Speed = toKts(w.at8000.speed)
 
-		if w.atGround.speed == 0 and w.at2000.speed == 0 and w.at8000.speed == 0 then
+		if atGroundSpeed == 0 and at2000Speed == 0 and at8000Speed == 0 then
 			return { cdata.NIL }
 		end
 
-        wind[1] = cdata.wind_at_ground .. ' ' .. windToStr(w.atGround)
-        wind[2] = cdata.wind_at_2000 .. ' ' .. windToStr(w.at2000)
-        wind[3] = cdata.wind_at_8000 .. ' ' .. windToStr(w.at8000)
+        wind[1] = cdata.wind_at_ground .. ' ' .. windToStr(w.atGround.dir, atGroundSpeed)
+        wind[2] = cdata.wind_at_2000 .. ' ' .. windToStr(w.at2000.dir, at2000Speed)
+        wind[3] = cdata.wind_at_8000 .. ' ' .. windToStr(w.at8000.dir, at8000Speed)
     else
 		local res = dllWeather.getGroundWindAtPoint({position = a_humanPosition or {x=0, y=0, z=0}})
 
@@ -173,7 +173,7 @@ function composeWindString(a_weather, a_humanPosition)
 			return { cdata.NIL }
 		end
 
-        wind[1] = cdata.wind_at_ground .. ' ' ..windToStr({speed=res.v, dir = toPositiveDegrees(res.a+math.pi)})
+        wind[1] = cdata.wind_at_ground .. ' ' ..windToStr(toPositiveDegrees(res.a+math.pi), res.v)
     end
     return wind
 end

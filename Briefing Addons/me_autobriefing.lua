@@ -94,8 +94,14 @@ local cdata =
     of = _('OF'),
     NA = _('N/A'),
     details = _('Details'),
-    BRIEFING = _('BRIEFING'),
-    noWeapon = _('No weapon')
+    BRIEFING = _('BRIEFING_HEADER','BRIEFING'),
+    noWeapon = _('No weapon'),
+
+    SITUATION       = _('SITUATION'),
+    MISSION         = _('MISSION'),
+    EXECUTION       = _('EXECUTION'),
+    ADMIN           = _('ADMINISTRATION / LOGISTICS'),
+    COMMAND         = _('COMMAND / SIGNAL'),
 }
 
 if ProductType.getType() == "LOFAC" then
@@ -543,13 +549,31 @@ function generateAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(nil, cdata.enemies,    enemiesString ))
         table.insert(autoBriefing, composeEntry(cdata.mission_data))
         table.insert(autoBriefing, composeEntry(nil, cdata.my_task,    group.task ))
-        table.insert(autoBriefing, composeEntry(nil, cdata.flight,     playerUnit.type.."*"..numGroupUnits ))
+        table.insert(autoBriefing, composeEntry(nil, cdata.flight,     DB.getDisplayNameByName(playerUnit.type).."*"..numGroupUnits ))
         table.insert(autoBriefing, composeEntry(nil, cdata.fuel,       composeFuelString()))
         table.insert(autoBriefing, composeEntry(nil, cdata.weapon,     composeWeaponsString() ))
         table.insert(autoBriefing, composeEntry(cdata.allies_flight_title))
         table.insert(autoBriefing, composeEntry(nil, cdata.allies_flight,     autobriefingutils.composeString(allies_list, '*') ))
-        table.insert(autoBriefing, composeEntry(cdata.description, nil,    mission.descriptionText))
-        table.insert(autoBriefing, composeEntry(cdata.mission_goal,    nil, mission_goal))
+        if mission.descriptionTbl == nil then
+            table.insert(autoBriefing, composeEntry(cdata.description, nil,    mission.descriptionText))
+            table.insert(autoBriefing, composeEntry(cdata.mission_goal,    nil, mission_goal))
+        else
+            if mission.descriptionTbl[coalitionName].situation and mission.descriptionTbl[coalitionName].situation ~= "" then
+                table.insert(autoBriefing, composeEntry(cdata.SITUATION, nil,    mission.descriptionTbl[coalitionName].situation))
+            end
+            if mission.descriptionTbl[coalitionName].mission and mission.descriptionTbl[coalitionName].mission ~= "" then
+                table.insert(autoBriefing, composeEntry(cdata.MISSION, nil,    mission.descriptionTbl[coalitionName].mission))
+            end
+            if mission.descriptionTbl[coalitionName].execution and mission.descriptionTbl[coalitionName].execution ~= "" then
+                table.insert(autoBriefing, composeEntry(cdata.EXECUTION, nil,    mission.descriptionTbl[coalitionName].execution))
+            end
+            if mission.descriptionTbl[coalitionName].administration and mission.descriptionTbl[coalitionName].administration ~= "" then
+                table.insert(autoBriefing, composeEntry(cdata.ADMIN, nil,    mission.descriptionTbl[coalitionName].administration))
+            end
+            if mission.descriptionTbl[coalitionName].command and mission.descriptionTbl[coalitionName].command ~= "" then
+                table.insert(autoBriefing, composeEntry(cdata.COMMAND, nil,    mission.descriptionTbl[coalitionName].command))
+            end
+        end
         table.insert(autoBriefing, composeEntry(cdata.specification))
         table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
         table.insert(autoBriefing, composeEntry(cdata.weather))

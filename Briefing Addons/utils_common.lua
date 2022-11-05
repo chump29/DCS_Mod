@@ -15,11 +15,12 @@ local math          = base.math
 local string        = base.string
 local clock         = base.os.clock
 
-local gettext       = require('i_18n')
-local dllWeather 	= require('Weather')
-local minizip       = require('minizip')
-local lfs       	= require('lfs')
-local mod_dictionary= require('dictionary')
+local gettext       	= require('i_18n')
+local dllWeather 		= require('Weather')
+local minizip       	= require('minizip')
+local lfs       		= require('lfs')
+local mod_dictionary	= require('dictionary')
+local datum_converter 	= base.safe_require("DatumConverter")
 
 local mdcVersion = 1
 
@@ -46,6 +47,14 @@ local missionTheatreCacheFilename = 'MissionEditor/MissionTheatreCache.lua'
 local missionDataCache
 local missionDataCacheChanged = false
 local missionDataCacheFilename = 'MissionEditor/MissionDataCache.lua'
+
+function LL_datum_convert(datum_src,datum_dest,lat,lon)
+    if datum_converter then
+       local  clat,clon = datum_converter.convert(datum_src,datum_dest,lat,lon)
+       return clat,clon
+    end
+    return lat,lon
+end
 
 function sleep(n)  -- mseconds только для небольших интервалов
   local t0 = clock()*1000
@@ -367,4 +376,35 @@ function getNumDayInMounts()
 		31	--Декабрь
 	}
 	return NumDayInMounts
-end	
+end
+
+function parseColorString(colorString)
+	local r
+	local g
+	local b
+	local a
+
+	local i = tonumber(colorString)
+
+	if i then
+		local f
+
+		i, f = math.modf(i / 256)
+		a = f * 256
+
+		i, f = math.modf(i / 256)
+		b = f * 256
+
+		r, f = math.modf(i / 256)
+
+		g = f * 256
+	end
+
+	return r, g, b, a
+end
+
+function colorFromString(colorString)
+	local r, g, b, a = parseColorString(colorString)
+
+	return { r / 255, g / 255, b / 255, a / 255}
+end

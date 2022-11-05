@@ -53,7 +53,7 @@ local function _(text, dText)
 end
 
 local cdata = {
-        BRIEFING = _('BRIEFING'),
+        BRIEFING = _('BRIEFING_HEADER','BRIEFING'),
         details = _('Details'),
         BACK = _('BACK'),
         FLY = _('FLY'),
@@ -96,7 +96,12 @@ local cdata = {
         km_unit = _('km'),
         --cloud_cover_base = _('base'),
         NA = _('N/A'),
-        metar = _("METAR")
+        metar = _("METAR"),
+        SITUATION       = _('SITUATION'),
+        MISSION         = _('MISSION'),
+        EXECUTION       = _('EXECUTION'),
+        ADMIN           = _('ADMINISTRATION / LOGISTICS'),
+        COMMAND         = _('COMMAND / SIGNAL'),
     }
 
     if base.LOFAC then
@@ -116,16 +121,6 @@ function create()
     pNoVisible = window.pNoVisible
     sbHorz = pCenter.bgPanel.sbHorz
     sbVert = pCenter.bgPanel.sbVert
-
-    autobriefingutils.setStaticSectionItemSkin(pNoVisible.staticSkinSectionItem:getSkin())
-    autobriefingutils.setStaticSectionDataItemSkin(pNoVisible.staticSkinSectionDataItem:getSkin())
-    autobriefingutils.setEditBoxSectionDataItemSkin(pNoVisible.editboxSkinSectionDataItem:getSkin())
-    autobriefingutils.setStaticTitleItemSkin(pNoVisible.staticSkinTitleItem:getSkin())
-    autobriefingutils.setStaticGridCellSkin(pNoVisible.staticGridCellSkin:getSkin())
-    autobriefingutils.setStaticGridCellMiddleSkin(pNoVisible.staticGridCellMiddleSkin:getSkin())
-    autobriefingutils.setGridSkin(pNoVisible.grid:getSkin())
-    autobriefingutils.setGridHeaderSkin(pNoVisible.gridHeaderCell:getSkin())
-    autobriefingutils.setGridHeaderMiddleSkin(pNoVisible.gridHeaderMiddle:getSkin())
 
     buttonClose = DialogLoader.findWidgetByName(window, 'buttonClose')
     buttonFly = DialogLoader.findWidgetByName(window, 'buttonFly')
@@ -172,6 +167,18 @@ function show()
     if window:getVisible() == false then
         DCS.lockAllMouseInput()
     end
+
+    pNoVisible = window.pNoVisible
+
+    autobriefingutils.setStaticSectionItemSkin(pNoVisible.staticSkinSectionItem:getSkin())
+    autobriefingutils.setStaticSectionDataItemSkin(pNoVisible.staticSkinSectionDataItem:getSkin())
+    autobriefingutils.setEditBoxSectionDataItemSkin(pNoVisible.editboxSkinSectionDataItem:getSkin())
+    autobriefingutils.setStaticTitleItemSkin(pNoVisible.staticSkinTitleItem:getSkin())
+    autobriefingutils.setStaticGridCellSkin(pNoVisible.staticGridCellSkin:getSkin())
+    autobriefingutils.setStaticGridCellMiddleSkin(pNoVisible.staticGridCellMiddleSkin:getSkin())
+    autobriefingutils.setGridSkin(pNoVisible.grid:getSkin())
+    autobriefingutils.setGridHeaderSkin(pNoVisible.gridHeaderCell:getSkin())
+    autobriefingutils.setGridHeaderMiddleSkin(pNoVisible.gridHeaderMiddle:getSkin())
 
     staticPause:setVisible(unpauseMessage)
 --  buttonBack:setVisible(not unpauseMessage)
@@ -502,9 +509,29 @@ function generateAutoBriefing()
 --   table.insert(autoBriefing, composeEntry(nil, cdata.weapon,     dataBrf.weaponsString ))
     table.insert(autoBriefing, composeEntry(cdata.allies_flight_title))
     table.insert(autoBriefing, composeEntry(nil, cdata.allies_flight,     autobriefingutils.composeString(allies_list, '*') ))
-    table.insert(autoBriefing, composeEntry(cdata.description, nil,    dataBrf.descText))
-    if dataBrf.mission_goal ~= "" then
-        table.insert(autoBriefing, composeEntry(cdata.mission_goal,    nil, dataBrf.mission_goal))
+    if dataBrf.descriptionTbl == nil then
+        table.insert(autoBriefing, composeEntry(cdata.description, nil,    dataBrf.descText))
+        if dataBrf.mission_goal ~= "" then
+            table.insert(autoBriefing, composeEntry(cdata.mission_goal,    nil, dataBrf.mission_goal))
+        end
+    else
+        base.U.traverseTable(dataBrf.descriptionTbl)
+--      base.print("--dataBrf.side--",dataBrf.side)
+        if dataBrf.descriptionTbl[dataBrf.side].situation and dataBrf.descriptionTbl[dataBrf.side].situation ~= "" then
+            table.insert(autoBriefing, composeEntry(cdata.SITUATION, nil,    dataBrf.descriptionTbl[dataBrf.side].situation))
+        end
+        if dataBrf.descriptionTbl[dataBrf.side].mission and dataBrf.descriptionTbl[dataBrf.side].mission ~= "" then
+            table.insert(autoBriefing, composeEntry(cdata.MISSION, nil,    dataBrf.descriptionTbl[dataBrf.side].mission))
+        end
+        if dataBrf.descriptionTbl[dataBrf.side].execution and dataBrf.descriptionTbl[dataBrf.side].execution ~= "" then
+            table.insert(autoBriefing, composeEntry(cdata.EXECUTION, nil,    dataBrf.descriptionTbl[dataBrf.side].execution))
+        end
+        if dataBrf.descriptionTbl[dataBrf.side].administration and dataBrf.descriptionTbl[dataBrf.side].administration ~= "" then
+            table.insert(autoBriefing, composeEntry(cdata.ADMIN, nil,    dataBrf.descriptionTbl[dataBrf.side].administration))
+        end
+        if dataBrf.descriptionTbl[dataBrf.side].command and dataBrf.descriptionTbl[dataBrf.side].command ~= "" then
+            table.insert(autoBriefing, composeEntry(cdata.COMMAND, nil,    dataBrf.descriptionTbl[dataBrf.side].command))
+        end
     end
     table.insert(autoBriefing, composeEntry(cdata.specification))
     table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))

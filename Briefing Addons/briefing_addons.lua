@@ -112,9 +112,9 @@ function cduWindString(a_weather, a_humanPosition, temperature)
 			local at2000Speed = toKts(w.at2000.speed)
 			local at8000Speed = toKts(w.at8000.speed)
 
-			if atGroundSpeed == 0 and at2000Speed == 0 and at8000Speed == 0 then
-				return { "NIL" }
-			end
+			--if atGroundSpeed == 0 and at2000Speed == 0 and at8000Speed == 0 then
+			--	return { "NIL" }
+			--end
 
 			wind[1] = '00  ' .. cduWindToStr(w.atGround.dir, atGroundSpeed, temperature)
 

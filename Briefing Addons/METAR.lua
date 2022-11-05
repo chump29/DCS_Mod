@@ -32,6 +32,7 @@ local function normalizeData(data)
 		precipitation = data.weather.clouds.iprecptns,
 		fog = data.weather.enable_fog,
 		fog_visibility = data.weather.fog.visibility,
+		fog_thickness = data.weather.fog.thickness,
 		dust = data.weather.enable_dust,
 		dust_visibility = data.weather.dust_density,
 		clouds = data.weather.clouds,
@@ -137,7 +138,7 @@ local function getVisibility(data)
 	return visibility
 end
 
-local function getWeather(p, f, fv, d)
+local function getWeather(p, f, fv, ft, d)
 	local str = ""
 	if p == 1 or p == 3 then
 		str = "SH"
@@ -149,11 +150,17 @@ local function getWeather(p, f, fv, d)
 	elseif p >= 3 then
 		str = str .. "SN"
 	end
-	if f and fv < 1000 then
-		if string.len(str) > 0 then
-			str = str .. " FG"
-		else
-			str = "FG"
+	if f then
+		if fv < 1000 then
+			local fs = "FG"
+			if ft < 2 then
+				fs = "MI" .. fs
+			end
+			if string.len(str) > 0 then
+				str = str .. " " .. fs
+			else
+				str = fs
+			end
 		end
 	end
 	if d then
@@ -304,7 +311,7 @@ function getMETAR(data, code)
 	metar = string.format("%s %s", metar, wind)
 	local vis = getVisibility(data)
 	metar = string.format("%s %0.4d", metar, vis)
-	metar = string.format("%s%s", metar, getWeather(data.precipitation, data.fog, data.fog_visibility, data.dust))
+	metar = string.format("%s%s", metar, getWeather(data.precipitation, data.fog, data.fog_visibility, data.fog_thickness, data.dust))
 	metar = string.format("%s %s", metar, getClouds(data.clouds, data.fog))
 	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.clouds, data.fog, data.temp, vis))
 	metar = string.format("%s A%0.4d", metar, math.floor(data.qnh / 25.4 * 100))

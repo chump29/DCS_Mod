@@ -82,7 +82,9 @@ function getClouds(c)
 	if c.density == 0 then
 		return "NIL"
 	end
-	return string.format("%dft / %dm", math.floor(c.base * 3.28084 + 0.5), c.base)
+	local ft = math.floor(c.base * 3.28084 / 100 + 0.5) * 100
+	local m = math.floor(c.base / 30) * 30
+	return string.format("%dft / %dm", ft, m)
 end
 
 local function reverseWind(dir)

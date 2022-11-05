@@ -65,6 +65,10 @@ local function toFt(m)
 	return m * 3.28084
 end
 
+local function toKts(mps)
+	 return mps * 1.943844
+end
+
 local function reverseWind(d)
 	local d = d + 180
 	if d > 360 then
@@ -76,7 +80,7 @@ end
 local function getWindDirectionAndSpeed(w, t)
 	-- NOTE: max settings in ME are s=97 & t=197
 	local d = reverseWind(math.floor(w.dir / 10 + 0.5) * 10)
-	local s = math.floor(w.speed * 1.943844 + 0.5)
+	local s = math.floor(toKts(w.speed) + 0.5)
 	if s < 1 then
 		if t < 36 then -- s: 0, t: 0-35
 			return "00000KT"
@@ -84,23 +88,26 @@ local function getWindDirectionAndSpeed(w, t)
 			return "/////KT"
 		end
 	elseif s < 8 and t >= 36 and t < 126 then -- s: 2-7, t: 36-125
-		return string.format("VRB%0.2dKT", math.floor(t * 0.48 / 10 + 0.5)) -- min: 2, max: 6
+		return string.format("VRB%0.2dKT", math.floor(t * 0.048 + 0.5)) -- min: 2, max: 6
 	elseif s < 8 and t >= 126 then -- s: 2-7, t: 126-197
 		return "/////KT"
 	elseif s < 46 and t >= 36 then -- s: 8-45, t: 36-197
 	 	local g = math.floor(s * (t * 0.0025 + 1.3) + 0.5)
-	 	if g < 17 then
-	 		v = 17
-	 	elseif g > 68 then
-	 		g = 68
+	 	if t < 126 and g < s + 6 then
+	 		g = s + 6
+	 	elseif t >= 126 and g < s + 9 then
+	 		g = s + 9
 	 	end
 		return string.format("%0.3d%0.2dG%0.2dKT", d, s, g) -- g = min: 17, max: 68
 	elseif s >= 46 and t >= 36 then -- s: 46-97, t: 36-197
-		local g = math.floor(s * (t * 0.0025 + 1.3) - s / 3 + 0.5)
-		if t >= 126 then
-			g = math.floor(s * (t * 0.0025 + 1.3) - s / 2 + 0.5)
+		local g
+		local gg = s * (t * 0.0025 + 1.3)
+		if t < 126 then
+			g = math.floor(s + (gg - s) / 3 + 0.5) -- g = min: 52, max: 123
+		else
+			g = math.floor(s + (gg - s) / 2 + 0.5) -- g = min: 55, max: 135
 		end
-		return string.format("%0.3d%0.2dG%0.2dKT", d, s, g) -- g = (3) - min: 6, max: 26    (2) - min: 9, max: 38
+		return string.format("%0.3d%0.2dG%0.2dKT", d, s, g)
 	end
 	return string.format("%0.3d%0.2dKT", d, s) -- s: 2-97, t: 0-35
 end
@@ -206,8 +213,8 @@ end
 
 local function getDewPoint(c, f, t, v)
 	local dp
-	ft = toFt(c.base)
-	if f and c.density > 0 and ft < 5000 then
+	local ft = toFt(c.base)
+	if not f then
 		dp = t - ft / 400
 		if dp < -15 then
 			dp = -15

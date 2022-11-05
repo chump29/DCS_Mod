@@ -587,7 +587,7 @@ function generateAutoBriefing(mission)
         end
         table.insert(autoBriefing, composeEntry(nil, _("Cloud Base"), BA.getClouds(mission.weather.clouds)))
         table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
-        if unitType and string.sub(unitType, 1, 5) == "A-10C" and dataBrf.weather.wind and dataBrf.weather.wind.atGround and dataBrf.weather.wind.atGround.speed and dataBrf.weather.wind.atGround.speed > 0 then
+        if unitType and string.sub(unitType, 1, 5) == "A-10C" then
             table.insert(autoBriefing, composeEntry(nil, _("A-10 CDU Wind"), BA.cduWindString(dataBrf.weather, dataBrf.humanPosition, dataBrf.temperature)))
         end
         table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,         turbulenceString))

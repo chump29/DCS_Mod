@@ -15,7 +15,7 @@ Adds the following to the generated briefings:
 - Magnetic variation
 - Cloud base (*ft & m*)
 - Wind (*blows FROM*)
-- A-10 CDU wind
+- CDU wind (*when in A-10*)
 - Turbulence (*kts & mps*)
 
 *Install to:*

@@ -48,14 +48,15 @@ local function getCallsign(c)
 			["Falklands"] = "SAVF",
 			["MarianaIslands"] = "KZAK",
 			["Nevada"] = "KZLA",
-			["Normandy"] = nil,
 			["PersianGulf"] = "OMAE",
-			["Syria"] = "LCCC",
-			["TheChannel"] = nil
+			["Syria"] = "LCCC"
 		}
 		local theatre = TheatreOfWarData.getName() or env.mission.theatre
 		if theatre then
-			return theatreCallsigns[theatre]
+			local cs = theatreCallsigns[theatre]
+			if cs then
+				return cs
+			end
 		end
 		return "ZZZZ"
 	end
@@ -151,18 +152,23 @@ local function getWeather(p, f, fv, ft, d)
 		str = str .. "SN"
 	end
 	if f then
-		local fs = "FG"
+		local fs
 		if fv < 1000 then
+			fs = "FG"
 			if ft < 2 then
 				fs = "MI" .. fs
 			end
+		elseif fv < 3000 then
+			fs = "BCFG"
 		elseif fv <= 5000 then
-			fs = "BR" .. fs
+			fs = "BR"
 		end
-		if string.len(str) > 0 then
-			str = str .. " " .. fs
-		else
-			str = fs
+		if fs then
+			if string.len(str) > 0 then
+				str = str .. " " .. fs
+			else
+				str = fs
+			end
 		end
 	end
 	if d then
@@ -171,9 +177,6 @@ local function getWeather(p, f, fv, ft, d)
 		else
 			str = "DU"
 		end
-	end
-	if string.len(str) > 0 then
-		return " " .. str
 	end
 	return str
 end
@@ -230,11 +233,10 @@ local function getDewPoint(c, f, t, v)
 			dp = -15
 		end
 	else
-		local v = toFt(v)
 		dp = t - 2
-		if v < 3000 then
+		if v < 1000 then
 			dp = t
-		elseif v < 10000 then
+		elseif v < 3000 then
 			dp = t - 1
 		end
 	end

@@ -151,16 +151,18 @@ local function getWeather(p, f, fv, ft, d)
 		str = str .. "SN"
 	end
 	if f then
+		local fs = "FG"
 		if fv < 1000 then
-			local fs = "FG"
 			if ft < 2 then
 				fs = "MI" .. fs
 			end
-			if string.len(str) > 0 then
-				str = str .. " " .. fs
-			else
-				str = fs
-			end
+		elseif fv <= 5000 then
+			fs = "BR" .. fs
+		end
+		if string.len(str) > 0 then
+			str = str .. " " .. fs
+		else
+			str = fs
 		end
 	end
 	if d then

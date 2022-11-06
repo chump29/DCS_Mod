@@ -7,13 +7,15 @@ ATISFREQS = {} -- global for Map_Stuff
 
 do
 
+	local config = ATIS_CONFIG or {
+		frequency_add = 250000 -- in Hz
+	}
+
 	local failMsg = " must be loaded prior to this script!"
 	assert(BASE ~= nil, "MOOSE" .. failMsg)
 	assert(require ~= nil, "REQUIRE" .. failMsg) -- for dofile()
 
 	local ATISfreqs = {}
-
-	local frequency_add = 250000 -- in Hz
 
 	local function HzToMHz(freq)
 		if not freq then return nil end
@@ -38,7 +40,7 @@ do
 		if CountArray(obj.frequency) > 0 then
 			local vhf = obj.frequency[VHF_HI]
 			if vhf and vhf[2] then
-				local atisFreq = HzToMHz(vhf[2] + frequency_add)
+				local atisFreq = HzToMHz(vhf[2] + config.frequency_add)
 				local ATCfreqs = {}
 				for _, freqData in pairs(obj.frequency) do
 					table.insert(ATCfreqs, HzToMHz(freqData[2]))

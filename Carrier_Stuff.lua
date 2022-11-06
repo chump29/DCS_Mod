@@ -5,7 +5,7 @@
 
 do
 
-	local config = {
+	local config = CARRIER_STUFF_CONFIG or {
 		carrierUnitName = "Carrier",
 		tanker = {
 			radio = 243, -- in MHz

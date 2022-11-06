@@ -5,9 +5,7 @@
 
 do
 
-	assert(mist ~= nil, "MiST must be loaded prior to this script!")
-
-	local config = {
+	local config = CRASH_CREW_CONFIG or {
 		maxCrews = 10,
 		minTime = 60, -- in seconds
 		maxTime = 120, -- in seconds
@@ -28,6 +26,8 @@ do
 		},
 		debug = false
 	}
+
+	assert(mist ~= nil, "MiST must be loaded prior to this script!")
 
 	local CrashCrew = {	num = 0	}
 

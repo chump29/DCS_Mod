@@ -5,9 +5,7 @@
 
 do
 
-	assert(mist ~= nil, "MiST must be loaded prior to this script!")
-
-	local config = {
+	local config = GCI_CONFIG or {
 		offsetUp = 800,
 		offsetRight = 400,
 		greenHeight = 1000, -- in ft
@@ -18,6 +16,8 @@ do
 		backgroundColor = {0, 0, 0, 0.1}, -- RGBA
 		debug = false
 	}
+
+	assert(mist ~= nil, "MiST must be loaded prior to this script!")
 
 	local positions = {}
 	local cachedGroups = {}

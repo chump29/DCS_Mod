@@ -5,15 +5,15 @@
 
 do
 
-	local dllWeather = require("Weather")
-
-	local config = {
+	local config = MAP_STUFF_CONIFG or {
 		announcements = false,
 		atc = true,
 		markers = true,
 		sound = "l10n/DEFAULT/static-short.ogg",
 		startingId = 10000
 	}
+
+	local dllWeather = require("Weather")
 
 	if config.atc then
 		assert(BASE ~= nil, "MOOSE must be loaded prior to this script!")

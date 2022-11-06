@@ -5,7 +5,7 @@
 
 do
 
-	local config = {
+	local config = JTAC_PRIORITY_CONFIG or {
 		maxDistance = 5000, -- in m
 		debug = false
 	}

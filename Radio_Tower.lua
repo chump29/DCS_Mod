@@ -5,7 +5,7 @@
 
 do
 
-	local config = {
+	local config = RADIO_TOWER_CONFIG or {
 		towers = {
 			{
 				name = "Music", -- zone

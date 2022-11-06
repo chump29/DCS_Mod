@@ -2,8 +2,14 @@
 Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) to create an [ATIS](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Ops.Atis.html) radio frequency at each blue airbase.
 - Place aircraft with name of **ATIS_[airbase callsign]** (*ATIS_Kobuleti*, for example) to get subtitles
   - Uses [MOOSE sound files](https://github.com/FlightControl-Master/MOOSE_SOUND/releases)
-- Frequency is **VHF + modifier** (*Kobuleti=133MHz, ATIS=133.25MHz*, for example)
-  - Can be changed by modifying `frequency_add` variable
+- Frequency is **VHF + `frequency_add`** (*Kobuleti=133MHz, ATIS=133.25MHz*, for example)
+
+Configuration settings:
+```lua
+  local config = ATIS_CONFIG or {
+    frequency_add = 250000 -- in Hz
+  }
+```
 
 ---
 
@@ -37,7 +43,7 @@ Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) to add the 
 
 Configuration settings:
 ```lua
-  local config = {
+  local config = CARRIER_STUFF_CONFIG or {
     carrierUnitName = "Carrier",
     tanker = {
       radio = 243, -- in MHz
@@ -67,7 +73,7 @@ Uses [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add 
 
 Configuration settings:
 ```lua
-  local config = {
+  local config = CRASH_CREW_CONFIG or {
     maxCrews = 10,
     minTime = 60, -- in seconds
     maxTime = 120, -- in seconds
@@ -106,7 +112,7 @@ Uses [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add 
 
 Configuration settings:
 ```lua
-  local config = {
+  local config = GCI_CONFIG or {
     offsetUp = 800,
     offsetRight = 400,
     greenHeight = 1000, -- in ft
@@ -139,7 +145,7 @@ Original JTAC script ***must*** include the following methods:
 
 Configuration settings:
 ```lua
-  local config = {
+  local config = JTAC_PRIORITY_CONFIG or {
     maxDistance = 5000, -- in m
     debug = false
   }
@@ -158,7 +164,7 @@ Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](
 
 Configuration settings:
 ```lua
-local config = {
+local config = MAP_STUFF_CONIFG or {
   announcements = false,
   atc = true,
   markers = true,
@@ -176,7 +182,7 @@ Creates a radio tower static object and transmission from zones with matching `n
 
 Configuration settings:
 ```lua
-  local config = {
+  local config = RADIO_TOWER_CONFIG or {
     towers = {
       {
         name = "Music", -- zone

@@ -41,7 +41,11 @@ local function normalizeData(data)
 	}
 end
 
-local function getCallsign(c)
+local function getCallsign(g)
+	local c
+	if g and #g > 0 then
+		c = g[1].code
+	end
 	if not c or string.len(c) == 0 then
 		local theatreCallsigns = {
 			["Caucasus"] = "UGGG",
@@ -301,12 +305,12 @@ local function getColor(v, c)
 	end
 end
 
-function getMETAR(data, code)
+function getMETAR(data, groups)
 	local data = normalizeData(data)
 	if data.date.Year < 1968 then
 		return "N/A"
 	end
-	local metar = string.format("%s %0.2d%0.2d%0.2dL", getCallsign(code), data.date.Day, math.floor(data.time / 60 / 60), data.time / 60 % 60)
+	local metar = string.format("%s %0.2d%0.2d%0.2dL", getCallsign(groups), data.date.Day, math.floor(data.time / 60 / 60), data.time / 60 % 60)
 	if data.atmosphere > 0 then
 		return string.format("%s NIL", metar)
 	end

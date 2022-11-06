@@ -537,9 +537,7 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
 
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    if #tblStartGroups > 0 then
-        table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(dataBrf, tblStartGroups[1].code)))
-    end
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(dataBrf, tblStartGroups)))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(dataBrf.qnh)))
     if #tblStartGroups > 0 then

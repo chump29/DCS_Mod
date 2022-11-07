@@ -145,15 +145,16 @@ end
 
 local function getWeather(p, f, fv, ft, d)
 	local str = ""
-	if p == 1 or p == 3 then
-		str = "SH"
-	elseif p == 2 or p == 4 then
-		str = "TS"
-	end
-	if p > 0 and p < 3 then
-		str = str .. "RA"
-	elseif p >= 3 then
-		str = str .. "SN"
+	if p > 0 then
+		if p == 1 then
+			str = "SHRA"
+		elseif p == 2 then
+			str = "TSRA"
+		elseif p == 3 then
+			str = "SHSN"
+		else
+			str = "+SN"
+		end
 	end
 	if f then
 		local fs
@@ -185,7 +186,7 @@ local function getWeather(p, f, fv, ft, d)
 	return str
 end
 
-local function getClouds(c, f)
+local function getClouds(c, f, s)
 	local ft = toFt(c.base)
 	local str
 	-- instead of using octals, split into ten parts
@@ -218,7 +219,11 @@ local function getClouds(c, f)
 		i = 1000
 		m = 10
 	end
-	return string.format("%s%0.3d", str, math.floor((ft + r) / i) * m)
+	local cb = "CB"
+	if s then
+		cb = ""
+	end
+	return string.format("%s%0.3d%s", str, math.floor((ft + r) / i) * m, cb)
 end
 
 local function getTemp(t)
@@ -319,8 +324,11 @@ function getMETAR(data, groups)
 	metar = string.format("%s %s", metar, wind)
 	local vis = getVisibility(data)
 	metar = string.format("%s %0.4d", metar, vis)
-	metar = string.format("%s%s", metar, getWeather(data.precipitation, data.fog, data.fog_visibility, data.fog_thickness, data.dust))
-	metar = string.format("%s %s", metar, getClouds(data.clouds, data.fog))
+	local clouds = getClouds(data.clouds, data.fog, data.precipitation == 3)
+	if clouds ~= "NSC" then
+		metar = string.format("%s %s", metar, getWeather(data.precipitation, data.fog, data.fog_visibility, data.fog_thickness, data.dust))
+	end
+	metar = string.format("%s %s", metar, clouds)
 	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.clouds, data.fog, data.temp, vis))
 	metar = string.format("%s A%0.4d", metar, math.floor(data.qnh / 25.4 * 100))
 	if wind == "/////KT" then

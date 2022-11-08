@@ -186,29 +186,31 @@ local function getWeather(p, f, fv, ft, d)
 	return str
 end
 
-local function getClouds(c, f, s)
+local function getClouds(c, f, p)
 	local ft = toFt(c.base)
-	local str
+	local str = ""
 	-- instead of using octals, split into ten parts
-	if c.density == 0 then
-		if f then
+	if p == 0 then
+		if c.density == 0 then
+			if f then
+				return "NSC"
+			end
+			return "CLR"
+		elseif f and c.density > 0 and ft > 5000 then
 			return "NSC"
+		elseif c.density > 0 and ft > 12000 then
+			return "CLR"
+		elseif c.density > 0 and ft > 5000 then
+			return "NSC"
+		elseif c.density > 0 and c.density < 3 then -- 1-2
+			str = "FEW"
+		elseif c.density > 2 and c.density < 6 then -- 3-5
+			str = "SCT"
+		elseif c.density > 5 and c.density < 9 then -- 6-8
+			str = "BKN"
+		else -- 9-10
+			str = "OVC"
 		end
-		return "CLR"
-	elseif f and c.density > 0 and ft > 5000 then
-		return "NSC"
-	elseif c.density > 0 and ft > 12000 then
-		return "CLR"
-	elseif c.density > 0 and ft > 5000 then
-		return "NSC"
-	elseif c.density > 0 and c.density < 3 then -- 1-2
-		str = "FEW"
-	elseif c.density > 2 and c.density < 6 then -- 3-5
-		str = "SCT"
-	elseif c.density > 5 and c.density < 9 then -- 6-8
-		str = "BKN"
-	else -- 9-10
-		str = "OVC"
 	end
 	-- cloud base min: 984ft/300m, max: 16404ft/5000m
 	local r = 50
@@ -220,7 +222,7 @@ local function getClouds(c, f, s)
 		m = 10
 	end
 	local cb = "CB"
-	if s then
+	if p == 3 then
 		cb = ""
 	end
 	return string.format("%s%0.3d%s", str, math.floor((ft + r) / i) * m, cb)
@@ -324,7 +326,7 @@ function getMETAR(data, groups)
 	metar = string.format("%s %s", metar, wind)
 	local vis = getVisibility(data)
 	metar = string.format("%s %0.4d", metar, vis)
-	local clouds = getClouds(data.clouds, data.fog, data.precipitation == 3)
+	local clouds = getClouds(data.clouds, data.fog, data.precipitation)
 	if clouds ~= "NSC" then
 		metar = string.format("%s %s", metar, getWeather(data.precipitation, data.fog, data.fog_visibility, data.fog_thickness, data.dust))
 	end

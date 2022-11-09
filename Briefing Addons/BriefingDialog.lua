@@ -98,6 +98,9 @@ local cdata = {
         NA = _('N/A'),
         metar = _("METAR"),
         cloud_base = _("Cloud Base (MSL)"),
+        qnh = _("QNH"),
+        magnetic_variation = _("Magnetic Variation"),
+        cdu_wind = _("A-10 CDU Wind"),
 
         SITUATION       = _('SITUATION'),
         MISSION         = _('MISSION'),
@@ -541,22 +544,22 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(cdata.weather))
     table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(dataBrf, tblStartGroups)))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
-    table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(dataBrf.qnh)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.qnh)))
     if #tblStartGroups > 0 then
-        table.insert(autoBriefing, composeEntry(nil, _("Magnetic Variation"), BA.getMV(dataBrf.mission_date, tblStartGroups[1].position)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, BA.getMV(dataBrf.mission_date, tblStartGroups[1].position)))
     end
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(dataBrf.weather.clouds)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.wind,           UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.wind, UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
     if unitType and string.sub(unitType, 1, 5) == "A-10C" then
-        table.insert(autoBriefing, composeEntry(nil, _("A-10 CDU Wind"), BA.cduWindString(dataBrf.weather, dataBrf.humanPosition, dataBrf.temperature)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.cdu_wind, BA.cduWindString(dataBrf.weather, dataBrf.humanPosition, dataBrf.temperature)))
     end
-    table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,        UC.composeTurbulenceString(dataBrf.weather)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, UC.composeTurbulenceString(dataBrf.weather)))
 
     if dataBrf.startTime then
         table.insert(autoBriefing, composeEntry(cdata.take_off_and_departure))
-        table.insert(autoBriefing, composeEntry(nil,  cdata.mission_start,  autobriefingutils.composeDateString(dataBrf.startTime, false, dataBrf.mission_date)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.mission_start, autobriefingutils.composeDateString(dataBrf.startTime, false, dataBrf.mission_date)))
         if #tblStartGroups > 0 then
-            table.insert(autoBriefing, composeEntry(nil,  nil,  tblStartGroups, true ))
+            table.insert(autoBriefing, composeEntry(nil, nil, tblStartGroups, true))
         end
     end
 
@@ -579,8 +582,8 @@ function generateSimpleAutoBriefing()
     table.insert(autoBriefing, composeEntry(cdata.weather))
     table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(dataBrf)))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
-    table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(dataBrf.qnh)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.qnh)))
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(dataBrf.weather.clouds)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.wind,           UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,        UC.composeTurbulenceString(dataBrf.weather)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.wind, UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, UC.composeTurbulenceString(dataBrf.weather)))
 end

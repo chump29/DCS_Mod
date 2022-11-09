@@ -88,6 +88,9 @@ local cdata =
     --cloud_cover_base = _('base'),
     metar = _("METAR"),
     cloud_base = _("Cloud Base (MSL)"),
+    qnh = _("QNH"),
+    magnetic_variation = _("Magnetic Variation"),
+    cdu_wind = _("A-10 CDU Wind"),
 
     BACK = _('CANCEL'),
     middleBtn = _('MISSION PLANNER'),
@@ -577,23 +580,24 @@ function generateAutoBriefing(mission)
         end
         table.insert(autoBriefing, composeEntry(cdata.specification))
         table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
+
         table.insert(autoBriefing, composeEntry(cdata.weather))
         table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(mission, tblStartGroups)))
         table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
-        table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(mission.weather.qnh)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(mission.weather.qnh)))
         if #tblStartGroups > 0 then
-            table.insert(autoBriefing, composeEntry(nil, _("Magnetic Variation"), BA.getMV(mission.date, tblStartGroups[1].position)))
+            table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, BA.getMV(mission.date, tblStartGroups[1].position)))
         end
         table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(mission.weather.clouds)))
-        table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
+        table.insert(autoBriefing, composeEntry(nil, cdata.wind, windString))
         if unitType and string.sub(unitType, 1, 5) == "A-10C" then
-            table.insert(autoBriefing, composeEntry(nil, _("A-10 CDU Wind"), BA.cduWindString(dataBrf.weather, dataBrf.humanPosition, dataBrf.temperature)))
+            table.insert(autoBriefing, composeEntry(nil, cdata.cdu_wind, BA.cduWindString(dataBrf.weather, dataBrf.humanPosition, dataBrf.temperature)))
         end
-        table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,         turbulenceString))
-        table.insert(autoBriefing, composeEntry(cdata.take_off_and_departure))
-        table.insert(autoBriefing, composeEntry(nil,  cdata.mission_start,  autobriefingutils.composeDateString(startTime, false, mission.date)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, turbulenceString))
 
-        table.insert(autoBriefing, composeEntry(nil,  nil,  tblStartGroups, true ))
+        table.insert(autoBriefing, composeEntry(cdata.take_off_and_departure))
+        table.insert(autoBriefing, composeEntry(nil, cdata.mission_start, autobriefingutils.composeDateString(startTime, false, mission.date)))
+        table.insert(autoBriefing, composeEntry(nil, nil, tblStartGroups, true))
 
     --traverseTable(autoBriefing)
     --traverseTable(mission)
@@ -617,14 +621,15 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.title,      MissionModule.mission.sortie))
     table.insert(autoBriefing, composeEntry(nil, cdata.start,      autobriefingutils.composeDateString(mission.start_time, true, mission.date)))
     table.insert(autoBriefing, composeEntry(cdata.description, nil,    mission.descriptionText))
+
     table.insert(autoBriefing, composeEntry(cdata.weather))
     table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(mission)))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
-    table.insert(autoBriefing, composeEntry(nil, _('QNH_brief','QNH'), BA.getQNH(mission.weather.qnh)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(mission.weather.qnh)))
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(mission.weather.clouds)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.wind,               windString))
-    table.insert(autoBriefing, composeEntry(nil, cdata.turbulence,         turbulenceString))
-    table.insert(autoBriefing, composeEntry(nil, cdata.general_visbility,  mission.weather.visibility.distance/1000 .. ' ' .. cdata.km_unit ))
+    table.insert(autoBriefing, composeEntry(nil, cdata.wind, windString))
+    table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, turbulenceString))
+    --table.insert(autoBriefing, composeEntry(nil, cdata.general_visbility, mission.weather.visibility.distance/1000 .. ' ' .. cdata.km_unit))
     --base.U.traverseTable(autoBriefing)
 end
 

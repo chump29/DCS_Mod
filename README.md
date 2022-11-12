@@ -176,7 +176,7 @@ local config = MAP_STUFF_CONIFG or {
 ---
 
 # [Radio Tower](Radio_Tower.lua)
-Creates a radio tower static object and transmission from zones with matching `name`. Handles multiple stations per tower. When destroyed, stops transmitting.
+Creates a radio tower static object and transmission from zone with matching `name`. Handles multiple towers/stations. When destroyed, stops transmitting.
 
 *NOTE: Must include `sound` file via trigger in editor*
 

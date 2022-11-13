@@ -77,16 +77,16 @@ do
 	end
 
 	local function getClouds(m)
-	  	return string.format("%dft / %dm", math.floor((m or 0) * 3.281), m or 0)
+	  	return string.format("%dft / %dm", math.floor((m or 0) * 3.280839), m or 0)
 	end
 
 	-- TODO: refactor wind
-	local function revertWind(a_value)
-		a_value = a_value + 180
-		if a_value > 360 then
-			a_value = a_value - 360
+	local function reverseWind(d)
+		local dir = d + 180
+		if dir > 360 then
+			return dir - 360
 		end
-		return a_value
+		return dir
 	end
 	local function toDegrees(radians, raw)
 		local degrees = radians * 180 / math.pi
@@ -110,12 +110,12 @@ do
 		local wind = "CALM"
 		if weather.atmosphere_type == 0 then
 			if weather.wind.atGround.speed > 0 then
-				wind = string.format("From %d° @ %dmph / %dkts", revertWind(weather.wind.atGround.dir), math.floor(weather.wind.atGround.speed * 2.23694), math.floor(mpsToKts(weather.wind.atGround.speed)))
+				wind = string.format("%d° @ %dkts", reverseWind(weather.wind.atGround.dir), math.floor(mpsToKts(weather.wind.atGround.speed)))
 			end
 		else
 			dllWeather.initAtmospere(weather)
 			local res = dllWeather.getGroundWindAtPoint({position = pos or {x = 0, y = 0, z = 0}})
-			wind = string.format("From %d° @ %dmph / %dkts", toPositiveDegrees(res.a + math.pi), math.floor(res.v * 2.23694), math.floor(mpsToKts(res.v)))
+			wind = string.format("%d° %dkts", toPositiveDegrees(res.a + math.pi), math.floor(mpsToKts(res.v)))
 		end
 		return wind
 	end

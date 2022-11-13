@@ -104,14 +104,14 @@ local function toKts(mps)
 	return math.floor(mps * 1.943844 + 0.5)
 end
 
-local function roundTo10(d)
-	return math.floor(d / 10 + 0.5) * 10
+local function round(n)
+	return math.floor(n + 0.5)
 end
 
 -------------------------------------------------------------------------------
 -- convert wind structure to wind string
 function windToStr(d, s)
-    return string.format("%.3d° @ %.1d%s", revertWind(roundTo10(d)), s, cdata.speed_unit_kts) -- direction wind blows FROM, in kts
+    return string.format("%.3d° @ %.1d%s", revertWind(round(d)), s, cdata.speed_unit_kts) -- direction wind blows FROM, in kts
 end
 
 -------------------------------------------------------------------------------

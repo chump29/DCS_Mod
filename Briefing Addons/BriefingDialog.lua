@@ -16,7 +16,6 @@ local table = base.table
 local math = base.math
 local string = base.string
 
-
 local Gui               = require('dxgui')
 local GuiWin            = require('dxguiWin')
 local DialogLoader      = require('DialogLoader')
@@ -33,7 +32,7 @@ local i18n              = require('i18n')
 local DB                = require('me_db_api')
 local imagePreview      = require('imagePreview')
 local BA = require("briefing_addons")
-local METAR = require("metar")
+local METAR = require("METAR")
 
 base.setmetatable(base.dxgui, {__index = base.dxguiWin})
 

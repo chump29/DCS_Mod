@@ -6,11 +6,13 @@
 
 local base = _G
 
-module("metar")
+module("METAR")
 
 local math = base.math
 local string = base.string
 local TheatreOfWarData = base.require("Mission.TheatreOfWarData")
+local MissionModule = base.require("me_mission")
+local CloudPresets = base.dofile("Config/Effects/getCloudsPresets.lua")
 
 --[[
 METAR resources used:
@@ -21,7 +23,7 @@ METAR resources used:
 --]]
 
 local function normalizeData(data)
-	-- checking DCS.getPlayerBriefing(), then env.mission
+	-- checking for DCS.getPlayerBriefing(), then env.mission
 	return {
 		date = data.mission_date or data.date,
 		time = data.mission_start_time or data.start_time,
@@ -37,7 +39,9 @@ local function normalizeData(data)
 		dust_visibility = data.weather.dust_density,
 		clouds = data.weather.clouds,
 		temp = data.weather.season.temperature,
-		qnh = data.weather.qnh
+		qnh = data.weather.qnh,
+		agl = 0,
+		theatre = nil
 	}
 end
 
@@ -68,38 +72,24 @@ local theatreData = {
 	}
 }
 
-local function getTheatre()
-	return TheatreOfWarData.getName() or env.mission.theatre
-end
-
-local function getCallsign(g)
-	local c
-	if g and #g > 0 then
-		c = g[1].code
-	end
-	if not c or string.len(c) == 0 then
-		local t = getTheatre()
-		if t then
-			local td = theatreData[t]
-			if td then
-				return td.icao
-			end
-		end
-		return "ZZZZ"
-	end
-	return c
-end
-
 local function toFt(m)
-	return m * 3.28084
-end
-
-local function toM(f)
-	return f / 3.28084
+	return m * 3.280839
 end
 
 local function toKts(m)
 	 return m * 1.943844
+end
+
+local function toM(f)
+	return f / 3.280839
+end
+
+local function reverseWind(d)
+	local dir = d + 180
+	if dir > 360 then
+		return dir - 360
+	end
+	return dir
 end
 
 local function round(n)
@@ -114,57 +104,77 @@ local function getMinutes(t)
 	return t / 60 % 60
 end
 
-local function reverseWind(d)
-	local d = d + 180
-	if d > 360 then
-		return d - 360
+local function getTheatre()
+	return TheatreOfWarData.getName() or MissionModule.mission.theatre
+end
+
+local function getCallsign(d, g)
+	d.theatre = getTheatre()
+	local c
+	if g and #g > 0 then
+		c = g[1].code
 	end
-	return d
+	if not c or string.len(c) == 0 then
+		if d.theatre then
+			local td = theatreData[d.theatre]
+			if td then
+				return td.icao
+			end
+		end
+		return "ZZZZ"
+	end
+	return c
 end
 
 local function getWindDirectionAndSpeed(w, t)
-	-- NOTE: max settings in ME are s=97 & t=197
-	local t = toFt(t)
+	-- NOTE: max settings in ME are s=97 & ft=197
+	local ft = toFt(t)
 	local d = reverseWind(round(w.dir / 10) * 10)
 	local s = round(toKts(w.speed))
 	if s < 3 then
-		if t < 36 then -- s: 0-2, t: 0-35
+		if ft < 36 then -- s: 0-2, ft: 0-35
 			return "00000KT"
-		else -- s: 0-2, t: 36-197
+		else -- s: 0-2, ft: 36-197
 			return "/////KT"
 		end
-	elseif s < 8 and t >= 36 and t < 126 then -- s: 3-7, t: 36-125
-		return string.format("VRB%0.2dKT", round(t * 0.048)) -- min: 2, max: 6
-	elseif s < 8 and t >= 126 then -- s: 3-7, t: 126-197
+	elseif s < 8 and ft >= 36 and ft < 126 then -- s: 3-7, ft: 36-125
+		return string.format("VRB%0.2dKT", round(ft * 0.048)) -- min: 2, max: 6
+	elseif s < 8 and ft >= 126 then -- s: 3-7, ft: 126-197
 		return "/////KT"
-	elseif s < 46 and t >= 36 then -- s: 8-45, t: 36-197
-	 	local g = round(s * (t * 0.0025 + 1.3))
-	 	if t < 126 and g < s + 6 then
+	elseif s < 46 and ft >= 36 then -- s: 8-45, ft: 36-197
+	 	local g = round(s * (ft * 0.0025 + 1.3))
+	 	if ft < 126 and g < s + 6 then
 	 		g = s + 6
-	 	elseif t >= 126 and g < s + 9 then
+	 	elseif ft >= 126 and g < s + 9 then
 	 		g = s + 9
 	 	end
 		return string.format("%0.3d%0.2dG%0.2dKT", d, s, g) -- g = min: 17, max: 68
-	elseif s >= 46 and t >= 36 then -- s: 46-97, t: 36-197
+	elseif s >= 46 and ft >= 36 then -- s: 46-97, ft: 36-197
 		local g
-		local gg = s * (t * 0.0025 + 1.3)
-		if t < 126 then
+		local gg = s * (ft * 0.0025 + 1.3)
+		if ft < 126 then
 			g = round(s + (gg - s) / 3) -- g = min: 52, max: 123
 		else
 			g = round(s + (gg - s) / 2) -- g = min: 55, max: 135
 		end
 		return string.format("%0.3d%0.2dG%0.2dKT", d, s, g)
 	end
-	return string.format("%0.3d%0.2dKT", d, s) -- s: 3-97, t: 0-35
+	return string.format("%0.3d%0.2dKT", d, s) -- s: 3-97, ft: 0-35
 end
 
-local function getVisibility(data)
-	local v = data.visibility
-	if data.fog and data.fog_visibility < v then
-		v = data.fog_visibility
+local function getVisibility(d)
+	if d.clouds.preset and string.find(d.clouds.preset, "RainyPreset") then
+		if d.clouds.preset == "RainyPreset2" then
+			return 1000 -- 1-5KM
+		end
+		return 3000 -- 3-5KM
 	end
-	if data.dust and data.dust_visibility < v then
-		v = data.dust_visibility
+	local v = d.visibility
+	if d.fog and d.fog_visibility < v then
+		v = d.fog_visibility
+	end
+	if d.dust and d.dust_visibility < v then
+		v = d.dust_visibility
 	end
 	local visibility = 9999
 	local m
@@ -183,17 +193,29 @@ local function getVisibility(data)
 	return visibility
 end
 
-local function getWeather(p, f, fv, ft, d)
+local function getWeather(c, p, f, fv, ft, du, d)
 	local str = ""
-	if p > 0 then
-		if p == 1 then
-			str = "SHRA"
-		elseif p == 2 then
-			str = "TSRA"
-		elseif p == 3 then
-			str = "SHSN"
-		else
-			str = "+SN"
+	if c and string.find(c, "RainyPreset") then
+		str = "RA"
+	else
+		if p > 0 then
+			if p == 1 then
+				if d < 7 then
+					str = "SHRA"
+				else
+					str = "RA"
+				end
+			elseif p == 2 then
+				str = "TSRA"
+			elseif p == 3 then
+				if d < 7 then
+					str = "SHSN"
+				else
+					str = "SN"
+				end
+			else
+				str = "+SN"
+			end
 		end
 	end
 	if f then
@@ -216,7 +238,7 @@ local function getWeather(p, f, fv, ft, d)
 			end
 		end
 	end
-	if d then
+	if du then
 		if string.len(str) > 0 then
 			str = str .. " DU"
 		else
@@ -229,33 +251,52 @@ local function getWeather(p, f, fv, ft, d)
 	return str
 end
 
-local function getAGL(c)
-	local t = getTheatre()
-	if t then
+local function getAGL(c, g, t)
+	local h
+	if g and #g > 0 then
+		h = g[1].position.y
+	else
 		local td = theatreData[t]
-		if td then
-			local cb = c - toM(td.elevation)
-			if cb < 0 then
-				cb = 0
-			end
-			return cb
+		if td and td.elevation then
+			h = toM(td.elevation)
+		else
+			h = 0
 		end
 	end
-	return c
+	local cb = c - h
+	if cb < 0 then
+		cb = 0
+	end
+	return cb
 end
 
-local function getClouds(c, f, p)
-	c.base = getAGL(c.base)
-	local ft = toFt(c.base)
+local function getClouds(d, g)
+	local c = d.clouds
+	d.agl = getAGL(c.base, g, d.theatre)
+	if c.preset and CloudPresets then
+		local preset = CloudPresets[c.preset]
+		if preset and string.len(preset.readableName) > 0 then
+			local str = "METAR: "
+			if string.find(c.preset, "RainyPreset") then
+				str = " RA "
+			end
+			local _, i = string.find(preset.readableName, str)
+			if i then
+				return string.sub(preset.readableName, i + 1)
+			end
+		end
+		return "///"
+	end
+	local ft = toFt(d.agl)
 	local str = ""
 	-- instead of using octals, split into ten parts
-	if p == 0 then
+	if d.precipitation == 0 then
 		if c.density == 0 then
-			if f then
+			if d.fog then
 				return "NSC"
 			end
 			return "CLR"
-		elseif f and c.density > 0 and ft > 5000 then
+		elseif d.fog and c.density > 0 and ft > 5000 then
 			return "NSC"
 		elseif c.density > 0 and ft > 12000 then
 			return "CLR"
@@ -271,6 +312,10 @@ local function getClouds(c, f, p)
 			str = "OVC"
 		end
 	end
+	local cb = "CB"
+	if d.precipitation == 0 or d.precipitation == 3 then
+		cb = ""
+	end
 	-- cloud base min: 984ft/300m, max: 16404ft/5000m
 	local r = 50
 	local i = 100
@@ -279,10 +324,6 @@ local function getClouds(c, f, p)
 		r = 500
 		i = 1000
 		m = 10
-	end
-	local cb = "CB"
-	if p == 3 then
-		cb = ""
 	end
 	return string.format("%s%0.3d%s", str, math.floor((ft + r) / i) * m, cb)
 end
@@ -294,9 +335,9 @@ local function getTemp(t)
 	return string.format("%0.2d", math.abs(round(t)))
 end
 
-local function getDewPoint(c, f, t, v)
+local function getDewPoint(a, c, f, t, v)
 	local dp
-	local ft = toFt(c.base)
+	local ft = toFt(a)
 	if not f then
 		dp = t - ft / 400
 		if dp < -15 then
@@ -317,59 +358,59 @@ local function getQNH(q)
 	return math.floor(q / 25.4 * 100)
 end
 
-local function getColor(v, c)
-	local v = v / 1000
-	local c = toFt(c)
-	if v < 0.8 then
+local function getColor(v, a)
+	local vis = v / 1000
+	local ft = toFt(a)
+	if vis < 0.8 then
 		return "RED"
-	elseif v < 1.6 then
-		if c < 200 then
+	elseif vis < 1.6 then
+		if ft < 200 then
 			return "RED"
 		else
 			return "AMB"
 		end
-	elseif v < 3.7 then
-		if c < 200 then
+	elseif vis < 3.7 then
+		if ft < 200 then
 			return "RED"
-		elseif c < 300 then
+		elseif ft < 300 then
 			return "AMB"
 		else
 			return "YLO"
 		end
-	elseif v < 5 then
-		if c < 200 then
+	elseif vis < 5 then
+		if ft < 200 then
 			return "RED"
-		elseif c < 300 then
+		elseif ft < 300 then
 			return "AMB"
-		elseif c < 700 then
+		elseif ft < 700 then
 			return "YLO"
 		else
 			return "GRN"
 		end
-	elseif v < 8 then
-		if c < 200 then
+	elseif vis < 8 then
+		if ft < 200 then
 			return "RED"
-		elseif c < 300 then
+		elseif ft < 300 then
 			return "AMB"
-		elseif c < 700 then
+		elseif ft < 700 then
 			return "YLO"
-		elseif c < 1500 then
+		elseif ft < 1500 then
 			return "GRN"
 		else
 			return "WHT"
 		end
 	else
-		if c < 200 then
+		if ft < 200 then
 			return "RED"
-		elseif c < 300 then
+		elseif ft < 300 then
 			return "AMB"
-		elseif c < 700 then
+		elseif ft < 700 then
 			return "YLO"
-		elseif c < 1500 then
+		elseif ft < 1500 then
 			return "GRN"
-		elseif c < 2500 then
+		elseif ft < 2500 then
 			return "WHT"
-		elseif c < 20000 then
+		elseif ft < 20000 then
 			return "BLU"
 		else
 			return "BLU+" -- DCS only allows 16,404ft set in ME
@@ -377,12 +418,12 @@ local function getColor(v, c)
 	end
 end
 
-function getMETAR(data, groups)
-	local data = normalizeData(data)
+function getMETAR(d, g)
+	local data = normalizeData(d)
 	if data.date.Year < 1968 then
 		return "N/A"
 	end
-	local metar = string.format("%s %0.2d%0.2d%0.2dL", getCallsign(groups), data.date.Day, getHour(data.time), getMinutes(data.time))
+	local metar = string.format("%s %0.2d%0.2d%0.2dL", getCallsign(data, g), data.date.Day, getHour(data.time), getMinutes(data.time))
 	if data.atmosphere > 0 then
 		return string.format("%s NIL", metar)
 	end
@@ -391,15 +432,15 @@ function getMETAR(data, groups)
 	metar = string.format("%s %s", metar, wind)
 	local vis = getVisibility(data)
 	metar = string.format("%s %0.4d", metar, vis)
-	local clouds = getClouds(data.clouds, data.fog, data.precipitation)
+	local clouds = getClouds(data, g)
 	if clouds ~= "NSC" then
-		metar = string.format("%s%s", metar, getWeather(data.precipitation, data.fog, data.fog_visibility, data.fog_thickness, data.dust))
+		metar = string.format("%s%s", metar, getWeather(data.clouds.preset, data.precipitation, data.fog, data.fog_visibility, data.fog_thickness, data.dust, data.clouds.density))
 	end
 	metar = string.format("%s %s", metar, clouds)
-	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.clouds, data.fog, data.temp, vis))
+	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.agl, data.clouds, data.fog, data.temp, vis))
 	metar = string.format("%s A%0.4d", metar, getQNH(data.qnh))
 	if wind == "/////KT" then
 		metar = string.format("%s RMK WS", metar)
 	end
-	return string.format("%s %s", metar, getColor(vis, data.clouds.base))
+	return string.format("%s %s", metar, getColor(vis, data.agl))
 end

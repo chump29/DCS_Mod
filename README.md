@@ -28,6 +28,7 @@ Adds the following to the generated briefings:
 - `[DCS Directory]\MissionEditor\modules\me_autobriefing.lua`
 - `[DCS Directory]\MissionEditor\modules\Mission\Airdrome.lua`
 - `[DCS Directory]\MissionEditor\modules\Mission\AirdromeData.lua`
+- `[DCS Directory]\Scripts\UI\autobriefingUtils.lua`
 - `[DCS Directory]\Scripts\UI\BriefingDialog.lua`
 - `[DCS Directory]\Scripts\briefing_addons.lua`
 - `[DCS Directory]\Scripts\METAR.lua`

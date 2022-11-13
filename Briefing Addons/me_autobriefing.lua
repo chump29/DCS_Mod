@@ -41,7 +41,7 @@ local imagePreview              = require('imagePreview')
 local Analytics                 = require("Analytics")
 local ProductType               = require('me_ProductType')
 local BA = require("briefing_addons")
-local METAR = require("metar")
+local METAR = require("METAR")
 
 i18n.setup(_M)
 

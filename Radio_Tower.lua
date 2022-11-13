@@ -67,10 +67,10 @@ do
 				heading = math.random(360),
 				--hidden = true
 			})
-			local power = math.floor(math.abs(station.power))
 			if obj then
 				for i, station in ipairs(tower.stations) do
 					local name = string.format("%s-%d", tower.name, i)
+					local power = math.floor(math.abs(station.power))
 					trigger.action.radioTransmission(
 						string.format("l10n/DEFAULT/%s", station.sound),
 						zone.point,
@@ -104,7 +104,7 @@ do
 				local stations = ""
 				for i, station in ipairs(tower.stations) do
 					if i > 1 then stations = string.format("%s\n", stations) end
-					stations = string.format("%s%s - %.3f %s %s [%dw]", stations, station.name, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation), power)
+					stations = string.format("%s%s - %.3f %s %s [%dw]", stations, station.name, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation), math.floor(math.abs(station.power)))
 				end
 				if string.len(stations) > 0 then
 					tower.id = math.random(1, 1000000)

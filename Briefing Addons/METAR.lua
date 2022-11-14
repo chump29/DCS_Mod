@@ -253,7 +253,7 @@ end
 
 local function getAGL(c, g, t)
 	local h
-	if g and #g > 0 then
+	if g and #g > 0 and g[1].position then
 		h = g[1].position.y
 	else
 		local td = theatreData[t]

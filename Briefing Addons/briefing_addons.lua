@@ -79,7 +79,7 @@ end
 
 function getClouds(c)
 	if not c or not c.density or not c.base then return 0 end
-	if c.density == 0 then
+	if not c.preset and c.density == 0 then
 		return "NIL"
 	end
 	local ft = math.floor(c.base * 3.28084 / 100 + 0.5) * 100

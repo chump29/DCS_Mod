@@ -8,11 +8,12 @@ local base = _G
 
 module("METAR")
 
+local CloudPresets = base.dofile("Config/Effects/getCloudsPresets.lua")
+local ipairs = base.ipairs
 local math = base.math
+local MissionModule = base.require("me_mission")
 local string = base.string
 local TheatreOfWarData = base.require("Mission.TheatreOfWarData")
-local MissionModule = base.require("me_mission")
-local CloudPresets = base.dofile("Config/Effects/getCloudsPresets.lua")
 
 --[[
 METAR resources used:
@@ -252,15 +253,15 @@ local function getWeather(c, p, f, fv, ft, du, d)
 end
 
 local function getAGL(c, g, t)
-	local h
+	local h = 0
 	if g and #g > 0 and g[1].position then
 		h = g[1].position.y
 	else
-		local td = theatreData[t]
-		if td and td.elevation then
-			h = toM(td.elevation)
-		else
-			h = 0
+		if t then
+			local td = theatreData[t]
+			if td and td.elevation then
+				h = toM(td.elevation)
+			end
 		end
 	end
 	local cb = c - h
@@ -270,26 +271,79 @@ local function getAGL(c, g, t)
 	return cb
 end
 
+local function getCoverage(c)
+	-- instead of using octals, split into ten parts for cloud density slider in ME
+	if c < .3 then -- 1-2
+		return "FEW", 1
+	elseif c > .2 and c < .6 then -- 3-5
+		return "SCT", 2
+	elseif c > .5 and c < .9 then -- 6-8
+		return "BKN", 3
+	end
+	return "OVC", 4 -- 9-10
+end
+
+local function roundClouds(f)
+	-- cloud base min: 984ft/300m, max: 16404ft/5000m
+	local r = 50
+	local i = 100
+	local m = 1
+	if f > 10000 then
+		r = 500
+		i = 1000
+		m = 10
+	end
+	return string.format("%0.3d", math.floor((f + r) / i) * m)
+end
+
+local function getCB(p)
+	if p <= 0 or p == 3 then
+		return ""
+	end
+	return "CB"
+end
+
+local function getPresetClouds(d, g)
+	local preset = d.clouds.preset
+	if preset and CloudPresets then
+		local p = CloudPresets[preset]
+		if p then
+			local str = ""
+			local z, n = 0, 0
+			for _, l in ipairs(p.layers) do
+				if l.coverage > 0 then
+					local c, i = getCoverage(l.coverage)
+					if i > z then
+						z = i
+						n = n + 1
+						local a = d.agl
+						if n > 1 then
+							a = getAGL(l.altitudeMin, g, d.theatre)
+						end
+						if string.len(str) > 0 then
+							str = str .. " "
+						end
+						str = string.format("%s%s%s%s", str, c, roundClouds(toFt(a)), getCB(p.precipitationPower))
+					end
+				end
+			end
+			if string.len(str) > 0 then
+				return str
+			end
+		end
+	end
+	return nil
+end
+
 local function getClouds(d, g)
 	local c = d.clouds
 	d.agl = getAGL(c.base, g, d.theatre)
-	if c.preset and CloudPresets then
-		local preset = CloudPresets[c.preset]
-		if preset and string.len(preset.readableName) > 0 then
-			local str = "METAR: "
-			if string.find(c.preset, "RainyPreset") then
-				str = " RA "
-			end
-			local _, i = string.find(preset.readableName, str)
-			if i then
-				return string.sub(preset.readableName, i + 1)
-			end
-		end
-		return "///"
+	local str = getPresetClouds(d, g)
+	if str then
+		return str
 	end
 	local ft = toFt(d.agl)
-	local str = ""
-	-- instead of using octals, split into ten parts
+	str = ""
 	if d.precipitation == 0 then
 		if c.density == 0 then
 			if d.fog then
@@ -302,30 +356,11 @@ local function getClouds(d, g)
 			return "CLR"
 		elseif c.density > 0 and ft > 5000 then
 			return "NSC"
-		elseif c.density > 0 and c.density < 3 then -- 1-2
-			str = "FEW"
-		elseif c.density > 2 and c.density < 6 then -- 3-5
-			str = "SCT"
-		elseif c.density > 5 and c.density < 9 then -- 6-8
-			str = "BKN"
-		else -- 9-10
-			str = "OVC"
+		else
+			str, _ = getCoverage(c.density / 10)
 		end
 	end
-	local cb = "CB"
-	if d.precipitation == 0 or d.precipitation == 3 then
-		cb = ""
-	end
-	-- cloud base min: 984ft/300m, max: 16404ft/5000m
-	local r = 50
-	local i = 100
-	local m = 1
-	if ft > 10000 then
-		r = 500
-		i = 1000
-		m = 10
-	end
-	return string.format("%s%0.3d%s", str, math.floor((ft + r) / i) * m, cb)
+	return string.format("%s%s%s", str, roundClouds(ft), getCB(d.precipitation))
 end
 
 local function getTemp(t)

@@ -43,7 +43,7 @@ local function normalizeData(data)
 		temp = data.weather.season.temperature,
 		qnh = data.weather.qnh,
 		agl = 0,
-		theatre = nil
+		theatre = TheatreOfWarData.getName() or MissionModule.mission.theatre
 	}
 end
 
@@ -104,25 +104,7 @@ local function round(n)
 	return math.floor(n + 0.5)
 end
 
-local function getHour(t, m)
-	local h = math.floor(t / 60 / 60)
-	local td = theatreData[t]
-	if td then
-		h = h - td.utc
-	end
-	return h
-end
-
-local function getMinutes(t)
-	return t / 60 % 60
-end
-
-local function getTheatre()
-	return TheatreOfWarData.getName() or MissionModule.mission.theatre
-end
-
 local function getCallsign(t, g)
-	t = getTheatre()
 	local c
 	if g and #g > 0 then
 		c = g[1].code
@@ -137,9 +119,22 @@ local function getCallsign(t, g)
 	return c
 end
 
+local function getHour(t, m)
+	local h = math.floor(t / 60 / 60)
+	local td = theatreData[m]
+	if td then
+		h = h - td.utc
+	end
+	return h
+end
+
+local function getMinutes(t)
+	return t / 60 % 60
+end
+
 local function getWindDirectionAndSpeed(w, t)
 	-- NOTE: max settings in ME are s=97 & ft=197
-	local ft = toFt(t)
+	local ft = round(toFt(t))
 	local d = reverseWind(round(w.dir / 10) * 10)
 	local s = round(toKts(w.speed))
 	if s < 3 then
@@ -307,7 +302,7 @@ local function roundClouds(f)
 end
 
 local function getCB(p, a)
-	if p <= 0 or p == 3 or a > 10000 then
+	if p <= 0 or p == 3 or a > 10000 then -- not marking clouds above FL100
 		return ""
 	end
 	return "CB"
@@ -329,7 +324,7 @@ local function getPresetClouds(d, g)
 						a = toAGL(l.altitudeMin, g, d.theatre)
 					end
 					local ft = toFt(a)
-					if ft <= 24000 then
+					if ft <= 24000 then -- skipping clouds above FL240
 						if string.len(str) > 0 then
 							str = str .. " "
 						end
@@ -405,7 +400,7 @@ end
 
 local function getTurbulence(w, t)
 	local s = round(toKts(w))
-	local ft = toFt(t)
+	local ft = round(toFt(t))
 	local str = ""
 	if s < 3 and ft >= 36 and ft < 126 then -- s: 0-2, ft: 36-125
 		str = "RMK TURB"
@@ -497,7 +492,7 @@ function getMETAR(d, g)
 	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.agl, data.clouds, data.fog, data.temp, vis))
 	metar = string.format("%s A%0.4d", metar, getQNH(data.qnh))
 	if wind == "/////KT" then
-		metar = string.format("%s %s", metar, getTurbulence(data.wind, data.turbulence))
+		metar = string.format("%s %s", metar, getTurbulence(data.wind.speed, data.turbulence))
 	end
 	return string.format("%s %s", metar, getColor(vis, data.agl))
 end

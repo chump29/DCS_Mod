@@ -50,27 +50,33 @@ end
 local theatreData = {
 	["Caucasus"] = {
 		["icao"] = "UGTB",
-		["elevation"] = 1574 -- in ft
+		["elevation"] = 1574, -- in ft
+		["utc"] = 4
 	},
 	["Falklands"] = {
 		["icao"] = "EGYP",
-		["elevation"] = 243
+		["elevation"] = 243,
+		["utc"] = -3
 	},
 	["MarianaIslands"] = {
 		["icao"] = "PGUA",
-		["elevation"] = 618
+		["elevation"] = 618,
+		["utc"] = 10
 	},
 	["Nevada"] = {
 		["icao"] = "KLSV",
-		["elevation"] = 1869
+		["elevation"] = 1869,
+		["utc"] = -8
 	},
 	["PersianGulf"] = {
 		["icao"] = "OMAA",
-		["elevation"] = 92
+		["elevation"] = 92,
+		["utc"] = 4
 	},
 	["Syria"] = {
 		["icao"] = "LCLK",
-		["elevation"] = 16
+		["elevation"] = 16,
+		["utc"] = 3
 	}
 }
 
@@ -98,8 +104,13 @@ local function round(n)
 	return math.floor(n + 0.5)
 end
 
-local function getHour(t)
-	return math.floor(t / 60 / 60)
+local function getHour(t, m)
+	local h = math.floor(t / 60 / 60)
+	local td = theatreData[t]
+	if td then
+		h = h - td.utc
+	end
+	return h
 end
 
 local function getMinutes(t)
@@ -117,11 +128,9 @@ local function getCallsign(t, g)
 		c = g[1].code
 	end
 	if not c or string.len(c) == 0 then
-		if d.theatre then
-			local td = theatreData[t]
-			if td then
-				return td.icao
-			end
+		local td = theatreData[t]
+		if td then
+			return td.icao
 		end
 		return "ZZZZ"
 	end
@@ -255,16 +264,14 @@ local function getWeather(c, p, f, fv, ft, du, d)
 	return str
 end
 
-local function getAGL(c, g, t)
+local function toAGL(c, g, t)
 	local h = 0
 	if g and #g > 0 and g[1].position then
 		h = g[1].position.y
 	else
-		if t then
-			local td = theatreData[t]
-			if td and td.elevation then
-				h = toM(td.elevation)
-			end
+		local td = theatreData[t]
+		if td then
+			h = toM(td.elevation)
 		end
 	end
 	local cb = c - h
@@ -299,8 +306,8 @@ local function roundClouds(f)
 	return string.format("%0.3d", math.floor((f + r) / i) * m)
 end
 
-local function getCB(p)
-	if p <= 0 or p == 3 then
+local function getCB(p, a)
+	if p <= 0 or p == 3 or a > 10000 then
 		return ""
 	end
 	return "CB"
@@ -319,12 +326,15 @@ local function getPresetClouds(d, g)
 					n = n + 1
 					local a = d.agl
 					if n > 1 then
-						a = getAGL(l.altitudeMin, g, d.theatre)
+						a = toAGL(l.altitudeMin, g, d.theatre)
 					end
-					if string.len(str) > 0 then
-						str = str .. " "
+					local ft = toFt(a)
+					if ft <= 24000 then
+						if string.len(str) > 0 then
+							str = str .. " "
+						end
+						str = string.format("%s%s%s%s", str, c, roundClouds(ft), getCB(p.precipitationPower, ft))
 					end
-					str = string.format("%s%s%s%s", str, c, roundClouds(toFt(a)), getCB(p.precipitationPower))
 				end
 			end
 		end
@@ -337,7 +347,7 @@ end
 
 local function getClouds(d, g)
 	local c = d.clouds
-	d.agl = getAGL(c.base, g, d.theatre)
+	d.agl = toAGL(c.base, g, d.theatre)
 	local str = getPresetClouds(d, g)
 	if str then
 		return str
@@ -360,7 +370,7 @@ local function getClouds(d, g)
 			str, _ = getCoverage(c.density / 10)
 		end
 	end
-	return string.format("%s%s%s", str, roundClouds(ft), getCB(d.precipitation))
+	return string.format("%s%s%s", str, roundClouds(ft), getCB(d.precipitation, ft))
 end
 
 local function getTemp(t)
@@ -391,6 +401,18 @@ end
 
 local function getQNH(q)
 	return math.floor(q / 25.4 * 100)
+end
+
+local function getTurbulence(w, t)
+	local s = round(toKts(w))
+	local ft = toFt(t)
+	local str = ""
+	if s < 3 and ft >= 36 and ft < 126 then -- s: 0-2, ft: 36-125
+		str = "RMK TURB"
+	elseif s < 8 and ft >= 126 then -- s: 0-7, ft: 126-197
+		str = "RMK MOD TURB"
+	end
+	return str
 end
 
 local function getColor(v, a)
@@ -458,7 +480,7 @@ function getMETAR(d, g)
 	if data.date.Year < 1968 then
 		return "N/A"
 	end
-	local metar = string.format("%s %0.2d%0.2d%0.2dL", getCallsign(data.theatre, g), data.date.Day, getHour(data.time), getMinutes(data.time))
+	local metar = string.format("%s %0.2d%0.2d%0.2dZ", getCallsign(data.theatre, g), data.date.Day, getHour(data.time, data.theatre), getMinutes(data.time))
 	if data.atmosphere > 0 then
 		return string.format("%s NIL", metar)
 	end
@@ -475,7 +497,7 @@ function getMETAR(d, g)
 	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.agl, data.clouds, data.fog, data.temp, vis))
 	metar = string.format("%s A%0.4d", metar, getQNH(data.qnh))
 	if wind == "/////KT" then
-		metar = string.format("%s WS ALL RWY", metar)
+		metar = string.format("%s %s", metar, getTurbulence(data.wind, data.turbulence))
 	end
 	return string.format("%s %s", metar, getColor(vis, data.agl))
 end

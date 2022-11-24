@@ -119,17 +119,21 @@ local function getCallsign(t, g)
 	return c
 end
 
-local function getHour(t, m)
+local function getDate(d, t, m)
+	local dd = d
 	local h = math.floor(t / 60 / 60)
 	local td = theatreData[m]
 	if td then
 		h = h - td.utc
 	end
-	return h
-end
-
-local function getMinutes(t)
-	return t / 60 % 60
+	if h >= 24 then
+		h = h - 24
+		dd = dd + 1
+	elseif h < 0 then
+		h = h + 24
+		dd = dd - 1
+	end
+	return string.format("%0.2d%0.2d%0.2d", dd, h, t / 60 % 60)
 end
 
 local function getWindDirectionAndSpeed(w, t)
@@ -205,7 +209,7 @@ local function getWeather(c, p, f, fv, ft, du, d)
 	local preset = getPreset(c)
 	if preset and preset.precipitationPower > 0 then
 		str = "RA"
-	else
+	elseif not preset then
 		if p > 0 then
 			if p == 1 then
 				if d < 7 then
@@ -348,7 +352,9 @@ local function getClouds(d, g)
 		return str
 	end
 	local ft = toFt(d.agl)
-	str = ""
+	if ft > 24000 then -- skipping clouds above FL240
+		return "NSC"
+	end
 	if d.precipitation == 0 then
 		if c.density == 0 then
 			if d.fog then
@@ -361,10 +367,9 @@ local function getClouds(d, g)
 			return "CLR"
 		elseif c.density > 0 and ft > 5000 then
 			return "NSC"
-		else
-			str, _ = getCoverage(c.density / 10)
 		end
 	end
+	str, _ = getCoverage(c.density / 10)
 	return string.format("%s%s%s", str, roundClouds(ft), getCB(d.precipitation, ft))
 end
 
@@ -475,7 +480,7 @@ function getMETAR(d, g)
 	if data.date.Year < 1968 then
 		return "N/A"
 	end
-	local metar = string.format("%s %0.2d%0.2d%0.2dZ", getCallsign(data.theatre, g), data.date.Day, getHour(data.time, data.theatre), getMinutes(data.time))
+	local metar = string.format("%s %sZ", getCallsign(data.theatre, g), getDate(data.date.Day, data.time, data.theatre))
 	if data.atmosphere > 0 then
 		return string.format("%s NIL", metar)
 	end
@@ -484,11 +489,8 @@ function getMETAR(d, g)
 	metar = string.format("%s %s", metar, wind)
 	local vis = getVisibility(data.visibility, data.fog, data.fog_visibility, data.dust, data.dust_visibility)
 	metar = string.format("%s %0.4d", metar, vis)
-	local clouds = getClouds(data, g)
-	if clouds ~= "NSC" then
-		metar = string.format("%s%s", metar, getWeather(data.clouds.preset, data.precipitation, data.fog, data.fog_visibility, data.fog_thickness, data.dust, data.clouds.density))
-	end
-	metar = string.format("%s %s", metar, clouds)
+	metar = string.format("%s%s", metar, getWeather(data.clouds.preset, data.precipitation, data.fog, data.fog_visibility, data.fog_thickness, data.dust, data.clouds.density))
+	metar = string.format("%s %s", metar, getClouds(data, g))
 	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.agl, data.clouds, data.fog, data.temp, vis))
 	metar = string.format("%s A%0.4d", metar, getQNH(data.qnh))
 	if wind == "/////KT" then

@@ -146,7 +146,7 @@ function composeWindString(a_weather, a_humanPosition)
     if not a_weather then 
 		return {'0','0','0'}
 	end
-	
+
 	local wind = {}
 	dllWeather.initAtmospere(a_weather)
  
@@ -165,7 +165,11 @@ function composeWindString(a_weather, a_humanPosition)
         wind[2] = cdata.wind_at_2000 .. ' ' .. windToStr(w.at2000.dir, at2000Speed)
         wind[3] = cdata.wind_at_8000 .. ' ' .. windToStr(w.at8000.dir, at8000Speed)
     else
-		local res = dllWeather.getGroundWindAtPoint({position = a_humanPosition or {x=0, y=0, z=0}})
+    	if not a_humanPosition then
+			return { cdata.NIL }
+		end
+
+		local res = dllWeather.getGroundWindAtPoint({position = a_humanPosition})
 
 		res.v = toKts(res.v)
 

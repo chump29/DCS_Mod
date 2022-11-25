@@ -111,7 +111,7 @@ end
 -------------------------------------------------------------------------------
 -- convert wind structure to wind string
 function windToStr(d, s)
-    return string.format("%.3d° @ %.1d%s", revertWind(roundTo10(d)), s, cdata.speed_unit_kts) -- direction wind blows FROM, in kts
+    return string.format("%.3d° @ %.1d%s", roundTo10(d), s, cdata.speed_unit_kts) -- direction wind blows FROM, in kts
 end
 
 -------------------------------------------------------------------------------
@@ -161,12 +161,12 @@ function composeWindString(a_weather, a_humanPosition)
 			return { cdata.NIL }
 		end
 
-        wind[1] = cdata.wind_at_ground .. ' ' .. windToStr(w.atGround.dir, atGroundSpeed)
-        wind[2] = cdata.wind_at_2000 .. ' ' .. windToStr(w.at2000.dir, at2000Speed)
-        wind[3] = cdata.wind_at_8000 .. ' ' .. windToStr(w.at8000.dir, at8000Speed)
+        wind[1] = cdata.wind_at_ground .. ' ' .. windToStr(revertWind(w.atGround.dir), atGroundSpeed)
+        wind[2] = cdata.wind_at_2000 .. ' ' .. windToStr(revertWind(w.at2000.dir), at2000Speed)
+        wind[3] = cdata.wind_at_8000 .. ' ' .. windToStr(revertWind(w.at8000.dir), at8000Speed)
     else
     	if not a_humanPosition then
-			return { cdata.NIL }
+			return { cdata.NA }
 		end
 
 		local res = dllWeather.getGroundWindAtPoint({position = a_humanPosition})

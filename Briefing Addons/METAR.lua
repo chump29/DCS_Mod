@@ -305,11 +305,13 @@ local function roundClouds(f)
 	return string.format("%0.3d", math.floor((f + r) / i) * m)
 end
 
-local function getCB(p, a)
-	if p <= 0 or p == 3 or a > 10000 then -- not marking clouds above FL100
-		return ""
+local function getCB(a, p, d)
+	if a <= 10000 then -- not marking clouds above FL100
+		if (p == 1 and d > 6) or p == 2 or p == 4 then
+			return "CB"
+		end
 	end
-	return "CB"
+	return ""
 end
 
 local function getPresetClouds(d, g)
@@ -332,7 +334,7 @@ local function getPresetClouds(d, g)
 						if string.len(str) > 0 then
 							str = str .. " "
 						end
-						str = string.format("%s%s%s%s", str, c, roundClouds(ft), getCB(p.precipitationPower, ft))
+						str = string.format("%s%s%s%s", str, c, roundClouds(ft), getCB(ft, p.precipitationPower, d.clouds.density))
 					end
 				end
 			end
@@ -370,7 +372,7 @@ local function getClouds(d, g)
 		end
 	end
 	str, _ = getCoverage(c.density / 10)
-	return string.format("%s%s%s", str, roundClouds(ft), getCB(d.precipitation, ft))
+	return string.format("%s%s%s", str, roundClouds(ft), getCB(ft, d.precipitation, c.density))
 end
 
 local function getTemp(t)
@@ -380,11 +382,22 @@ local function getTemp(t)
 	return string.format("%0.2d", math.abs(round(t)))
 end
 
-local function getDewPoint(a, c, f, t, v)
-	local dp
+local function getQNH(q)
+	return math.floor(q / 25.4 * 100)
+end
+
+local function getDewPoint(a, f, d, t, q, v)
+	local dp = -15
 	local ft = toFt(a)
 	if not f then
-		dp = t - ft / 400
+		if d > 0 then
+			dp = t - ft / 400
+		end
+		if q < 2992 and t - dp > 7 then
+			dp = t - 7
+		elseif t - dp > 11 then
+			dp = t - 11
+		end
 		if dp < -15 then
 			dp = -15
 		end
@@ -397,10 +410,6 @@ local function getDewPoint(a, c, f, t, v)
 		end
 	end
 	return getTemp(dp)
-end
-
-local function getQNH(q)
-	return math.floor(q / 25.4 * 100)
 end
 
 local function getTurbulence(w, t)
@@ -491,8 +500,9 @@ function getMETAR(d, g)
 	metar = string.format("%s %0.4d", metar, vis)
 	metar = string.format("%s%s", metar, getWeather(data.clouds.preset, data.precipitation, data.fog, data.fog_visibility, data.fog_thickness, data.dust, data.clouds.density))
 	metar = string.format("%s %s", metar, getClouds(data, g))
-	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.agl, data.clouds, data.fog, data.temp, vis))
-	metar = string.format("%s A%0.4d", metar, getQNH(data.qnh))
+	local qnh = getQNH(data.qnh)
+	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.agl, data.fog, data.clouds.density, data.temp, qnh, vis))
+	metar = string.format("%s A%0.4d", metar, qnh)
 	if wind == "/////KT" then
 		metar = string.format("%s %s", metar, getTurbulence(data.wind.speed, data.turbulence))
 	end

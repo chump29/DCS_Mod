@@ -68,23 +68,20 @@ local function round(n)
 end
 
 function getTemp(c)
-	if not c then return 0 end
 	return string.format("%d°C (%d°F)", round(c), round(c * 9 / 5 + 32))
 end
 
 function getQNH(a, qnh)
 	if a > 0 then
-		return "NIL"
+		return "N/A"
 	end
-	if not qnh then return 0 end
 	return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(qnh / 25.4 * 100) / 100, qnh, math.floor(qnh * 1.33322))
 end
 
 function getClouds(a, c)
 	if a > 0 then
-		return "NIL"
+		return "N/A"
 	end
-	if not c or not c.density or not c.base then return 0 end
 	if not c.preset and c.density == 0 then
 		return "NIL"
 	end

@@ -220,10 +220,16 @@ local function createSectionGrid_(a_scrollPane, a_data, a_x, a_y, a_w)
         local cellAirdrom
         cellAirdrom = Static.new()
         cellAirdrom:setSkin(staticGridCellSkin)
-        cellAirdrom:setWrapping(true)
-        local ft = math.ceil(v.position.y * 3.280839)
-        local m = math.ceil(v.position.y)
-        cellAirdrom:setText(string.format("%s\n%dft / %dm MSL", v.airdromeName, ft, m))
+
+        if v.position and v.position.y then
+            cellAirdrom:setWrapping(true)
+            local ft = math.ceil(v.position.y * 3.280839)
+            local m = math.ceil(v.position.y)
+            cellAirdrom:setText(string.format("%s\n%dft / %dm MSL", v.airdromeName, ft, m))
+        else
+            cellAirdrom:setText(v.airdromeName)
+        end
+
         cellAirdrom:setBounds(0, 0, w2, 20)
         _tmp, h2 = cellAirdrom:calcSize()   
                 

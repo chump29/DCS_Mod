@@ -239,6 +239,8 @@ local function toAGL(c, h, t)
 		local td = theatreData[t]
 		if td then
 			height = toM(td.elevation)
+		else
+			height = 0
 		end
 	end
 	local cb = c - height

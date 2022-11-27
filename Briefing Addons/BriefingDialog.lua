@@ -33,6 +33,7 @@ local DB                = require('me_db_api')
 local imagePreview      = require('imagePreview')
 local BA = require("briefing_addons")
 local METAR = require("METAR")
+local TheatreOfWarData = require("Mission.TheatreOfWarData")
 
 base.setmetatable(base.dxgui, {__index = base.dxguiWin})
 
@@ -466,7 +467,7 @@ local function getMetarData(b, g)
         precipitation = b.weather.clouds.iprecptns,
         qnh = b.weather.qnh,
         temp = b.weather.season.temperature,
-        theatre = b.theatre,
+        theatre = b.theatre or TheatreOfWarData.getName(),
         time = b.mission_start_time,
         turbulence = b.weather.groundTurbulence,
         visibility = b.weather.visibility.distance, -- always 80000

@@ -19,7 +19,7 @@ Adds the following to the generated briefings:
 - Temperature (*C & F*)
 - QNH (*inHg & mmHg & hPa*)
 - Magnetic variation
-- Cloud base (*ft & m*)
+- Cloud base rounded to 100ft/30m (*ft & m*)
 - Wind (*blows FROM*)
 - CDU wind (*when in A-10*)
 - Turbulence (*kts & mps*)

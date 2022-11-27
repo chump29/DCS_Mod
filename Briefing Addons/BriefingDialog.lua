@@ -474,7 +474,9 @@ local function getMetarData(b, g)
     }
     if g and #g > 0 then
         d.airbase_icao = g[1].code
-        d.airbase_msl = g[1].position.y
+        if g[1].position and g[1].position.y then
+            d.airbase_msl = g[1].position.y
+        end
     end
     return d
 end

@@ -458,6 +458,32 @@ function composeEntry(section, title, data, needGrid)
     return {section = section, title = title, data = data, needGrid = needGrid}
 end
 
+local function getMetarData(m, g)
+    local d = {
+        atmosphere = m.weather.atmosphere_type,
+        clouds = m.weather.clouds,
+        date = m.date,
+        dust = m.weather.enable_dust,
+        dust_visibility = m.weather.dust_density,
+        fog = m.weather.enable_fog,
+        fog_thickness = m.weather.fog.thickness,
+        fog_visibility = m.weather.fog.visibility,
+        precipitation = m.weather.clouds.iprecptns,
+        qnh = m.weather.qnh,
+        temp = m.weather.season.temperature,
+        theatre = m.theatre,
+        time = m.start_time,
+        turbulence = m.weather.groundTurbulence,
+        visibility = m.weather.visibility.distance, -- always 80000
+        wind = m.weather.wind.atGround
+    }
+    if g and #g > 0 then
+        d.airbase_icao = g[1].code
+        d.airbase_msl = g[1].position.y
+    end
+    return d
+end
+
 -------------------------------------------------------------------------------
 -- генерация автобрифинга
 function generateAutoBriefing(mission)
@@ -582,7 +608,7 @@ function generateAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
 
         table.insert(autoBriefing, composeEntry(cdata.weather))
-        table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(mission, tblStartGroups) .. "\n"))
+        table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(getMetarData(mission, tblStartGroups)) .. "\n"))
         table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
         table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(mission.weather.atmosphere_type, mission.weather.qnh)))
         if #tblStartGroups > 0 then
@@ -623,7 +649,7 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(cdata.description, nil,    mission.descriptionText))
 
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(mission) .. "\n"))
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(getMetarData(mission)) .. "\n"))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(mission.weather.atmosphere_type, mission.weather.qnh)))
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(mission.weather.atmosphere_type, mission.weather.clouds)))

@@ -8,12 +8,9 @@ local base = _G
 
 module("METAR")
 
-local CloudPresets = base.dofile("Config/Effects/getCloudsPresets.lua")
-local ipairs = base.ipairs
+local CloudPresets = base.dofile("Config\\Effects\\getCloudsPresets.lua")
 local math = base.math
-local MissionModule = base.require("me_mission")
 local string = base.string
-local TheatreOfWarData = base.require("Mission.TheatreOfWarData")
 
 --[[
 METAR resources used:
@@ -23,29 +20,6 @@ METAR resources used:
 * https://meteocentre.com/doc/metar.html
 * https://www.icams-portal.gov/resources/ofcm/fmh/FMH1/fmh1_2019.pdf
 --]]
-
-local function normalizeData(data)
-	-- checking for DCS.getPlayerBriefing(), then env.mission
-	return {
-		date = data.mission_date or data.date,
-		time = data.mission_start_time or data.start_time,
-		atmosphere = data.weather.atmosphere_type,
-		wind = data.weather.wind.atGround,
-		turbulence = data.weather.groundTurbulence,
-		visibility = data.weather.visibility.distance, -- doesn't seem to change, always 80000
-		precipitation = data.weather.clouds.iprecptns,
-		fog = data.weather.enable_fog,
-		fog_visibility = data.weather.fog.visibility,
-		fog_thickness = data.weather.fog.thickness,
-		dust = data.weather.enable_dust,
-		dust_visibility = data.weather.dust_density,
-		clouds = data.weather.clouds,
-		temp = data.weather.season.temperature,
-		qnh = data.weather.qnh,
-		agl = 0,
-		theatre = TheatreOfWarData.getName() or MissionModule.mission.theatre
-	}
-end
 
 local theatreData = {
 	["Caucasus"] = {
@@ -104,19 +78,15 @@ local function round(n)
 	return math.floor(n + 0.5)
 end
 
-local function getCallsign(t, g)
-	local c
-	if g and #g > 0 then
-		c = g[1].code
-	end
-	if not c or string.len(c) == 0 then
+local function getCallsign(t, i)
+	if not i or string.len(i) == 0 then
 		local td = theatreData[t]
 		if td then
 			return td.icao
 		end
 		return "ZZZZ"
 	end
-	return c
+	return i
 end
 
 local function getDate(d, t, m)
@@ -263,17 +233,15 @@ local function getWeather(c, p, f, fv, ft, du, d)
 	return str
 end
 
-local function toAGL(c, g, t)
-	local h = 0
-	if g and #g > 0 and g[1].position then
-		h = g[1].position.y
-	else
+local function toAGL(c, h, t)
+	local height = h
+	if not height then
 		local td = theatreData[t]
 		if td then
-			h = toM(td.elevation)
+			height = toM(td.elevation)
 		end
 	end
-	local cb = c - h
+	local cb = c - height
 	if cb < 0 then
 		cb = 0
 	end
@@ -314,12 +282,12 @@ local function getCB(a, p, d)
 	return ""
 end
 
-local function getPresetClouds(d, g)
+local function getPresetClouds(d, h)
 	local p = getPreset(d.clouds.preset)
 	if p then
 		local str = ""
 		local z, n = 0, 0
-		for _, l in ipairs(p.layers) do
+		for _, l in base.ipairs(p.layers) do
 			if l.coverage > 0 then
 				local c, i = getCoverage(l.coverage)
 				if i >= z then
@@ -327,7 +295,7 @@ local function getPresetClouds(d, g)
 					n = n + 1
 					local a = d.agl
 					if n > 1 then
-						a = toAGL(l.altitudeMin, g, d.theatre)
+						a = toAGL(l.altitudeMin, h, d.theatre)
 					end
 					local ft = toFt(a)
 					if ft <= 24000 then -- skipping clouds above FL240
@@ -346,10 +314,10 @@ local function getPresetClouds(d, g)
 	return nil
 end
 
-local function getClouds(d, g)
+local function getClouds(d, h)
 	local c = d.clouds
-	d.agl = toAGL(c.base, g, d.theatre)
-	local str = getPresetClouds(d, g)
+	d.agl = toAGL(c.base, h, d.theatre)
+	local str = getPresetClouds(d, h)
 	if str then
 		return str
 	end
@@ -484,27 +452,48 @@ local function getColor(v, a)
 	end
 end
 
-function getMETAR(d, g)
-	local data = normalizeData(d)
-	if data.date.Year < 1968 then
+--[[
+local function debug(d)
+	if base.io and base.os and base.require then
+		local dir = base.os.getenv("USERPROFILE") or ""
+		if string.len(dir) > 0 then
+			dir = dir .. "\\Desktop\\"
+		end
+		local f = base.assert(base.io.open(dir .. "METAR.log", "a"))
+		if f then
+			local Serializer = base.require("Serializer")
+			local s = Serializer.new(f)
+			f:write(base.os.date("-- %x @ %X"), "\n\n")
+			s:serialize_sorted("d", d)
+			f:write("\n")
+			f:flush()
+			f:close()
+		end
+	end
+end
+--]]
+
+function getMETAR(d)
+	--debug(d)
+	if d.date.Year < 1968 then
 		return "N/A"
 	end
-	local metar = string.format("%s %sZ", getCallsign(data.theatre, g), getDate(data.date.Day, data.time, data.theatre))
-	if data.atmosphere > 0 then
+	local metar = string.format("%s %sZ", getCallsign(d.theatre, d.airbase_icao), getDate(d.date.Day, d.time, d.theatre))
+	if d.atmosphere > 0 then
 		return string.format("%s NIL", metar)
 	end
 	metar = string.format("%s AUTO", metar)
-	local wind = getWindDirectionAndSpeed(data.wind, data.turbulence)
+	local wind = getWindDirectionAndSpeed(d.wind, d.turbulence)
 	metar = string.format("%s %s", metar, wind)
-	local vis = getVisibility(data.visibility, data.fog, data.fog_visibility, data.dust, data.dust_visibility)
+	local vis = getVisibility(d.visibility, d.fog, d.fog_visibility, d.dust, d.dust_visibility)
 	metar = string.format("%s %0.4d", metar, vis)
-	metar = string.format("%s%s", metar, getWeather(data.clouds.preset, data.precipitation, data.fog, data.fog_visibility, data.fog_thickness, data.dust, data.clouds.density))
-	metar = string.format("%s %s", metar, getClouds(data, g))
-	local qnh = getQNH(data.qnh)
-	metar = string.format("%s %s/%s", metar, getTemp(data.temp), getDewPoint(data.agl, data.fog, data.clouds.density, data.temp, qnh, vis))
+	metar = string.format("%s%s", metar, getWeather(d.clouds.preset, d.precipitation, d.fog, d.fog_visibility, d.fog_thickness, d.dust, d.clouds.density))
+	metar = string.format("%s %s", metar, getClouds(d, d.airbase_msl))
+	local qnh = getQNH(d.qnh)
+	metar = string.format("%s %s/%s", metar, getTemp(d.temp), getDewPoint(d.agl, d.fog, d.clouds.density, d.temp, qnh, vis))
 	metar = string.format("%s A%0.4d", metar, qnh)
 	if wind == "/////KT" then
-		metar = string.format("%s %s", metar, getTurbulence(data.wind.speed, data.turbulence))
+		metar = string.format("%s %s", metar, getTurbulence(d.wind.speed, d.turbulence))
 	end
-	return string.format("%s %s", metar, getColor(vis, data.agl))
+	return string.format("%s %s", metar, getColor(vis, d.agl))
 end

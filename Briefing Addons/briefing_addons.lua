@@ -26,7 +26,7 @@ if magvar then
 	MapWindow			= require("me_map_window")
 end
 
-function toDegrees(radians, raw)
+local function toDegrees(radians, raw)
 	local degrees = radians * 180 / math.pi
 
 	if not raw then
@@ -36,7 +36,7 @@ function toDegrees(radians, raw)
 	return degrees
 end
 
-function toPositiveDegrees(radians, raw)
+local function toPositiveDegrees(radians, raw)
 	local degrees = toDegrees(radians, raw)
 
 	if degrees < 0 then
@@ -46,12 +46,12 @@ function toPositiveDegrees(radians, raw)
 	return degrees
 end
 
-function getMV(d, p)
-	if not magvar or not p then
+function getMV(d, g)
+	if not magvar or not g or not g.position then
 		return "N/A"
 	end
 	magvar.init(d.Month, d.Year)
-	local lat, long = MapWindow.convertMetersToLatLon(p.x, p.z)
+	local lat, long = MapWindow.convertMetersToLatLon(g.position.x, g.position.z)
 	local magVar = UC.toDegrees(magvar.get_mag_decl(lat, long), true)
 	local dir = "East"
 	if magVar < 0 then
@@ -71,11 +71,19 @@ function getTemp(c)
 	return string.format("%d°C (%d°F)", round(c), round(c * 9 / 5 + 32))
 end
 
-function getQNH(a, qnh)
-	if a > 0 then
-		return "N/A"
+local function toQNH(q, a)
+	return q + a / 27.3 -- in hPa
+end
+
+function getQNH(a, q, g)
+	if a == 0 then
+		return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(q / 25.4 * 100) / 100, math.floor(q), math.floor(q * 1.333224))
+	elseif g and g.position and g.position.y then -- in m
+		local _, pressure = dllWeather.getTemperatureAndPressureAtPoint({position = g.position}) -- QFE in Pa
+		local qnh = toQNH(pressure / 100, g.position.y)
+		return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(qnh * 0.029530), math.floor(qnh * 0.750062), math.floor(qnh))
 	end
-	return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(qnh / 25.4 * 100) / 100, qnh, math.floor(qnh * 1.33322))
+	return "N/A"
 end
 
 function getClouds(a, c)
@@ -102,7 +110,7 @@ local function toKts(mps)
 	return math.floor(mps * 1.943844 + 0.5)
 end
 
-function cduWindToStr(d, s, t)
+local function cduWindToStr(d, s, t)
 	return string.format("%0.3d/%0.2d  %+0.2d", reverseWind(d), s, t)
 end
 

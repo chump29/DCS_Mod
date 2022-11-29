@@ -71,7 +71,7 @@ function toDegrees(radians, raw)
   return degrees
 end
 
-function toRadians(degrees, raw)
+local function toRadians(degrees, raw)
   local radians = degrees * math.pi / 180  
   
   if not raw then
@@ -81,7 +81,7 @@ function toRadians(degrees, raw)
   return radians
 end
 
-function toPositiveDegrees(radians, raw)
+local function toPositiveDegrees(radians, raw)
   local degrees = toDegrees(radians, raw)
   
   if degrees < 0 then
@@ -110,42 +110,44 @@ end
 
 -------------------------------------------------------------------------------
 -- convert wind structure to wind string
-function windToStr(d, s)
+local function windToStr(d, s)
     return string.format("%.3d° @ %.1d%s", roundTo10(d), s, cdata.speed_unit_kts) -- direction wind blows FROM, in kts
 end
 
 -------------------------------------------------------------------------------
 -- формирование массива строк с данными о турбулентности
 function composeTurbulenceString(a_weather)
-	if not a_weather then 
-		return {cdata.NA}
+	--if not a_weather then
+	--	return {cdata.NA}
+	--end
+    --if  a_weather.turbulence then
+    --    local t = a_weather.turbulence
+    --    local turbulence = {}
+    --    if t == 0 then
+    --    	turbulence[1] = cdata.NIL
+    --    else
+    --    	turbulence[1] = string.format("%0.1f%s (%0.1f%s)", math.floor(t.atGround * 1.943844 + 0.5) / 10, cdata.speed_unit_kts, math.floor(t.atGround + 0.5) / 10, cdata.speed_unit)
+    --    end
+    --    return turbulence
+    --else
+    if a_weather.atmosphere_type == 0 then
+		if a_weather.groundTurbulence == 0 then
+			return { cdata.NIL }
+		else
+			return { string.format("%0.1f%s (%0.1f%s)", math.floor(a_weather.groundTurbulence * 1.943844 + 0.5) / 10, cdata.speed_unit_kts, math.floor(a_weather.groundTurbulence + 0.5) / 10, cdata.speed_unit) }
+		end
+	else
+		return { cdata.NA }
 	end
-    if  a_weather.turbulence then
-        local t = a_weather.turbulence
-        local turbulence = {}
-        if t == 0 then
-        	turbulence[1] = cdata.NIL
-        else
-        	turbulence[1] = string.format("%0.1f%s (%0.1f%s)", math.floor(t.atGround * 1.943844 + 0.5) / 10, cdata.speed_unit_kts, math.floor(t.atGround + 0.5) / 10, cdata.speed_unit)
-        end
-        return turbulence
-    else
-        local turbulence = {}
-        if a_weather.groundTurbulence == 0 then
-        	turbulence[1] = cdata.NIL
-        else
-        	turbulence[1] = string.format("%0.1f%s (%0.1f%s)", math.floor(a_weather.groundTurbulence * 1.943844 + 0.5) / 10, cdata.speed_unit_kts, math.floor(a_weather.groundTurbulence + 0.5) / 10, cdata.speed_unit)
-        end
-        return turbulence
-    end    
+    --end
 end
 
 -------------------------------------------------------------------------------
 -- формирование массива строк с данными о ветре
 function composeWindString(a_weather, a_humanPosition)
-    if not a_weather then 
-		return {'0','0','0'}
-	end
+    --if not a_weather then
+	--	return {'0','0','0'}
+	--end
 
 	local wind = {}
 	dllWeather.initAtmospere(a_weather)

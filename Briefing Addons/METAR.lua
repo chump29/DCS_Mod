@@ -54,15 +54,15 @@ local theatreData = {
 	}
 }
 
-local function toFt(m)
+local function toFt(m) -- in m
 	return m * 3.280839
 end
 
-local function toKts(m)
+local function toKts(m) -- in mps
 	 return m * 1.943844
 end
 
-local function toM(f)
+local function toM(f) -- in ft
 	return f / 3.280839
 end
 
@@ -284,7 +284,7 @@ local function getCB(a, p, d)
 	return ""
 end
 
-local function getPresetClouds(d, h)
+local function getPresetClouds(d)
 	local p = getPreset(d.clouds.preset)
 	if p then
 		local str = ""
@@ -297,7 +297,7 @@ local function getPresetClouds(d, h)
 					n = n + 1
 					local a = d.agl
 					if n > 1 then
-						a = toAGL(l.altitudeMin, h, d.theatre)
+						a = toAGL(l.altitudeMin, d.position.y, d.theatre)
 					end
 					local ft = toFt(a)
 					if ft <= 24000 then -- skipping clouds above FL240
@@ -316,10 +316,10 @@ local function getPresetClouds(d, h)
 	return nil
 end
 
-local function getClouds(d, h)
+local function getClouds(d)
 	local c = d.clouds
-	d.agl = toAGL(c.base, h, d.theatre)
-	local str = getPresetClouds(d, h)
+	d.agl = toAGL(c.base, d.position.y, d.theatre)
+	local str = getPresetClouds(d)
 	if str then
 		return str
 	end
@@ -327,7 +327,7 @@ local function getClouds(d, h)
 	if ft > 24000 then -- skipping clouds above FL240
 		return "NSC"
 	end
-	if d.precipitation == 0 then
+	if c.iprecptns == 0 then
 		if c.density == 0 then
 			if d.fog then
 				return "NSC"
@@ -342,7 +342,7 @@ local function getClouds(d, h)
 		end
 	end
 	str, _ = getCoverage(c.density / 10)
-	return string.format("%s%s%s", str, roundClouds(ft), getCB(ft, d.precipitation, c.density))
+	return string.format("%s%s%s", str, roundClouds(ft), getCB(ft, c.iprecptns, c.density))
 end
 
 local function getTemp(t)
@@ -387,9 +387,9 @@ local function getTurbulence(w, t)
 	local ft = round(toFt(t))
 	local str = ""
 	if s < 3 and ft >= 36 and ft < 126 then -- s: 0-2, ft: 36-125
-		str = "RMK TURB"
+		str = " RMK TURB"
 	elseif s < 8 and ft >= 126 then -- s: 0-7, ft: 126-197
-		str = "RMK MOD TURB"
+		str = " RMK MOD TURB"
 	end
 	return str
 end
@@ -455,18 +455,18 @@ local function getColor(v, a)
 end
 
 --[[
-local function debug(d)
+local function debug(n, v)
 	if base.io and base.os and base.require then
-		local dir = base.os.getenv("USERPROFILE") or ""
-		if string.len(dir) > 0 then
-			dir = dir .. "\\Desktop\\"
+		local d = base.os.getenv("USERPROFILE") or ""
+		if string.len(d) > 0 then
+			d = d .. "\\Desktop\\"
 		end
-		local f = base.assert(base.io.open(dir .. "METAR.log", "a"))
+		local f = base.assert(base.io.open(d .. "METAR.log", "a"))
 		if f then
 			local Serializer = base.require("Serializer")
 			local s = Serializer.new(f)
 			f:write(base.os.date("-- %x @ %X"), "\n\n")
-			s:serialize_sorted("d", d)
+			s:serialize_sorted(n, v)
 			f:write("\n")
 			f:flush()
 			f:close()
@@ -476,11 +476,11 @@ end
 --]]
 
 function getMETAR(d)
-	--debug(d)
+	--debug("d", d)
 	if d.date.Year < 1968 then
 		return "N/A"
 	end
-	local metar = string.format("%s %sZ", getCallsign(d.theatre, d.airbase_icao), getDate(d.date.Day, d.time, d.theatre))
+	local metar = string.format("%s %sZ", getCallsign(d.theatre, d.icao), getDate(d.date.Day, d.time, d.theatre))
 	if d.atmosphere > 0 then
 		return string.format("%s NIL", metar)
 	end
@@ -489,13 +489,13 @@ function getMETAR(d)
 	metar = string.format("%s %s", metar, wind)
 	local vis = getVisibility(d.visibility, d.fog, d.fog_visibility, d.dust, d.dust_visibility)
 	metar = string.format("%s %0.4d", metar, vis)
-	metar = string.format("%s%s", metar, getWeather(d.clouds.preset, d.precipitation, d.fog, d.fog_visibility, d.fog_thickness, d.dust, d.clouds.density))
-	metar = string.format("%s %s", metar, getClouds(d, d.airbase_msl))
+	metar = string.format("%s%s", metar, getWeather(d.clouds.preset, d.clouds.iprecptns, d.fog, d.fog_visibility, d.fog_thickness, d.dust, d.clouds.density))
+	metar = string.format("%s %s", metar, getClouds(d))
 	local qnh = getQNH(d.qnh)
 	metar = string.format("%s %s/%s", metar, getTemp(d.temp), getDewPoint(d.agl, d.fog, d.clouds.density, d.temp, qnh, vis))
 	metar = string.format("%s A%0.4d", metar, qnh)
 	if wind == "/////KT" then
-		metar = string.format("%s %s", metar, getTurbulence(d.wind.speed, d.turbulence))
+		metar = string.format("%s%s", metar, getTurbulence(d.wind.speed, d.turbulence))
 	end
 	return string.format("%s %s", metar, getColor(vis, d.agl))
 end

@@ -472,11 +472,10 @@ local function getMetarData(b, g)
         visibility = b.weather.visibility.distance, -- always 80000
         wind = b.weather.wind.atGround
     }
-    d.position = {}
     if g then
         d.icao = g.code
-        if g.position then
-            d.position = g.position
+        if g.position and g.position.y then
+            d.msl = g.position.y
         end
     end
     return d

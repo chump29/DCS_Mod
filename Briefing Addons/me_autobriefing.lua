@@ -477,11 +477,10 @@ local function getMetarData(m, g)
         wind = m.weather.wind.atGround,
         cyclones = m.weather.cyclones
     }
-    d.position = {}
     if g then
         d.icao = g.code
-        if g.position then
-            d.position = g.position
+        if g.position and g.position.y then
+            d.msl = g.position.y
         end
     end
     return d

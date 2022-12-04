@@ -8,18 +8,8 @@ local base = _G
 
 module("METAR")
 
-local CloudPresets = base.dofile("Config\\Effects\\getCloudsPresets.lua")
 local math = base.math
 local string = base.string
-
---[[
-METAR resources used:
-* https://mediawiki.ivao.aero/index.php?title=METAR_explanation
-* https://metar-taf.com/explanation
-* https://www.dwd.de/EN/specialusers/aviation/download/products/metar_taf/metar_taf_download.pdf?__blob=publicationFile&v=3
-* https://meteocentre.com/doc/metar.html
-* https://www.icams-portal.gov/resources/ofcm/fmh/FMH1/fmh1_2019.pdf
---]]
 
 local theatreData = {
 	["Caucasus"] = {
@@ -59,7 +49,7 @@ local function toFt(m) -- in m
 end
 
 local function toKts(m) -- in mps
-	 return m * 1.943844
+	return m * 1.943844
 end
 
 local function toM(f) -- in ft
@@ -78,15 +68,16 @@ local function round(n)
 	return math.floor(n + 0.5)
 end
 
-local function getCallsign(t, i)
-	if not i or string.len(i) == 0 then
-		local td = theatreData[t]
+local function getICAO(d)
+	if not d.icao or string.len(d.icao) == 0 then
+		local td = theatreData[d.theatre]
 		if td then
+			d.useDefault = true
 			return td.icao
 		end
 		return "ZZZZ"
 	end
-	return i
+	return d.icao
 end
 
 local function getDate(d, t, m)
@@ -168,6 +159,7 @@ local function getVisibility(v, f, fv, d, dv)
 end
 
 local function getPreset(p)
+	local CloudPresets = base.dofile("Config\\Effects\\getCloudsPresets.lua")
 	if p and CloudPresets then
 		return CloudPresets[p]
 	end
@@ -233,9 +225,9 @@ local function getWeather(c, p, f, fv, ft, du, d)
 	return str
 end
 
-local function toAGL(c, h, t)
+local function toAGL(c, h, t, d)
 	local height = h
-	if not height then
+	if not height or d then
 		local td = theatreData[t]
 		if td then
 			height = toM(td.elevation)
@@ -297,7 +289,7 @@ local function getPresetClouds(d)
 					n = n + 1
 					local a = d.agl
 					if n > 1 then
-						a = toAGL(l.altitudeMin, d.position.y, d.theatre)
+						a = toAGL(l.altitudeMin, d.msl, d.theatre, d.useDefault)
 					end
 					local ft = toFt(a)
 					if ft <= 24000 then -- skipping clouds above FL240
@@ -318,7 +310,7 @@ end
 
 local function getClouds(d)
 	local c = d.clouds
-	d.agl = toAGL(c.base, d.position.y, d.theatre)
+	d.agl = toAGL(c.base, d.msl, d.theatre, d.useDefault)
 	local str = getPresetClouds(d)
 	if str then
 		return str
@@ -480,7 +472,8 @@ function getMETAR(d)
 	if d.date.Year < 1968 then
 		return "N/A"
 	end
-	local metar = string.format("%s %sZ", getCallsign(d.theatre, d.icao), getDate(d.date.Day, d.time, d.theatre))
+	local icao = getICAO(d)
+	local metar = string.format("%s %sZ", icao, getDate(d.date.Day, d.time, d.theatre))
 	if d.atmosphere > 0 then
 		return string.format("%s NIL", metar)
 	end

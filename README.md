@@ -99,35 +99,6 @@ Configuration settings:
 
 ---
 
-# [GCI](GCI.lua)
-***NOTE: This is a proof-of-concept!***
-
-Uses [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add F10 data to blue flights:
-- Unit flight path history
-  - Color-coded based on altitude
-    - < 1000ft: ![Green](https://via.placeholder.com/15/00ff00/00ff00.png)
-    - < 2500ft: ![Yellow](https://via.placeholder.com/15/ffff00/ffff00.png)
-    - \>= 2500ft: ![Red](https://via.placeholder.com/15/ff0000/ff0000.png)
-  - *NOTE: Turning on **Show All Routes** helps draw in real-time*
-- Group name/altitude/speed/heading
-
-Configuration settings:
-```lua
-  local config = GCI_CONFIG or {
-    offsetUp = 800,
-    offsetRight = 400,
-    greenHeight = 1000, -- in ft
-    yellowHeight = 2500, -- in ft
-    maxHistory = 3, -- 30s
-    fontColor = {0, 0, 1, 1}, -- RGBA
-    fontSize = 10,
-    backgroundColor = {0, 0, 0, 0.1}, -- RGBA
-    debug = false
-  }
-```
-
----
-
 # [JTAC Priority](JTAC_Priority.lua)
 Replaces `findNearestVisibleEnemy` in JTAC script to target red ground units with priority *(highest to lowest)*:
 - SAM

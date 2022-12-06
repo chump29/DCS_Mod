@@ -386,9 +386,12 @@ local function getTurbulence(w, t)
 	return str
 end
 
-local function getColor(v, a)
+local function getColor(v, d, a)
 	local vis = v / 1000
-	local ft = toFt(a)
+	local ft = 99999 -- arbitrary
+	if d > 0 then
+		ft = toFt(a)
+	end
 	if vis < 0.8 then
 		return "RED"
 	elseif vis < 1.6 then
@@ -453,7 +456,7 @@ local function debug(n, v)
 		if string.len(d) > 0 then
 			d = d .. "\\Desktop\\"
 		end
-		local f = base.assert(base.io.open(d .. "METAR.log", "a"))
+		local f = base.assert(base.io.open(d .. "log.txt", "a"))
 		if f then
 			local Serializer = base.require("Serializer")
 			local s = Serializer.new(f)
@@ -490,5 +493,5 @@ function getMETAR(d)
 	if wind == "/////KT" then
 		metar = string.format("%s%s", metar, getTurbulence(d.wind.speed, d.turbulence))
 	end
-	return string.format("%s %s", metar, getColor(vis, d.agl))
+	return string.format("%s %s", metar, getColor(vis, d.clouds.density, d.agl))
 end

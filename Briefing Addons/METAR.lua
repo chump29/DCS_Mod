@@ -32,6 +32,7 @@ local theatreData = {
 		["elevation"] = 1869,
 		["utc"] = -8
 	},
+	-- Normandy
 	["PersianGulf"] = {
 		["icao"] = "OMAA",
 		["elevation"] = 92,
@@ -42,6 +43,7 @@ local theatreData = {
 		["elevation"] = 16,
 		["utc"] = 3
 	}
+	-- TheChannel
 }
 
 local function toFt(m) -- in m
@@ -81,6 +83,7 @@ local function getICAO(d)
 end
 
 local function getDate(d, t, m)
+	if not d then return "?" end
 	local dd = d
 	local h = math.floor(t / 60 / 60)
 	local td = theatreData[m]
@@ -98,6 +101,7 @@ local function getDate(d, t, m)
 end
 
 local function getWindDirectionAndSpeed(w, t)
+	if not w then return "?" end
 	-- NOTE: max settings in ME are s=97 & ft=197
 	local ft = round(toFt(t))
 	local d = reverseWind(round(w.dir / 10) * 10)
@@ -133,9 +137,24 @@ local function getWindDirectionAndSpeed(w, t)
 	return string.format("%0.3d%0.2dKT", d, s) -- s: 3-97, ft: 0-35
 end
 
-local function getVisibility(v, f, fv, d, dv)
+local function getPreset(p)
+	local CloudPresets = base.dofile("Config\\Effects\\getCloudsPresets.lua")
+	if p and CloudPresets then
+		return CloudPresets[p]
+	end
+	return nil
+end
+
+local function getVisibility(v, f, fv, d, dv, c, p)
+	if not v then return -666 end
 	local vis = v
-	if f and fv < vis then
+	local preset = getPreset(c)
+	if preset and preset.precipitationPower > 0 then
+		vis = 8000
+	elseif p and (p == 2 or p == 4) then
+		vis = 3050
+	end
+	if f and fv and fv < vis then
 		vis = fv
 	end
 	if d and dv < vis then
@@ -158,23 +177,23 @@ local function getVisibility(v, f, fv, d, dv)
 	return visibility
 end
 
-local function getPreset(p)
-	local CloudPresets = base.dofile("Config\\Effects\\getCloudsPresets.lua")
-	if p and CloudPresets then
-		return CloudPresets[p]
-	end
-	return nil
-end
-
-local function getWeather(c, p, f, fv, ft, du, d)
+local function getWeather(c, p, f, fv, ft, du, d, t, h, v)
 	local str = ""
 	local preset = getPreset(c)
 	if preset and preset.precipitationPower > 0 then
-		str = "RA"
+		if t and t < 3 then
+			str = "SN"
+		else
+			str = "RA"
+		end
 	elseif not preset then
-		if p > 0 then
-			if p == 1 then
-				if d < 7 then
+		if p and p > 0 then
+			if p < 3 and t and t < 3 then
+				str = "RASN"
+			elseif p < 3 and t and t < 0 then
+				str = "SN"
+			elseif p == 1 then
+				if d and d < 7 then
 					str = "SHRA"
 				else
 					str = "RA"
@@ -182,7 +201,7 @@ local function getWeather(c, p, f, fv, ft, du, d)
 			elseif p == 2 then
 				str = "TSRA"
 			elseif p == 3 then
-				if d < 7 then
+				if d and d < 7 then
 					str = "SHSN"
 				else
 					str = "SN"
@@ -192,7 +211,14 @@ local function getWeather(c, p, f, fv, ft, du, d)
 			end
 		end
 	end
-	if f then
+	if h and h ~= "off" and v <= 5000 then
+		if string.len(str) > 0 then
+			str = str .. " IC"
+		else
+			str = "IC"
+		end
+	end
+	if f and fv and ft then
 		local fs
 		if fv < 1000 then
 			fs = "FG"
@@ -288,7 +314,9 @@ local function getPresetClouds(d)
 					z = i
 					n = n + 1
 					local a = d.agl
-					if n > 1 then
+					if n == 1 then
+						d.clouds.density = math.floor(l.density * 10)
+					elseif n > 1 then
 						a = toAGL(l.altitudeMin, d.msl, d.theatre, d.useDefault)
 					end
 					local ft = toFt(a)
@@ -338,6 +366,7 @@ local function getClouds(d)
 end
 
 local function getTemp(t)
+	if not t then return "?" end
 	if t < 0 then
 		return "M" .. string.format("%0.2d", math.abs(math.ceil(t - 0.5)))
 	end
@@ -349,10 +378,11 @@ local function getQNH(q)
 end
 
 local function getDewPoint(a, f, d, t, q, v)
+	if not t then return "?" end
 	local dp = -15
 	local ft = toFt(a)
 	if not f then
-		if d > 0 then
+		if d and d > 0 then
 			dp = t - ft / 400
 		end
 		if q < 2992 and t - dp > 7 then
@@ -375,13 +405,14 @@ local function getDewPoint(a, f, d, t, q, v)
 end
 
 local function getTurbulence(w, t)
+	if not w then return "?" end
 	local s = round(toKts(w))
 	local ft = round(toFt(t))
 	local str = ""
 	if s < 3 and ft >= 36 and ft < 126 then -- s: 0-2, ft: 36-125
-		str = " RMK TURB"
+		str = " TURB"
 	elseif s < 8 and ft >= 126 then -- s: 0-7, ft: 126-197
-		str = " RMK MOD TURB"
+		str = " MOD TURB"
 	end
 	return str
 end
@@ -389,7 +420,7 @@ end
 local function getColor(v, d, a)
 	local vis = v / 1000
 	local ft = 99999 -- arbitrary
-	if d > 0 then
+	if d and d > 0 then
 		ft = toFt(a)
 	end
 	if vis < 0.8 then
@@ -449,30 +480,8 @@ local function getColor(v, d, a)
 	end
 end
 
---[[
-local function debug(n, v)
-	if base.io and base.os and base.require then
-		local d = base.os.getenv("USERPROFILE") or ""
-		if string.len(d) > 0 then
-			d = d .. "\\Desktop\\"
-		end
-		local f = base.assert(base.io.open(d .. "log.txt", "a"))
-		if f then
-			local Serializer = base.require("Serializer")
-			local s = Serializer.new(f)
-			f:write(base.os.date("-- %x @ %X"), "\n\n")
-			s:serialize_sorted(n, v)
-			f:write("\n")
-			f:flush()
-			f:close()
-		end
-	end
-end
---]]
-
 function getMETAR(d)
-	--debug("d", d)
-	if d.date.Year < 1968 then
+	if d.date and d.date.Year < 1968 then
 		return "N/A"
 	end
 	local icao = getICAO(d)
@@ -483,13 +492,14 @@ function getMETAR(d)
 	metar = string.format("%s AUTO", metar)
 	local wind = getWindDirectionAndSpeed(d.wind, d.turbulence)
 	metar = string.format("%s %s", metar, wind)
-	local vis = getVisibility(d.visibility, d.fog, d.fog_visibility, d.dust, d.dust_visibility)
+	local vis = getVisibility(d.visibility, d.fog, d.fog_visibility, d.dust, d.dust_visibility, d.clouds.preset, d.clouds.iprecptns)
 	metar = string.format("%s %0.4d", metar, vis)
-	metar = string.format("%s%s", metar, getWeather(d.clouds.preset, d.clouds.iprecptns, d.fog, d.fog_visibility, d.fog_thickness, d.dust, d.clouds.density))
+	metar = string.format("%s%s", metar, getWeather(d.clouds.preset, d.clouds.iprecptns, d.fog, d.fog_visibility, d.fog_thickness, d.dust, d.clouds.density, d.temp, d.halo, vis))
 	metar = string.format("%s %s", metar, getClouds(d))
 	local qnh = getQNH(d.qnh)
 	metar = string.format("%s %s/%s", metar, getTemp(d.temp), getDewPoint(d.agl, d.fog, d.clouds.density, d.temp, qnh, vis))
 	metar = string.format("%s A%0.4d", metar, qnh)
+	metar = string.format("%s RMK AO2", metar)
 	if wind == "/////KT" then
 		metar = string.format("%s%s", metar, getTurbulence(d.wind.speed, d.turbulence))
 	end

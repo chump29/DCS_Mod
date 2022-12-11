@@ -455,6 +455,13 @@ function composeEntry(section, title, data, needGrid)
 end
 
 local function getMetarData(b, g)
+    b.weather.clouds = b.weather.clouds or {}
+    b.weather.mission_date = b.weather.mission_date or {}
+    b.weather.fog = b.weather.fog or {}
+    b.weather.season = b.weather.season or {}
+    b.weather.visibility = b.weather.visibility or {}
+    b.weather.wind = b.weather.wind or {}
+    b.weather.halo = b.weather.halo or {}
     local d = {
         atmosphere = b.weather.atmosphere_type,
         clouds = b.weather.clouds,
@@ -470,7 +477,8 @@ local function getMetarData(b, g)
         time = b.mission_start_time,
         turbulence = b.weather.groundTurbulence,
         visibility = b.weather.visibility.distance, -- always 80000
-        wind = b.weather.wind.atGround
+        wind = b.weather.wind.atGround,
+        halo = b.weather.halo.preset
     }
     if g then
         d.icao = g.code

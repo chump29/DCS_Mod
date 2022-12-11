@@ -6,9 +6,9 @@ Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) to create a
 
 Configuration settings:
 ```lua
-  local config = ATIS_CONFIG or {
-    frequency_add = 250000 -- in Hz
-  }
+local config = ATIS_CONFIG or {
+  frequency_add = 250000 -- in Hz
+}
 ```
 
 ---
@@ -28,13 +28,13 @@ local config = {
   - Eliminates repeated group calls for radar/contact/tally/nails/spike/mudspike
 
 ```lua
-    local config = {
-      minRange = 3704, -- in m (2nm)
-      maxRange = 277800, -- in m (150nm)
-      degreesBetweenSameCall = 30,
-      distanceBetweenSameCall = 9260, -- in m (5nm)
-      timeBetweenSameCall = 60 -- in seconds
-    }
+local config = {
+  minRange = 3704, -- in m (2nm)
+  maxRange = 277800, -- in m (150nm)
+  degreesBetweenSameCall = 30,
+  distanceBetweenSameCall = 9260, -- in m (5nm)
+  timeBetweenSameCall = 60 -- in seconds
+}
 ```
 
 *Install to:*
@@ -76,25 +76,25 @@ Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) to add the 
 
 Configuration settings:
 ```lua
-  local config = CARRIER_STUFF_CONFIG or {
-    carrierUnitName = "Carrier",
-    tanker = {
-      radio = 243, -- in MHz
-      speed = 200, -- in kts
-      tacan = {
-        channel = 79, -- Y
-        id = "TEX"
-      }
-    },
-    awacs = {
-      altitude = 20000, -- in ft
-      radio = 255, -- in MHz
-      tacan = {
-        channel = 55, -- Y
-        id = "WAX"
-      }
+local config = CARRIER_STUFF_CONFIG or {
+  carrierUnitName = "Carrier",
+  tanker = {
+    radio = 243, -- in MHz
+    speed = 200, -- in kts
+    tacan = {
+      channel = 79, -- Y
+      id = "TEX"
+    }
+  },
+  awacs = {
+    altitude = 20000, -- in ft
+    radio = 255, -- in MHz
+    tacan = {
+      channel = 55, -- Y
+      id = "WAX"
     }
   }
+}
 ```
 
 ---
@@ -106,27 +106,27 @@ Uses [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add 
 
 Configuration settings:
 ```lua
-  local config = CRASH_CREW_CONFIG or {
-    maxCrews = 10,
-    minTime = 60, -- in seconds
-    maxTime = 120, -- in seconds
-    useFlares = true,
-    useSmoke = true,
-    useIllumination = true,
-    sound = "l10n/DEFAULT/siren.ogg",
-    message = true,
-    units = {
-      land = {
-        type = "HEMTT TFFT",
-        livery = ""
-      },
-      water = {
-        type  = "speedboat",
-        livery = ""
-      }
+local config = CRASH_CREW_CONFIG or {
+  maxCrews = 10,
+  minTime = 60, -- in seconds
+  maxTime = 120, -- in seconds
+  useFlares = true,
+  useSmoke = true,
+  useIllumination = true,
+  sound = "l10n/DEFAULT/siren.ogg",
+  message = true,
+  units = {
+    land = {
+      type = "HEMTT TFFT",
+      livery = ""
     },
-    debug = false
-  }
+    water = {
+      type  = "speedboat",
+      livery = ""
+    }
+  },
+  debug = false
+}
 ```
 
 ---
@@ -149,10 +149,10 @@ Original JTAC script ***must*** include the following methods:
 
 Configuration settings:
 ```lua
-  local config = JTAC_PRIORITY_CONFIG or {
-    maxDistance = 5000, -- in m
-    debug = false
-  }
+local config = JTAC_PRIORITY_CONFIG or {
+  maxDistance = 5000, -- in m
+  debug = false
+}
 ```
 
 ---
@@ -197,31 +197,31 @@ Creates a radio tower static object and transmission from zone with matching `na
 
 Configuration settings:
 ```lua
-  local config = RADIO_TOWER_CONFIG or {
-    towers = {
-      {
-        name = "Music", -- zone
-        stations = {
-          {
-            name = "Radio X",
-            sound = "Radio X.ogg", -- mp3/ogg
-            frequency = 40, -- in MHz
-            modulation = 1, -- 0=AM, 1=FM
-            power = 1000, -- in W
-            loop = true
-          },
-          {
-            name = "V-Rock",
-            sound = "VROCK.ogg",
-            frequency = 41,
-            modulation = 1,
-            power = 1000,
-            loop = true
-          }
+local config = RADIO_TOWER_CONFIG or {
+  towers = {
+    {
+      name = "Music", -- zone
+      stations = {
+        {
+          name = "Radio X",
+          sound = "Radio X.ogg", -- mp3/ogg
+          frequency = 40, -- in MHz
+          modulation = 1, -- 0=AM, 1=FM
+          power = 1000, -- in W
+          loop = true
+        },
+        {
+          name = "V-Rock",
+          sound = "VROCK.ogg",
+          frequency = 41,
+          modulation = 1,
+          power = 1000,
+          loop = true
         }
       }
-    },
-    enableMarks = true, -- show on F10 map
-    messages = false -- show status messages
-  }
+    }
+  },
+  enableMarks = true, -- show on F10 map
+  messages = false -- show status messages
+}
 ```

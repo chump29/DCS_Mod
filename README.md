@@ -129,7 +129,7 @@ Configuration settings:
 Writes LUA objects to a file. Tries to find user's desktop folder.
 - `fileName` sets output file name
 - Usage is ***logger.log(object, name)***
--- where *name* is optional
+  - where *name* is optional
 
 ---
 

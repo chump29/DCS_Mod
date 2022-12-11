@@ -125,6 +125,14 @@ Configuration settings:
 
 ---
 
+# [Logger](logger.lua)
+Writes LUA objects to a file. Tries to find user's desktop folder.
+- `fileName` sets output file name
+- Usage is ***logger.log(object, name)***
+-- where *name* is optional
+
+---
+
 # [Map Stuff](Map_Stuff.lua)
 Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add the following to a map:
 - Announce when a player joins/dies/crashes

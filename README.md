@@ -13,6 +13,38 @@ Configuration settings:
 
 ---
 
+# [AWACS & Wingman Addons](https://github.com/chump29/DCS_Mod/tree/master/AWAC%20%26%20Wingman%20Addons)
+- AWACS picture calls
+  - Rounds bearing to nearest 10°
+  - Sorts groups nearest to farthest from player
+  - Eliminates repeated groups if BRA within 10°/2nm/1000ft
+```lua
+local config = {
+  maxDistance = 185200 -- in m (100nm)
+}
+```
+
+- Wingman calls
+  - Eliminates repeated group calls for radar/contact/tally/nails/spike/mudspike
+
+```lua
+    local config = {
+      minRange = 3704, -- in m (2nm)
+      maxRange = 277800, -- in m (150nm)
+      degreesBetweenSameCall = 30,
+      distanceBetweenSameCall = 9260, -- in m (5nm)
+      timeBetweenSameCall = 60 -- in seconds
+    }
+```
+
+*Install to:*
+- `[DCS Directory]\Scripts\Speech\common.lua`
+- `[DCS Directory]\Scripts\Speech\NATO.lua`
+
+*NOTE: For NATO only.*
+
+---
+
 # [Briefing Addons](https://github.com/chump29/DCS_Mod/tree/master/Briefing%20Addons)
 Adds the following to the generated briefings:
 - METAR
@@ -130,6 +162,9 @@ Writes LUA objects to a file. Tries to find user's desktop folder.
 - `fileName` sets output file name
 - Usage is ***logger.log(object, name)***
   - where *name* is optional
+
+*Install to:*
+- `[DCS Directory]\Scripts\logger.lua`
 
 ---
 

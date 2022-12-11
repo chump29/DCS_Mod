@@ -18,6 +18,8 @@ local config = ATIS_CONFIG or {
   - Rounds bearing to nearest 10°
   - Sorts groups nearest to farthest from player
   - Eliminates repeated groups if BRA within 10°/2nm/1000ft
+
+Configuration settings:
 ```lua
 local config = {
   maxDistance = 185200 -- in m (100nm)
@@ -27,6 +29,7 @@ local config = {
 - Wingman calls
   - Eliminates repeated group calls for radar/contact/tally/nails/spike/mudspike
 
+Configuration settings:
 ```lua
 local config = {
   minRange = 3704, -- in m (2nm)

@@ -90,6 +90,15 @@ local function getDate(d, t, m)
 	if td then
 		h = h - td.utc
 	end
+	local mm = t / 60 % 60
+	if mm > 50 then
+		mm = 50
+	elseif mm > 20 then
+		mm = 20
+	else
+		mm = 50
+		h = h - 1
+	end
 	if h >= 24 then
 		h = h - 24
 		dd = dd + 1
@@ -97,7 +106,7 @@ local function getDate(d, t, m)
 		h = h + 24
 		dd = dd - 1
 	end
-	return string.format("%0.2d%0.2d%0.2d", dd, h, t / 60 % 60)
+	return string.format("%0.2d%0.2d%0.2d", dd, h, mm)
 end
 
 local function getWindDirectionAndSpeed(w, t)
@@ -145,20 +154,24 @@ local function getPreset(p)
 	return nil
 end
 
-local function getVisibility(v, f, fv, d, dv, c, p)
-	if not v then return -666 end
-	local vis = v
-	local preset = getPreset(c)
+local function getVisibility(d)
+	if not d.visibility then return -1 end
+	local vis = d.visibility
+	local preset = getPreset(d.clouds.preset)
 	if preset and preset.precipitationPower > 0 then
 		vis = 8000
-	elseif p and (p == 2 or p == 4) then
+		d.tempo = true
+	elseif d.clouds.iprecptns and (d.clouds.iprecptns == 2 or d.clouds.iprecptns == 4) then
 		vis = 3050
 	end
-	if f and fv and fv < vis then
-		vis = fv
+	if d.fog and d.fog_visibility and d.fog_visibility < vis then
+		vis = d.fog_visibility
 	end
-	if d and dv < vis then
-		vis = dv
+	if d.dust and d.dust_visibility < vis then
+		vis = d.dust_visibility
+	end
+	if d.tempo and vis <= 2400 then
+		d.tempo = nil
 	end
 	local visibility = 9999
 	local m
@@ -185,6 +198,8 @@ local function getWeather(c, p, f, fv, ft, du, d, t, h, v)
 			str = "SN"
 		else
 			str = "RA"
+			if t < 0 then
+				str = "FZ" .. str
 		end
 	elseif not preset then
 		if p and p > 0 then
@@ -197,6 +212,9 @@ local function getWeather(c, p, f, fv, ft, du, d, t, h, v)
 					str = "SHRA"
 				else
 					str = "RA"
+					if t < 0 then
+						str = "FZ" .. str
+					end
 				end
 			elseif p == 2 then
 				str = "TSRA"
@@ -211,7 +229,7 @@ local function getWeather(c, p, f, fv, ft, du, d, t, h, v)
 			end
 		end
 	end
-	if h and h ~= "off" and v <= 5000 then
+	if h and h ~= "off" and v <= 5000 and t <= 0 then
 		if string.len(str) > 0 then
 			str = str .. " IC"
 		else
@@ -224,6 +242,9 @@ local function getWeather(c, p, f, fv, ft, du, d, t, h, v)
 			fs = "FG"
 			if ft < 2 then
 				fs = "MI" .. fs
+			end
+			if t < 0 then
+				fs = "FZ" .. fs
 			end
 		elseif fv < 3000 then
 			fs = "BCFG"
@@ -424,58 +445,58 @@ local function getColor(v, d, a)
 		ft = toFt(a)
 	end
 	if vis < 0.8 then
-		return "RED"
+		return "RED", 1
 	elseif vis < 1.6 then
 		if ft < 200 then
-			return "RED"
+			return "RED", 1
 		else
-			return "AMB"
+			return "AMB", 2
 		end
 	elseif vis < 3.7 then
 		if ft < 200 then
-			return "RED"
+			return "RED", 1
 		elseif ft < 300 then
-			return "AMB"
+			return "AMB", 2
 		else
-			return "YLO"
+			return "YLO", 3
 		end
 	elseif vis < 5 then
 		if ft < 200 then
-			return "RED"
+			return "RED", 1
 		elseif ft < 300 then
-			return "AMB"
+			return "AMB", 2
 		elseif ft < 700 then
-			return "YLO"
+			return "YLO", 3
 		else
-			return "GRN"
+			return "GRN", 4
 		end
 	elseif vis < 8 then
 		if ft < 200 then
-			return "RED"
+			return "RED", 1
 		elseif ft < 300 then
-			return "AMB"
+			return "AMB", 2
 		elseif ft < 700 then
-			return "YLO"
+			return "YLO", 3
 		elseif ft < 1500 then
-			return "GRN"
+			return "GRN", 4
 		else
-			return "WHT"
+			return "WHT", 5
 		end
 	else
 		if ft < 200 then
-			return "RED"
+			return "RED", 1
 		elseif ft < 300 then
-			return "AMB"
+			return "AMB", 2
 		elseif ft < 700 then
-			return "YLO"
+			return "YLO", 3
 		elseif ft < 1500 then
-			return "GRN"
+			return "GRN", 4
 		elseif ft < 2500 then
-			return "WHT"
+			return "WHT", 5
 		elseif ft < 20000 then
-			return "BLU"
+			return "BLU", 6
 		else
-			return "BLU+" -- DCS only allows 16,404ft set in ME
+			return "BLU+", 7 -- DCS only allows 16,404ft set in ME
 		end
 	end
 end
@@ -492,16 +513,24 @@ function getMETAR(d)
 	metar = string.format("%s AUTO", metar)
 	local wind = getWindDirectionAndSpeed(d.wind, d.turbulence)
 	metar = string.format("%s %s", metar, wind)
-	local vis = getVisibility(d.visibility, d.fog, d.fog_visibility, d.dust, d.dust_visibility, d.clouds.preset, d.clouds.iprecptns)
+	local vis = getVisibility(d)
 	metar = string.format("%s %0.4d", metar, vis)
 	metar = string.format("%s%s", metar, getWeather(d.clouds.preset, d.clouds.iprecptns, d.fog, d.fog_visibility, d.fog_thickness, d.dust, d.clouds.density, d.temp, d.halo, vis))
 	metar = string.format("%s %s", metar, getClouds(d))
 	local qnh = getQNH(d.qnh)
 	metar = string.format("%s %s/%s", metar, getTemp(d.temp), getDewPoint(d.agl, d.fog, d.clouds.density, d.temp, qnh, vis))
 	metar = string.format("%s A%0.4d", metar, qnh)
+	local color, num = getColor(vis, d.clouds.density, d.agl)
+	metar = string.format("%s %s", metar, color)
 	metar = string.format("%s RMK AO2", metar)
 	if wind == "/////KT" then
 		metar = string.format("%s%s", metar, getTurbulence(d.wind.speed, d.turbulence))
 	end
-	return string.format("%s %s", metar, getColor(vis, d.clouds.density, d.agl))
+	if d.tempo then
+		metar = string.format("%s TEMPO 2400", metar)
+		if num > 3 then
+			metar = string.format("%s YLO", metar)
+		end
+	end
+	return string.format("%s=", metar)
 end

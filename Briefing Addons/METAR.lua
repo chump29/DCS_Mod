@@ -200,6 +200,7 @@ local function getWeather(c, p, f, fv, ft, du, d, t, h, v)
 			str = "RA"
 			if t < 0 then
 				str = "FZ" .. str
+			end
 		end
 	elseif not preset then
 		if p and p > 0 then

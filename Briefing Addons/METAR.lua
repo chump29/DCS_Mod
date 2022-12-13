@@ -244,9 +244,6 @@ local function getWeather(c, p, f, fv, ft, du, d, t, h, v)
 			if ft < 2 then
 				fs = "MI" .. fs
 			end
-			if t < 0 then
-				fs = "FZ" .. fs
-			end
 		elseif fv < 3000 then
 			fs = "BCFG"
 		elseif fv <= 5000 then

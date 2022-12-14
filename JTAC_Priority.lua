@@ -6,7 +6,7 @@
 do
 
 	local config = JTAC_PRIORITY_CONFIG or {
-		maxDistance = 5000, -- in m
+		maxDistance = 8046.72, -- in m (5mi)
 		debug = false
 	}
 
@@ -97,13 +97,16 @@ do
 				end
 				world.searchObjects(Object.Category.UNIT, volume, search)
 				if config.debug then
+					local function mToMi(m)
+						return m / 1609.344
+					end
 					if #foundUnits > 0 then
-						log(string.format("Found %i units within %0.2fm of JTAC %s:", #foundUnits, distance, jtacName))
+						log(string.format("Found %i unit(s) within %0.2fmi of JTAC %s:", #foundUnits, mToMi(distance), jtacName))
 						for _, unit in ipairs(foundUnits) do
-							log(string.format("  %s @ %0.2fm", unit.unit:getName(), unit.dist))
+							log(string.format("  %s @ %0.2fmi", unit.unit:getName(), mToMi(unit.dist)))
 						end
 					else
-						log(string.format("No units found within %0.2fm of JTAC %s", distance, jtacName))
+						log(string.format("No units found within %0.2fmi of JTAC %s", mToMi(distance), jtacName))
 					end
 				end
 				return foundUnits

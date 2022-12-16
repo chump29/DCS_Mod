@@ -21,10 +21,7 @@ local function handleRequire(m)
 	return nil
 end
 local magvar			= handleRequire("magvar")
-local MapWindow
-if magvar then
-	MapWindow			= require("me_map_window")
-end
+local terrain			= require("terrain")
 
 local function toDegrees(radians, raw)
 	local degrees = radians * 180 / math.pi
@@ -51,8 +48,8 @@ function getMV(d, g)
 		return "N/A"
 	end
 	magvar.init(d.Month, d.Year)
-	local lat, long = MapWindow.convertMetersToLatLon(g.position.x, g.position.z)
-	local magVar = UC.toDegrees(magvar.get_mag_decl(lat, long), true)
+	local lat, lon = terrain.convertMetersToLatLon(g.position.x, g.position.z)
+	local magVar = UC.toDegrees(magvar.get_mag_decl(lat, lon), true)
 	local dir = "East"
 	if magVar < 0 then
 		dir = "West"

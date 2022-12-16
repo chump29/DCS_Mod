@@ -51,6 +51,7 @@ local config = {
 # [Briefing Addons](https://github.com/chump29/DCS_Mod/tree/master/Briefing%20Addons)
 Adds the following to the generated briefings:
 - METAR
+- Case I/II/III
 - Temperature (*C & F*)
 - QNH (*inHg & mmHg & hPa*)
 - Magnetic variation

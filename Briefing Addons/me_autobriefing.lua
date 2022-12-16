@@ -87,6 +87,7 @@ local cdata =
     --wind_at_8000 = _('At 8000m'),
     --cloud_cover_base = _('base'),
     metar = _("METAR"),
+    carrier = _("CARRIER"),
     cloud_base = _("Cloud Base (MSL)"),
     qnh = _("QNH"),
     magnetic_variation = _("Magnetic Variation"),
@@ -487,7 +488,7 @@ local function getMetarData(m, g)
     if g then
         d.icao = g.code
         if g.position and g.position.y then
-            d.msl = g.position.y
+            d.position = g.position
         end
     end
     return d
@@ -617,7 +618,9 @@ function generateAutoBriefing(mission)
         table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
 
         table.insert(autoBriefing, composeEntry(cdata.weather))
-        table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(getMetarData(mission, tblStartGroups[1])) .. "\n"))
+        local metar, case = METAR.getMETARandCase(getMetarData(mission, tblStartGroups[1]))
+        table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar .. "\n"))
+        table.insert(autoBriefing, composeEntry(nil, cdata.carrier, case .. "\n"))
         table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
         table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(mission.weather.atmosphere_type, mission.weather.qnh, tblStartGroups[1])))
         table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, BA.getMV(mission.date, tblStartGroups[1])))
@@ -656,7 +659,9 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(cdata.description, nil,    mission.descriptionText))
 
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, METAR.getMETAR(getMetarData(mission)) .. "\n"))
+    local metar, case = METAR.getMETARandCase(getMetarData(mission))
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar .. "\n"))
+    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, case .. "\n"))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(mission.weather.atmosphere_type, mission.weather.qnh)))
     table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, BA.getMV(mission.date)))

@@ -15,33 +15,39 @@ local theatreData = {
 	["Caucasus"] = {
 		["icao"] = "UGTB",
 		["elevation"] = 1574, -- in ft
-		["utc"] = 4
+		["utc"] = 4,
+		["id"] = 29
 	},
 	["Falklands"] = {
 		["icao"] = "EGYP",
 		["elevation"] = 243,
-		["utc"] = -3
+		["utc"] = -3,
+		["id"] = 2
 	},
 	["MarianaIslands"] = {
 		["icao"] = "PGUA",
 		["elevation"] = 618,
-		["utc"] = 10
+		["utc"] = 10,
+		["id"] = 6
 	},
 	["Nevada"] = {
 		["icao"] = "KLSV",
 		["elevation"] = 1869,
-		["utc"] = -8
+		["utc"] = -8,
+		["id"] = 4
 	},
 	-- Normandy
 	["PersianGulf"] = {
 		["icao"] = "OMAA",
 		["elevation"] = 92,
-		["utc"] = 4
+		["utc"] = 4,
+		["id"] = 22
 	},
 	["Syria"] = {
 		["icao"] = "LCLK",
 		["elevation"] = 16,
-		["utc"] = 3
+		["utc"] = 3,
+		["id"] = 47
 	}
 	-- TheChannel
 }
@@ -82,14 +88,18 @@ local function getICAO(d)
 	return d.icao
 end
 
+local function getOffset(m)
+	local td = theatreData[m]
+	if td then
+		return td.utc
+	end
+	return 0
+end
+
 local function getDate(d, t, m)
 	if not d then return "?" end
 	local dd = d
-	local h = math.floor(t / 60 / 60)
-	local td = theatreData[m]
-	if td then
-		h = h - td.utc
-	end
+	local h = math.floor(t / 60 / 60) - getOffset(m)
 	local mm = t / 60 % 60
 	if mm > 50 then
 		mm = 50
@@ -357,6 +367,10 @@ end
 
 local function getClouds(d)
 	local c = d.clouds
+	d.msl = nil
+	if d.position then
+		d.msl = d.position.y
+	end
 	d.agl = toAGL(c.base, d.msl, d.theatre, d.useDefault)
 	local str = getPresetClouds(d)
 	if str then
@@ -499,7 +513,43 @@ local function getColor(v, d, a)
 	end
 end
 
-function getMETAR(d)
+local function getCase(p, d, m, t, a, v)
+	if not p then
+		local AirdromeController = base.require("Mission.AirdromeController")
+		local function getAirbaseID(m)
+			local td = theatreData[m]
+			if td then
+				return td.id
+			end
+			return 0
+		end
+		local airbase = AirdromeController.getAirdrome(AirdromeController.getAirdromeId(getAirbaseID(m)))
+		if not airbase then return "N/A" end
+		p = {x = airbase.x, z = airbase.y}
+	end
+	local terrain = base.require("terrain")
+	local lat, lon = terrain.convertMetersToLatLon(p.x, p.z)
+	if not d then return "N/A" end
+	local offset = getOffset(m)
+
+	-- NOTE: Borrowed (and modified) from MOOSE
+	local MOOSE={}function MOOSE.GetDayOfYear(b,c,d)local e=math.floor;local f=e(275*c/9)local g=e((c+9)/12)local h=1+e((b-4*e(b/4)+2)/3)return f-g*h+d-30 end;function MOOSE.GetSunRiseAndSet(i,j,k,l,m)local n=90.83;local o=j;local p=k;local q=l;local r=i;m=m or 0;local s=math.rad;local t=math.deg;local e=math.floor;local u=function(r)return r-e(r)end;local v=function(w)return math.cos(s(w))end;local x=function(w)return t(math.acos(w))end;local y=function(w)return math.sin(s(w))end;local z=function(w)return t(math.asin(w))end;local A=function(w)return math.tan(s(w))end;local B=function(w)return t(math.atan(w))end;local function C(D,E,F)local G=F-E;local H;if D<E then H=e((E-D)/G)+1;return D+H*G elseif D>=F then H=e((D-F)/G)+1;return D-H*G else return D end end;local I=p/15;local J;if q then J=r+(6-I)/24 else J=r+(18-I)/24 end;local K=0.9856*J-3.289;local L=C(K+1.916*y(K)+0.020*y(2*K)+282.634,0,360)local M=C(B(0.91764*A(L)),0,360)local N=e(L/90)*90;local O=e(M/90)*90;M=M+N-O;M=M/15;local P=0.39782*y(L)local Q=v(z(P))local R=(v(n)-P*y(o))/(Q*v(o))if q and R>1 then return"N/R"elseif R<-1 then return"N/S"end;local S;if q then S=360-x(R)else S=x(R)end;S=S/15;local T=S+M-0.06571*J-6.622;local U=C(T-I+m,0,24)return e(U)*60*60+u(U)*60*60 end;function MOOSE.GetSunrise(d,c,b,j,k,m)local i=MOOSE.GetDayOfYear(b,c,d)return MOOSE.GetSunRiseAndSet(i,j,k,true,m)end;function MOOSE.GetSunset(d,c,b,j,k,m)local i=MOOSE.GetDayOfYear(b,c,d)return MOOSE.GetSunRiseAndSet(i,j,k,false,m)end
+
+	local sunrise = MOOSE.GetSunrise(d.Day, d.Month, d.Year, lat, lon, offset)
+	local sunset = MOOSE.GetSunset(d.Day, d.Month, d.Year, lat, lon, offset)
+	if sunrise == "N/R" or sunset == "N/S" then return "N/A" end
+	local ft = toFt(a)
+	local nm = v / 1852
+	local case = "I"
+	if t < sunrise or t > sunset or ft < 1000 or nm < 5 then
+		case = "III"
+	elseif ft < 3000 then
+		case = "II"
+	end
+	return string.format("Case %s", case)
+end
+
+function getMETARandCase(d)
 	if d.date and d.date.Year < 1968 then
 		return "N/A"
 	end
@@ -530,5 +580,5 @@ function getMETAR(d)
 			metar = string.format("%s YLO", metar)
 		end
 	end
-	return string.format("%s=", metar)
+	return string.format("%s=", metar), getCase(d.position, d.date, d.theatre, d.time, d.agl, vis)
 end

@@ -513,7 +513,7 @@ local function getColor(v, d, a)
 	end
 end
 
-local function getCase(p, d, m, t, a, v)
+local function getCase(p, d, m, t, c, a, v)
 	if not p then
 		local AirdromeController = base.require("Mission.AirdromeController")
 		local function getAirbaseID(m)
@@ -538,7 +538,10 @@ local function getCase(p, d, m, t, a, v)
 	local sunrise = MOOSE.GetSunrise(d.Day, d.Month, d.Year, lat, lon, offset)
 	local sunset = MOOSE.GetSunset(d.Day, d.Month, d.Year, lat, lon, offset)
 	if sunrise == "N/R" or sunset == "N/S" then return "N/A" end
-	local ft = toFt(a)
+	local ft = 99999 -- arbitrary
+	if c and c > 0 then
+		ft = toFt(a)
+	end
 	local nm = v / 1852
 	local case = "I"
 	if t < sunrise or t > sunset or ft < 1000 or nm < 5 then
@@ -580,5 +583,5 @@ function getMETARandCase(d)
 			metar = string.format("%s YLO", metar)
 		end
 	end
-	return string.format("%s=", metar), getCase(d.position, d.date, d.theatre, d.time, d.agl, vis)
+	return string.format("%s=", metar), getCase(d.position, d.date, d.theatre, d.time, d.clouds.density, d.agl, vis)
 end

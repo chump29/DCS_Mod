@@ -29,7 +29,10 @@ do
 				}
 			}
 		},
-		enableMarks = true, -- show on F10 map
+		marks = {
+			show = true, -- show on F10 map
+			coalition = 1 -- 0=ALL, 1=BLUE, 2=RED
+		},
 		messages = false -- show status messages
 	}
 
@@ -92,7 +95,7 @@ do
 							local str = string.format("%s stopped transmitting %s (%s) on %.3f %s %s [%dw]", tower.name, station.name, station.sound, getFrequency(station.frequency), getHertz(station.frequency), getModulation(station.modulation), power)
 							log(str)
 							if config.messages then say(str) end
-							if config.enableMarks then
+							if config.marks.show then
 								trigger.action.removeMark(tower.id)
 							end
 						end
@@ -102,7 +105,7 @@ do
 			else
 				log(string.format("Unable to spawn static object for %s", tower.name))
 			end
-			if config.enableMarks then
+			if config.marks.show then
 				local stations = ""
 				for i, station in ipairs(tower.stations) do
 					if i > 1 then stations = string.format("%s\n", stations) end
@@ -110,7 +113,16 @@ do
 				end
 				if string.len(stations) > 0 then
 					tower.id = math.random(100000, 1000000)
-					trigger.action.markToAll(tower.id, string.format("%s stations:\n%s", tower.name, stations), zone.point, true)
+					local str = string.format("%s stations:\n%s", tower.name, stations)
+					if config.marks.coalition > 0 then
+						local coa = coalition.side.BLUE
+						if config.marks.coalition == 2 then
+							coa = coalition.side.RED
+						end
+						trigger.action.markToCoalition(tower.id, str, zone.point, coa, true)
+					else
+						trigger.action.markToAll(tower.id, str, zone.point, true)
+					end
 				end
 			end
 		else

@@ -225,7 +225,10 @@ local config = RADIO_TOWER_CONFIG or {
       }
     }
   },
-  enableMarks = true, -- show on F10 map
+  marks = {
+    show = true, -- show on F10 map
+    coalition = 1 -- 0=ALL, 1=BLUE, 2=RED
+  },
   messages = false -- show status messages
 }
 ```

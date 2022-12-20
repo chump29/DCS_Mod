@@ -65,7 +65,9 @@ do
 				x = zone.point.x,
 				name = tower.name,
 				heading = math.random(360),
-				--hidden = true
+				hidden = true,
+				hiddenOnMFD = true,
+				hiddenOnPlanner = true
 			})
 			if obj then
 				for i, station in ipairs(tower.stations) do

@@ -54,7 +54,7 @@ function getMV(d, g)
 	if magVar < 0 then
 		dir = "West"
 	end
-	return string.format("%0.1f° %s (%+0.1d)", math.abs(magVar), dir, math.floor(magVar * -1 + 0.5))
+	return string.format("%0.1f° %s (%+0.1f)", math.abs(magVar), dir, magVar * -1)
 end
 
 local function round(n)

@@ -14,40 +14,34 @@ local string = base.string
 local theatreData = {
 	["Caucasus"] = {
 		["icao"] = "UGTB",
-		["elevation"] = 1574, -- in ft
 		["utc"] = 4,
-		["id"] = 29
+		["position"] = { x = -314926.25, y = 479.69479370117, z = 895724 }
 	},
 	["Falklands"] = {
 		["icao"] = "EGYP",
-		["elevation"] = 243,
 		["utc"] = -3,
-		["id"] = 2
+		["position"] = { x = 73598.5625, y = 74.136428833008, z = 46176.4140625 }
 	},
 	["MarianaIslands"] = {
 		["icao"] = "PGUA",
-		["elevation"] = 618,
 		["utc"] = 10,
-		["id"] = 6
+		["position"] = { x = 9961.662109375, y = 166.12214660645, z = 13072.155273438 }
 	},
 	["Nevada"] = {
 		["icao"] = "KLSV",
-		["elevation"] = 1869,
 		["utc"] = -8,
-		["id"] = 4
+		["position"] = { x = -399275.84375, y = 561.30914306641, z = -18183.12109375 }
 	},
 	-- Normandy
 	["PersianGulf"] = {
 		["icao"] = "OMAA",
-		["elevation"] = 92,
 		["utc"] = 4,
-		["id"] = 22
+		["position"] = { x = -187211.25, y = 28.000028610229, z = -163535.515625 }
 	},
 	["Syria"] = {
 		["icao"] = "LCLK",
-		["elevation"] = 16,
 		["utc"] = 3,
-		["id"] = 47
+		["position"] = { x = -8466.0517578125, y = 5.0000047683716, z = -209773.46875 }
 	}
 	-- TheChannel
 }
@@ -58,10 +52,6 @@ end
 
 local function toKts(m) -- in mps
 	return m * 1.943844
-end
-
-local function toM(f) -- in ft
-	return f / 3.280839
 end
 
 local function reverseWind(d)
@@ -285,7 +275,7 @@ local function toAGL(c, h, t, d)
 	if not height or d then
 		local td = theatreData[t]
 		if td then
-			height = toM(td.elevation)
+			height = td.position.y
 		else
 			height = 0
 		end
@@ -515,17 +505,11 @@ end
 
 local function getCase(p, d, m, t, c, a, v)
 	if not p then
-		local AirdromeController = base.require("Mission.AirdromeController")
-		local function getAirbaseID(m)
-			local td = theatreData[m]
-			if td then
-				return td.id
-			end
-			return 0
+		local td = theatreData[m]
+		if td then
+			p = td.position
 		end
-		local airbase = AirdromeController.getAirdrome(AirdromeController.getAirdromeId(getAirbaseID(m)))
-		if not airbase then return "N/A" end
-		p = {x = airbase.x, z = airbase.y}
+		if not p then return "N/A" end
 	end
 	local terrain = base.require("terrain")
 	local lat, lon = terrain.convertMetersToLatLon(p.x, p.z)

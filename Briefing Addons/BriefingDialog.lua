@@ -536,7 +536,7 @@ function generateAutoBriefing()
 
     updateStartGroups(dataBrf.tblStartData)
 
-    local metarData = getMetarData(mission)
+    local metarData = getMetarData(dataBrf)
 
     autoBriefing = {}
     table.insert(autoBriefing, composeEntry(cdata.title_data))
@@ -615,7 +615,7 @@ function generateSimpleAutoBriefing()
     local currentTab = '  '
     local mission_goal
 
-    local metarData = getMetarData(mission)
+    local metarData = getMetarData(dataBrf)
 
     autoBriefing = {}
     table.insert(autoBriefing, composeEntry(cdata.title_data))

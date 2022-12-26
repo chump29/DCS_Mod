@@ -545,6 +545,7 @@ function getSunriseAndSunset(d)
 end
 
 function getCase(d)
+	if d.atmosphere > 0 then return NA end
 	if not d.sun.sr or not d.sun.ss then return NA end
 	local ft = 99999
 	if d.clouds.density and d.clouds.density > 0 then

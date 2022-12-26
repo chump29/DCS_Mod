@@ -49,7 +49,9 @@ local config = {
 ---
 
 # [Briefing Addons](https://github.com/chump29/DCS_Mod/tree/master/Briefing%20Addons)
-Adds the following to the generated briefings:
+Adds the following to the briefings:
+- Long date
+- Sunrise/sunset times
 - METAR
 - Case I/II/III
 - Temperature (*C & F*)
@@ -67,8 +69,8 @@ Adds the following to the generated briefings:
 - `[DCS Directory]\Scripts\UI\autobriefingUtils.lua`
 - `[DCS Directory]\Scripts\UI\BriefingDialog.lua`
 - `[DCS Directory]\Scripts\briefing_addons.lua`
-- `[DCS Directory]\Scripts\METAR.lua`
 - `[DCS Directory]\Scripts\utils_common.lua`
+- `[DCS Directory]\Scripts\wxDCS.lua`
 
 ---
 

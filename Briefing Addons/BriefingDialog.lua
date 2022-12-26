@@ -32,8 +32,8 @@ local i18n              = require('i18n')
 local DB                = require('me_db_api')
 local imagePreview      = require('imagePreview')
 local BA = require("briefing_addons")
-local METAR = require("METAR")
 local TheatreOfWarData = require("Mission.TheatreOfWarData")
+local wx = require("wxDCS")
 
 base.setmetatable(base.dxgui, {__index = base.dxguiWin})
 
@@ -102,6 +102,7 @@ local cdata = {
         magnetic_variation = _("Magnetic Variation"),
         cdu_wind = _("A-10 CDU Wind"),
         carrier = _("CARRIER"),
+        empty = _(" "),
 
         SITUATION       = _('SITUATION'),
         MISSION         = _('MISSION'),
@@ -487,6 +488,7 @@ local function getMetarData(b, g)
             d.position = g.position
         end
     end
+    d.sun = wx.getSunriseAndSunset(d)
     return d
 end
 
@@ -534,53 +536,57 @@ function generateAutoBriefing()
 
     updateStartGroups(dataBrf.tblStartData)
 
+    local metarData = getMetarData(mission)
+
     autoBriefing = {}
     table.insert(autoBriefing, composeEntry(cdata.title_data))
-    table.insert(autoBriefing, composeEntry(nil, cdata.title,      dataBrf.sortie))
-    table.insert(autoBriefing, composeEntry(nil, cdata.start,    autobriefingutils.composeDateString(dataBrf.mission_start_time, true, dataBrf.mission_date)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.my_side,    side))
+    table.insert(autoBriefing, composeEntry(nil, cdata.title, dataBrf.sortie))
+    table.insert(autoBriefing, composeEntry(nil, cdata.start, autobriefingutils.composeDateString(dataBrf.mission_start_time, true, dataBrf.mission_date)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, metarData.sun.sunrise))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, metarData.sun.sunset))
+    table.insert(autoBriefing, composeEntry(nil, cdata.my_side, side))
      --   table.insert(autoBriefing, composeEntry(nil, cdata.friends,    composeFriendsString() ))
      --   table.insert(autoBriefing, composeEntry(nil, cdata.enemies,    enemiesString ))
     if dataBrf.task then
         table.insert(autoBriefing, composeEntry(cdata.mission_data))
-        table.insert(autoBriefing, composeEntry(nil, cdata.my_task,    _(dataBrf.task)))
-        table.insert(autoBriefing, composeEntry(nil, cdata.flight,     keys.getDisplayName(dataBrf.type).."*"..dataBrf.numGroupUnits ))
+        table.insert(autoBriefing, composeEntry(nil, cdata.my_task, _(dataBrf.task)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.flight, keys.getDisplayName(dataBrf.type).."*"..dataBrf.numGroupUnits))
     end
- --   table.insert(autoBriefing, composeEntry(nil, cdata.fuel,       playerUnit.payload.fuel..'('..getFuelPods()..')' ))
+--   table.insert(autoBriefing, composeEntry(nil, cdata.fuel,       playerUnit.payload.fuel..'('..getFuelPods()..')' ))
 --   table.insert(autoBriefing, composeEntry(nil, cdata.weapon,     dataBrf.weaponsString ))
     table.insert(autoBriefing, composeEntry(cdata.allies_flight_title))
-    table.insert(autoBriefing, composeEntry(nil, cdata.allies_flight,     autobriefingutils.composeString(allies_list, '*') ))
+    table.insert(autoBriefing, composeEntry(nil, cdata.allies_flight, autobriefingutils.composeString(allies_list, '*')))
     if dataBrf.descriptionTbl == nil then
-        table.insert(autoBriefing, composeEntry(cdata.description, nil,    dataBrf.descText))
+        table.insert(autoBriefing, composeEntry(cdata.description, nil, dataBrf.descText))
         if dataBrf.mission_goal ~= "" then
-            table.insert(autoBriefing, composeEntry(cdata.mission_goal,    nil, dataBrf.mission_goal))
+            table.insert(autoBriefing, composeEntry(cdata.mission_goal, nil, dataBrf.mission_goal))
         end
     else
         base.U.traverseTable(dataBrf.descriptionTbl)
 --      base.print("--dataBrf.side--",dataBrf.side)
         if dataBrf.descriptionTbl[dataBrf.side].situation and dataBrf.descriptionTbl[dataBrf.side].situation ~= "" then
-            table.insert(autoBriefing, composeEntry(cdata.SITUATION, nil,    dataBrf.descriptionTbl[dataBrf.side].situation))
+            table.insert(autoBriefing, composeEntry(cdata.SITUATION, nil, dataBrf.descriptionTbl[dataBrf.side].situation))
         end
         if dataBrf.descriptionTbl[dataBrf.side].mission and dataBrf.descriptionTbl[dataBrf.side].mission ~= "" then
-            table.insert(autoBriefing, composeEntry(cdata.MISSION, nil,    dataBrf.descriptionTbl[dataBrf.side].mission))
+            table.insert(autoBriefing, composeEntry(cdata.MISSION, nil, dataBrf.descriptionTbl[dataBrf.side].mission))
         end
         if dataBrf.descriptionTbl[dataBrf.side].execution and dataBrf.descriptionTbl[dataBrf.side].execution ~= "" then
-            table.insert(autoBriefing, composeEntry(cdata.EXECUTION, nil,    dataBrf.descriptionTbl[dataBrf.side].execution))
+            table.insert(autoBriefing, composeEntry(cdata.EXECUTION, nil, dataBrf.descriptionTbl[dataBrf.side].execution))
         end
         if dataBrf.descriptionTbl[dataBrf.side].administration and dataBrf.descriptionTbl[dataBrf.side].administration ~= "" then
-            table.insert(autoBriefing, composeEntry(cdata.ADMIN, nil,    dataBrf.descriptionTbl[dataBrf.side].administration))
+            table.insert(autoBriefing, composeEntry(cdata.ADMIN, nil, dataBrf.descriptionTbl[dataBrf.side].administration))
         end
         if dataBrf.descriptionTbl[dataBrf.side].command and dataBrf.descriptionTbl[dataBrf.side].command ~= "" then
-            table.insert(autoBriefing, composeEntry(cdata.COMMAND, nil,    dataBrf.descriptionTbl[dataBrf.side].command))
+            table.insert(autoBriefing, composeEntry(cdata.COMMAND, nil, dataBrf.descriptionTbl[dataBrf.side].command))
         end
     end
     table.insert(autoBriefing, composeEntry(cdata.specification))
-    table.insert(autoBriefing, composeEntry(nil, cdata.threat,     autobriefingutils.composeString(threats_list, '*') ))
-
+    table.insert(autoBriefing, composeEntry(nil, cdata.threat, autobriefingutils.composeString(threats_list, '*')))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    local metar, case = METAR.getMETARandCase(getMetarData(dataBrf, tblStartGroups[1]))
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar .. "\n"))
-    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, case .. "\n"))
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, wx.getMETAR(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh, tblStartGroups[1])))
     table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, BA.getMV(dataBrf.mission_date, tblStartGroups[1])))
@@ -590,7 +596,6 @@ function generateAutoBriefing()
         table.insert(autoBriefing, composeEntry(nil, cdata.cdu_wind, BA.cduWindString(dataBrf.weather, dataBrf.humanPosition, dataBrf.temperature)))
     end
     table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, UC.composeTurbulenceString(dataBrf.weather)))
-
     if dataBrf.startTime then
         table.insert(autoBriefing, composeEntry(cdata.take_off_and_departure))
         table.insert(autoBriefing, composeEntry(nil, cdata.mission_start, autobriefingutils.composeDateString(dataBrf.startTime, false, dataBrf.mission_date)))
@@ -609,16 +614,21 @@ function generateSimpleAutoBriefing()
     -- обновляем диалог редактирования брифинга для текущей загруженной миссии
     local currentTab = '  '
     local mission_goal
-    autoBriefing = {}
 
+    local metarData = getMetarData(mission)
+
+    autoBriefing = {}
     table.insert(autoBriefing, composeEntry(cdata.title_data))
-    table.insert(autoBriefing, composeEntry(nil, cdata.title,      dataBrf.sortie))
-    table.insert(autoBriefing, composeEntry(nil, cdata.start,    autobriefingutils.composeDateString(dataBrf.mission_start_time, true, dataBrf.mission_date)))
-    table.insert(autoBriefing, composeEntry(cdata.description, nil,    dataBrf.descText))
+    table.insert(autoBriefing, composeEntry(nil, cdata.title, dataBrf.sortie))
+    table.insert(autoBriefing, composeEntry(nil, cdata.start, autobriefingutils.composeDateString(dataBrf.mission_start_time, true, dataBrf.mission_date)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, metarData.sun.sunrise))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, metarData.sun.sunset))
+    table.insert(autoBriefing, composeEntry(cdata.description, nil, dataBrf.descText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    local metar, case = METAR.getMETARandCase(getMetarData(dataBrf))
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar .. "\n"))
-    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, case .. "\n"))
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, wx.getMETAR(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh)))
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(dataBrf.weather.atmosphere_type, dataBrf.weather.clouds)))

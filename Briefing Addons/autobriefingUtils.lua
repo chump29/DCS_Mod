@@ -25,6 +25,7 @@ local GridHeaderCell            = require('GridHeaderCell')
 local Skin                      = require('Skin')
 local EditBox			        = require('EditBox')
 local dllWeather                = require('Weather')
+local U = require("me_utilities")
 
 i18n.setup(_M)
 
@@ -499,16 +500,20 @@ function composeDateString(start_time, include_date, MissionDate)
     local s = math.floor(start_time - m * 60)
     local res = ''
     if include_date then
-        res = data..'  '--string.format('%03d', d) .. '/'
+        --res = data..'  '--string.format('%03d', d) .. '/'
+        res = " on " .. data
     end
-    return res .. num2s2(h) .. ':' .. num2s2(m) .. ':' .. num2s2(s)
+    --return res .. num2s2(h) .. ':' .. num2s2(m) .. ':' .. num2s2(s)
+    return string.format("%0.2d:%0.2d:%0.2d%s", h, m, s, res)
 end
 
 -------------------------------------------------------------------------------
 -- convert number to string using %02d format string
+--[[
 function num2s2(num)
     return string.format('%02d', num)
 end
+--]]
 
 function convertDaysToData(a_days, MissionDate)
 
@@ -562,6 +567,7 @@ function convertDaysToData(a_days, MissionDate)
 		end 
 	end
 	
-	local result = tostring(day)..'/'..tostring(month)..'/'..tostring(year)
-	return result
+	--local result = tostring(day)..'/'..tostring(month)..'/'..tostring(year)
+    result = string.format("%0.2d %s %d", day, U.months[month].name, year)
+    return result
 end

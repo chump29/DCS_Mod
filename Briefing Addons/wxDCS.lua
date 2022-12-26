@@ -1,12 +1,14 @@
 --[[
--- METAR
+-- wxDCS
 -- by Chump
 -- Many thanks to HILOK for the ideas and testing!
 --]]
 
 local base = _G
 
-module("METAR")
+module("wxDCS")
+
+local terrain = base.require("terrain")
 
 local math = base.math
 local string = base.string
@@ -86,11 +88,17 @@ local function getOffset(m)
 	return 0
 end
 
+local function getTime(t)
+	local h = math.floor(t / 60 / 60)
+	local m = t / 60 % 60
+	return h, m
+end
+
 local function getDate(d, t, m)
 	if not d then return "?" end
 	local dd = d
-	local h = math.floor(t / 60 / 60) - getOffset(m)
-	local mm = t / 60 % 60
+	local h, mm = getTime(t)
+	h = h - getOffset(m)
 	if mm > 50 then
 		mm = 50
 	elseif mm > 20 then
@@ -442,7 +450,7 @@ end
 
 local function getColor(v, d, a)
 	local vis = v / 1000
-	local ft = 99999 -- arbitrary
+	local ft = 99999
 	if d and d > 0 then
 		ft = toFt(a)
 	end
@@ -503,32 +511,58 @@ local function getColor(v, d, a)
 	end
 end
 
-local function getCase(p, d, m, t, c, a, v)
+local NA = "N/A"
+
+function getSunriseAndSunset(d)
+	local p = d.position
 	if not p then
-		local td = theatreData[m]
+		local td = theatreData[d.theatre]
 		if td then
 			p = td.position
 		end
-		if not p then return "N/A" end
+		if not p then return { sunrise = NA, sunset = NA } end
 	end
-	local terrain = base.require("terrain")
 	local lat, lon = terrain.convertMetersToLatLon(p.x, p.z)
-	if not d then return "N/A" end
-	local offset = getOffset(m)
+	if not lat or not lon then return { sunrise = NA, sunset = NA } end
 
 	-- NOTE: Borrowed (and modified) from MOOSE [https://github.com/FlightControl-Master/MOOSE/blob/fea1839c06a7608182a465a1852800a07e3b43bb/Moose%20Development/Moose/Utilities/Utils.lua#L1612]
 	local MOOSE={}function MOOSE.GetDayOfYear(b,c,d)local e=math.floor;local f=e(275*c/9)local g=e((c+9)/12)local h=1+e((b-4*e(b/4)+2)/3)return f-g*h+d-30 end;function MOOSE.GetSunRiseAndSet(i,j,k,l,m)local n=90.83;local o=j;local p=k;local q=l;local r=i;m=m or 0;local s=math.rad;local t=math.deg;local e=math.floor;local u=function(r)return r-e(r)end;local v=function(w)return math.cos(s(w))end;local x=function(w)return t(math.acos(w))end;local y=function(w)return math.sin(s(w))end;local z=function(w)return t(math.asin(w))end;local A=function(w)return math.tan(s(w))end;local B=function(w)return t(math.atan(w))end;local function C(D,E,F)local G=F-E;local H;if D<E then H=e((E-D)/G)+1;return D+H*G elseif D>=F then H=e((D-F)/G)+1;return D-H*G else return D end end;local I=p/15;local J;if q then J=r+(6-I)/24 else J=r+(18-I)/24 end;local K=0.9856*J-3.289;local L=C(K+1.916*y(K)+0.020*y(2*K)+282.634,0,360)local M=C(B(0.91764*A(L)),0,360)local N=e(L/90)*90;local O=e(M/90)*90;M=M+N-O;M=M/15;local P=0.39782*y(L)local Q=v(z(P))local R=(v(n)-P*y(o))/(Q*v(o))if q and R>1 then return"N/R"elseif R<-1 then return"N/S"end;local S;if q then S=360-x(R)else S=x(R)end;S=S/15;local T=S+M-0.06571*J-6.622;local U=C(T-I+m,0,24)return e(U)*60*60+u(U)*60*60 end;function MOOSE.GetSunrise(d,c,b,j,k,m)local i=MOOSE.GetDayOfYear(b,c,d)return MOOSE.GetSunRiseAndSet(i,j,k,true,m)end;function MOOSE.GetSunset(d,c,b,j,k,m)local i=MOOSE.GetDayOfYear(b,c,d)return MOOSE.GetSunRiseAndSet(i,j,k,false,m)end
 
-	local sunrise = MOOSE.GetSunrise(d.Day, d.Month, d.Year, lat, lon, offset)
-	local sunset = MOOSE.GetSunset(d.Day, d.Month, d.Year, lat, lon, offset)
-	if sunrise == "N/R" or sunset == "N/S" then return "N/A" end
-	local ft = 99999 -- arbitrary
-	if c and c > 0 then
-		ft = toFt(a)
+	local offset = getOffset(d.theatre)
+	local sr = MOOSE.GetSunrise(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
+	local ss = MOOSE.GetSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
+	if sr == "N/R" or ss == "N/S" then return { sunrise = NA, sunset = NA } end
+
+	local function toTime(h, m)
+		return string.format("%0.2d:%0.2d", h, m)
 	end
-	local nm = v / 1852
+
+	local h, m = getTime(sr)
+	local sunrise = toTime(h, m)
+	h, m = getTime(ss)
+	local sunset = toTime(h, m)
+	return { sunrise = sunrise, sunset = sunset, sr = sr, ss = ss }
+end
+
+function getCase(d)
+	if not d.sun.sr or not d.sun.ss then return NA end
+	local ft = 99999
+	if d.clouds.density and d.clouds.density > 0 then
+		local p = d.position
+		local useDefault = false
+		if not p then
+			local td = theatreData[d.theatre]
+			if td then
+				p = td.position
+				useDefault = true
+			end
+		end
+		if not p then return NA end
+		ft = toFt(toAGL(d.clouds.base, p.y, d.theatre, useDefault))
+	end
+	local v = getVisibility(d) / 1852
 	local case = "I"
-	if t < sunrise or t > sunset or ft < 1000 or nm < 5 then
+	if d.time < d.sun.sr or d.time > d.sun.ss or ft < 1000 or v < 5 then
 		case = "III"
 	elseif ft < 3000 then
 		case = "II"
@@ -536,10 +570,8 @@ local function getCase(p, d, m, t, c, a, v)
 	return string.format("Case %s", case)
 end
 
-function getMETARandCase(d)
-	if d.date and d.date.Year < 1968 then
-		return "N/A"
-	end
+function getMETAR(d)
+	if d.date and d.date.Year < 1968 then return NA end
 	local icao = getICAO(d)
 	local metar = string.format("%s %sZ", icao, getDate(d.date.Day, d.time, d.theatre))
 	if d.atmosphere > 0 then
@@ -567,5 +599,5 @@ function getMETARandCase(d)
 			metar = string.format("%s YLO", metar)
 		end
 	end
-	return string.format("%s=", metar), getCase(d.position, d.date, d.theatre, d.time, d.clouds.density, d.agl, vis)
+	return string.format("%s=", metar)
 end

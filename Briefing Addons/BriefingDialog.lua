@@ -34,6 +34,7 @@ local imagePreview      = require('imagePreview')
 local BA = require("briefing_addons")
 local TheatreOfWarData = require("Mission.TheatreOfWarData")
 local wx = require("wxDCS")
+local U = require("utils")
 
 base.setmetatable(base.dxgui, {__index = base.dxguiWin})
 
@@ -102,6 +103,8 @@ local cdata = {
         magnetic_variation = _("Magnetic Variation"),
         cdu_wind = _("A-10 CDU Wind"),
         carrier = _("CARRIER"),
+        sunrise = _("Sunrise"),
+        sunset = _("Sunset"),
         empty = _(" "),
 
         SITUATION       = _('SITUATION'),

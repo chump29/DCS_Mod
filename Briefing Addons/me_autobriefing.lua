@@ -43,6 +43,8 @@ local ProductType               = require('me_ProductType')
 local BA = require("briefing_addons")
 local wx = require("wxDCS")
 
+local MAX_WIDTH = 71
+
 i18n.setup(_M)
 
 local cdata =
@@ -482,7 +484,7 @@ local function getMetarData(m, g)
         qnh = m.weather.qnh,
         temp = m.weather.season.temperature,
         theatre = m.theatre,
-        time = m.start_time,
+        start_time = m.start_time,
         turbulence = m.weather.groundTurbulence,
         visibility = m.weather.visibility.distance, -- always 80000
         wind = m.weather.wind.atGround,
@@ -590,6 +592,7 @@ function generateAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(cdata.title_data))
     table.insert(autoBriefing, composeEntry(nil, cdata.title, mission.sortie))
     table.insert(autoBriefing, composeEntry(nil, cdata.start, autobriefingutils.composeDateString(mission.start_time, true, mission.date)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.my_side, countryName))
     table.insert(autoBriefing, composeEntry(nil, cdata.friends, composeFriendsString()))
     table.insert(autoBriefing, composeEntry(nil, cdata.enemies, enemiesString))
@@ -627,7 +630,7 @@ function generateAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%sZ / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     local metar = wx.getMETAR(metarData)
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > 71))
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
@@ -673,7 +676,7 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%sZ / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     local metar = wx.getMETAR(metarData)
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > 71))
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))

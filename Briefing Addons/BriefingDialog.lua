@@ -35,6 +35,8 @@ local BA = require("briefing_addons")
 local TheatreOfWarData = require("Mission.TheatreOfWarData")
 local wx = require("wxDCS")
 
+local MAX_WIDTH = 71
+
 base.setmetatable(base.dxgui, {__index = base.dxguiWin})
 
 local indexPict = 1
@@ -105,6 +107,7 @@ local cdata = {
         sunrise = _("Sunrise"),
         sunset = _("Sunset"),
         empty = _(" "),
+        current = _("Currently"),
 
         SITUATION       = _('SITUATION'),
         MISSION         = _('MISSION'),
@@ -478,11 +481,12 @@ local function getMetarData(b, g)
         qnh = b.weather.qnh,
         temp = b.weather.season.temperature,
         theatre = b.theatre or TheatreOfWarData.getName(),
-        time = b.mission_start_time,
+        start_time = b.mission_start_time,
         turbulence = b.weather.groundTurbulence,
         visibility = b.weather.visibility.distance, -- always 80000
         wind = b.weather.wind.atGround,
-        halo = b.weather.halo.preset
+        halo = b.weather.halo.preset,
+        current_time = b.mission_start_time + DCS.getModelTime()
     }
     if g then
         d.icao = g.code
@@ -544,6 +548,8 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(cdata.title_data))
     table.insert(autoBriefing, composeEntry(nil, cdata.title, dataBrf.sortie))
     table.insert(autoBriefing, composeEntry(nil, cdata.start, autobriefingutils.composeDateString(dataBrf.mission_start_time, true, dataBrf.mission_date)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.current, autobriefingutils.composeDateString(metarData.current_time)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.my_side, side))
      --   table.insert(autoBriefing, composeEntry(nil, cdata.friends,    composeFriendsString() ))
      --   table.insert(autoBriefing, composeEntry(nil, cdata.enemies,    enemiesString ))
@@ -587,9 +593,9 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%sZ / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     local metar = wx.getMETAR(metarData)
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > 71))
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData))) -- TODO: dynamic?
+    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh, tblStartGroups[1])))
@@ -625,21 +631,16 @@ function generateSimpleAutoBriefing()
     table.insert(autoBriefing, composeEntry(cdata.title_data))
     table.insert(autoBriefing, composeEntry(nil, cdata.title, dataBrf.sortie))
     table.insert(autoBriefing, composeEntry(nil, cdata.start, autobriefingutils.composeDateString(dataBrf.mission_start_time, true, dataBrf.mission_date)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.current, autobriefingutils.composeDateString(metarData.current_time)))
     table.insert(autoBriefing, composeEntry(cdata.description, nil, dataBrf.descText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
     table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, string.format("%sZ / %s", metarData.sun.z.sunrise, metarData.sun.l.sunrise)))
     table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%sZ / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     local metar = wx.getMETAR(metarData)
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > 71))
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData))) -- TODO: dynamic?
-    dofile("Scripts/TheTime.lua")
-    if TheTime then
-        table.insert(autoBriefing, composeEntry(nil, "test", TheTime))
-    else
-        table.insert(autoBriefing, composeEntry(nil, "test", "no"))
-    end
+    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh)))

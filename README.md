@@ -51,9 +51,10 @@ local config = {
 # [Briefing Addons](https://github.com/chump29/DCS_Mod/tree/master/Briefing%20Addons)
 Adds the following to the briefings:
 - Long date
+- Current time
 - Sunrise/sunset times
 - METAR
-- Case I/II/III
+- Dynamic Case I/II/III
 - Temperature (*C & F*)
 - QNH (*inHg & mmHg & hPa*)
 - Magnetic variation

@@ -89,9 +89,13 @@ local function getOffset(m)
 end
 
 local function getTime(t)
-	local h = math.floor(t / 60 / 60)
-	local m = t / 60 % 60
-	return h, m
+	local x = t / 60
+	local h = math.floor(x / 60)
+	x = x % 60
+	local m = math.floor(x)
+	x = x - m
+	local s = math.floor(x * 60)
+	return h, m, s
 end
 
 local function getDate(d, t, m)
@@ -542,21 +546,12 @@ function getSunriseAndSunset(d)
 	if srL == "N/R" or ssL == "N/S" then return err end
 
 	local function toTime(h, m, s)
-		return string.format("%0.2d%s%0.2d", h, s or "", m)
+		return string.format("%0.2d:%0.2d:%0.2d", h, m, s)
 	end
 
-	local h, m = getTime(srZ)
-	local sunriseZ = toTime(h, m)
-	h, m = getTime(ssZ)
-	local sunsetZ = toTime(h, m)
-	h, m = getTime(srL)
-	local sunriseL = toTime(h, m, ":")
-	h, m = getTime(ssL)
-	local sunsetL = toTime(h, m, ":")
-
 	return {
-		z = { sunrise = sunriseZ, sunset = sunsetZ, sr = srZ, ss = ssZ },
-		l = { sunrise = sunriseL, sunset = sunsetL, sr = srL, ss = ssL }
+		z = { sunrise = toTime(getTime(srZ)), sunset = toTime(getTime(ssZ)), sr = srZ, ss = ssZ },
+		l = { sunrise = toTime(getTime(srL)), sunset = toTime(getTime(ssL)), sr = srL, ss = ssL }
 	}
 end
 
@@ -578,8 +573,9 @@ function getCase(d)
 		ft = toFt(toAGL(d.clouds.base, p.y, d.theatre, useDefault))
 	end
 	local v = getVisibility(d) / 1852
+	local time = d.current_time or d.start_time
 	local case = "I"
-	if d.time < d.sun.l.sr or d.time > d.sun.l.ss or ft < 1000 or v < 5 then
+	if time < d.sun.l.sr or time > d.sun.l.ss or ft < 1000 or v < 5 then
 		case = "III"
 	elseif ft < 3000 then
 		case = "II"
@@ -590,7 +586,7 @@ end
 function getMETAR(d)
 	if d.date and d.date.Year < 1968 then return NA end
 	local icao = getICAO(d)
-	local metar = string.format("%s %sZ", icao, getDate(d.date.Day, d.time, d.theatre))
+	local metar = string.format("%s %sZ", icao, getDate(d.date.Day, d.start_time, d.theatre))
 	if d.atmosphere > 0 then
 		return string.format("%s NIL", metar)
 	end

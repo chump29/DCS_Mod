@@ -451,11 +451,11 @@ function updateStartGroups(a_tblStartData)
     end
 end
 
-function composeEntry(section, title, data, needGrid)
+function composeEntry(section, title, data, needGrid, isMultiline)
     if data == "" then
         return nil
     end
-    return {section = section, title = title, data = data, needGrid = needGrid}
+    return {section = section, title = title, data = data, needGrid = needGrid, isMultiline = isMultiline}
 end
 
 local function getMetarData(b, g)
@@ -501,7 +501,7 @@ function generateAutoBriefing()
     local currentTab = '  '
     local separator = '#'
     local tab1,tab2 = 2,20
-    autoBriefing = {}
+    --autoBriefing = {}
 
     coalitionName = dataBrf.coalitionName -- 'red' 'blue'
     --base.print("----coalitionName=",coalitionName)
@@ -583,12 +583,13 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(cdata.specification))
     table.insert(autoBriefing, composeEntry(nil, cdata.threat, autobriefingutils.composeString(threats_list, '*')))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, metarData.sun.sunrise))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, metarData.sun.sunset))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, string.format("%sZ / %s", metarData.sun.z.sunrise, metarData.sun.l.sunrise)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%sZ / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, wx.getMETAR(metarData)))
+    local metar = wx.getMETAR(metarData)
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > 71))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData))) -- TODO: dynamic?
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh, tblStartGroups[1])))
@@ -626,12 +627,19 @@ function generateSimpleAutoBriefing()
     table.insert(autoBriefing, composeEntry(nil, cdata.start, autobriefingutils.composeDateString(dataBrf.mission_start_time, true, dataBrf.mission_date)))
     table.insert(autoBriefing, composeEntry(cdata.description, nil, dataBrf.descText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, metarData.sun.sunrise))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, metarData.sun.sunset))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, string.format("%sZ / %s", metarData.sun.z.sunrise, metarData.sun.l.sunrise)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%sZ / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, wx.getMETAR(metarData)))
+    local metar = wx.getMETAR(metarData)
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > 71))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData))) -- TODO: dynamic?
+    dofile("Scripts/TheTime.lua")
+    if TheTime then
+        table.insert(autoBriefing, composeEntry(nil, "test", TheTime))
+    else
+        table.insert(autoBriefing, composeEntry(nil, "test", "no"))
+    end
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh)))

@@ -150,11 +150,16 @@ local function createTitleItem_(scrollPane, itemText, x, y, h)
     scrollPane:insertWidget(item)
 end
 
-local function createDataItem_(scrollPane, itemText, x, y, h, w)
+local function createDataItem_(scrollPane, itemText, x, y, h, w, isMultiline)
     local item = EditBox.new(itemText)
     item:setBounds(0, 0, w, h)
-    item:setTextWrapping(true)  
-	item:setMultiline(true)
+    item:setTextWrapping(true)
+
+    if isMultiline == nil then
+        isMultiline = true
+    end
+	item:setMultiline(isMultiline)
+
     item:setReadOnly(true)
     
     item:setSkin(editBoxSectionDataItemSkin)
@@ -315,7 +320,7 @@ function updateScrollPane(scrollPane, a_width)
                 end
                 
                 for i =1, #data do
-                    local itemHeight = createDataItem_(scrollPane, data[i], columnPos, rowPos, rowHeight, sectionWidth-130)
+                    local itemHeight = createDataItem_(scrollPane, data[i], columnPos, rowPos, rowHeight, sectionWidth-130, rec.isMultiline)
                     
                     rowPos = rowPos + itemHeight
                 end
@@ -384,7 +389,7 @@ function updateScrollPaneBriefingRoom(scrollPane, a_width)	-- BriefingRoom  brie
                 end
                 
                 for i =1, #data do
-					  local itemHeight = createDataItem_(scrollPane, data[i], columnPos, rowPos, rowHeight, sectionWidth - 300)
+					  local itemHeight = createDataItem_(scrollPane, data[i], columnPos, rowPos, rowHeight, sectionWidth - 300, rec.isMultiline)
                     rowPos = rowPos + itemHeight
                 end
                 if #data < 1 then
@@ -443,7 +448,7 @@ function updateBaseBriefingScrollPane(scrollPane, a_width)	-- BriefingRoom simpl
                 end
                 
                 for i =1, #data do
-                    local itemHeight = createDataItem_(scrollPane, data[i], columnPos, rowPos, rowHeight, sectionWidth-130)
+                    local itemHeight = createDataItem_(scrollPane, data[i], columnPos, rowPos, rowHeight, sectionWidth-130, rec.isMultiline)
                     
                     rowPos = rowPos + itemHeight
                 end

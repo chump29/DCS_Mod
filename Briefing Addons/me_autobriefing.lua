@@ -455,11 +455,11 @@ function getDataUnit(unit)
     return {name = name, airdromeName = '-', frequency = '-'}
 end
 
-function composeEntry(section, title, data, needGrid)
+function composeEntry(section, title, data, needGrid, isMultiline)
     if data == "" then
         return nil
     end
-    return {section = section, title = title, data = data, needGrid = needGrid}
+    return {section = section, title = title, data = data, needGrid = needGrid, isMultiline = isMultiline}
 end
 
 local function getMetarData(m, g)
@@ -506,7 +506,7 @@ function generateAutoBriefing(mission)
     local separator = '#'
     local tab1,tab2 = 2,20
     local mission_goal
-    autoBriefing = {}
+    --autoBriefing = {}
     -- определяем цвет коалиции
     if coalitionName == CoalitionController.redCoalitionName()  then
         mission_goal = mission.descriptionRedTask
@@ -623,10 +623,11 @@ function generateAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(cdata.specification))
     table.insert(autoBriefing, composeEntry(nil, cdata.threat, autobriefingutils.composeString(threats_list, '*')))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, metarData.sun.sunrise))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, metarData.sun.sunset))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, string.format("%sZ / %s", metarData.sun.z.sunrise, metarData.sun.l.sunrise)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%sZ / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, wx.getMETAR(metarData)))
+    local metar = wx.getMETAR(metarData)
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > 71))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
@@ -653,7 +654,7 @@ function generateSimpleAutoBriefing(mission)
     -- обновляем диалог редактирования брифинга для текущей загруженной миссии
     local currentTab = '  '
     local mission_goal
-    autoBriefing = {}
+    --autoBriefing = {}
     -- ветер
     local windString = UC.composeWindString(mission.weather)
 
@@ -668,10 +669,11 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.start, autobriefingutils.composeDateString(mission.start_time, true, mission.date)))
     table.insert(autoBriefing, composeEntry(cdata.description, nil, mission.descriptionText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, metarData.sun.sunrise))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, metarData.sun.sunset))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, string.format("%sZ / %s", metarData.sun.z.sunrise, metarData.sun.l.sunrise)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%sZ / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, wx.getMETAR(metarData)))
+    local metar = wx.getMETAR(metarData)
+    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > 71))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))

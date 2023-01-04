@@ -514,39 +514,55 @@ end
 local NA = "N/A"
 
 function getSunriseAndSunset(d)
+	local err = {
+		z = { sunrise = NA, sunset = NA },
+		l = { sunrise = NA, sunset = NA }
+	}
 	local p = d.position
 	if not p then
 		local td = theatreData[d.theatre]
 		if td then
 			p = td.position
 		end
-		if not p then return { sunrise = NA, sunset = NA } end
+		if not p then return err end
 	end
 	local lat, lon = terrain.convertMetersToLatLon(p.x, p.z)
-	if not lat or not lon then return { sunrise = NA, sunset = NA } end
+	if not lat or not lon then return err end
 
 	-- NOTE: Borrowed (and modified) from MOOSE [https://github.com/FlightControl-Master/MOOSE/blob/fea1839c06a7608182a465a1852800a07e3b43bb/Moose%20Development/Moose/Utilities/Utils.lua#L1612]
 	local MOOSE={}function MOOSE.GetDayOfYear(b,c,d)local e=math.floor;local f=e(275*c/9)local g=e((c+9)/12)local h=1+e((b-4*e(b/4)+2)/3)return f-g*h+d-30 end;function MOOSE.GetSunRiseAndSet(i,j,k,l,m)local n=90.83;local o=j;local p=k;local q=l;local r=i;m=m or 0;local s=math.rad;local t=math.deg;local e=math.floor;local u=function(r)return r-e(r)end;local v=function(w)return math.cos(s(w))end;local x=function(w)return t(math.acos(w))end;local y=function(w)return math.sin(s(w))end;local z=function(w)return t(math.asin(w))end;local A=function(w)return math.tan(s(w))end;local B=function(w)return t(math.atan(w))end;local function C(D,E,F)local G=F-E;local H;if D<E then H=e((E-D)/G)+1;return D+H*G elseif D>=F then H=e((D-F)/G)+1;return D-H*G else return D end end;local I=p/15;local J;if q then J=r+(6-I)/24 else J=r+(18-I)/24 end;local K=0.9856*J-3.289;local L=C(K+1.916*y(K)+0.020*y(2*K)+282.634,0,360)local M=C(B(0.91764*A(L)),0,360)local N=e(L/90)*90;local O=e(M/90)*90;M=M+N-O;M=M/15;local P=0.39782*y(L)local Q=v(z(P))local R=(v(n)-P*y(o))/(Q*v(o))if q and R>1 then return"N/R"elseif R<-1 then return"N/S"end;local S;if q then S=360-x(R)else S=x(R)end;S=S/15;local T=S+M-0.06571*J-6.622;local U=C(T-I+m,0,24)return e(U)*60*60+u(U)*60*60 end;function MOOSE.GetSunrise(d,c,b,j,k,m)local i=MOOSE.GetDayOfYear(b,c,d)return MOOSE.GetSunRiseAndSet(i,j,k,true,m)end;function MOOSE.GetSunset(d,c,b,j,k,m)local i=MOOSE.GetDayOfYear(b,c,d)return MOOSE.GetSunRiseAndSet(i,j,k,false,m)end
 
-	local offset = getOffset(d.theatre)
-	local sr = MOOSE.GetSunrise(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
-	local ss = MOOSE.GetSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
-	if sr == "N/R" or ss == "N/S" then return { sunrise = NA, sunset = NA } end
+	local srZ = MOOSE.GetSunrise(d.date.Day, d.date.Month, d.date.Year, lat, lon)
+	local ssZ = MOOSE.GetSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon)
+	if srZ == "N/R" or ssZ == "N/S" then return err end
 
-	local function toTime(h, m)
-		return string.format("%0.2d:%0.2d", h, m)
+	local offset = getOffset(d.theatre)
+	local srL = MOOSE.GetSunrise(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
+	local ssL = MOOSE.GetSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
+	if srL == "N/R" or ssL == "N/S" then return err end
+
+	local function toTime(h, m, s)
+		return string.format("%0.2d%s%0.2d", h, s or "", m)
 	end
 
-	local h, m = getTime(sr)
-	local sunrise = toTime(h, m)
-	h, m = getTime(ss)
-	local sunset = toTime(h, m)
-	return { sunrise = sunrise, sunset = sunset, sr = sr, ss = ss }
+	local h, m = getTime(srZ)
+	local sunriseZ = toTime(h, m)
+	h, m = getTime(ssZ)
+	local sunsetZ = toTime(h, m)
+	h, m = getTime(srL)
+	local sunriseL = toTime(h, m, ":")
+	h, m = getTime(ssL)
+	local sunsetL = toTime(h, m, ":")
+
+	return {
+		z = { sunrise = sunriseZ, sunset = sunsetZ, sr = srZ, ss = ssZ },
+		l = { sunrise = sunriseL, sunset = sunsetL, sr = srL, ss = ssL }
+	}
 end
 
 function getCase(d)
 	if d.atmosphere > 0 then return NA end
-	if not d.sun.sr or not d.sun.ss then return NA end
+	if not d.sun.l.sr or not d.sun.l.ss then return NA end
 	local ft = 99999
 	if d.clouds.density and d.clouds.density > 0 then
 		local p = d.position
@@ -563,7 +579,7 @@ function getCase(d)
 	end
 	local v = getVisibility(d) / 1852
 	local case = "I"
-	if d.time < d.sun.sr or d.time > d.sun.ss or ft < 1000 or v < 5 then
+	if d.time < d.sun.l.sr or d.time > d.sun.l.ss or ft < 1000 or v < 5 then
 		case = "III"
 	elseif ft < 3000 then
 		case = "II"

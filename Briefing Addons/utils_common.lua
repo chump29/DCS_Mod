@@ -21,6 +21,9 @@ local minizip       	= require('minizip')
 local lfs       		= require('lfs')
 local mod_dictionary	= require('dictionary')
 local datum_converter 	= base.safe_require("DatumConverter")
+local convert = require("unit_converter")
+
+local mpsToKts = convert.mpsToKts
 
 local mdcVersion = 1
 
@@ -71,17 +74,7 @@ function toDegrees(radians, raw)
   return degrees
 end
 
-local function toRadians(degrees, raw)
-  local radians = degrees * math.pi / 180  
-  
-  if not raw then
-    radians = math.floor(radians + 0.5)
-  end
-  
-  return radians
-end
-
-local function toPositiveDegrees(radians, raw)
+function toPositiveDegrees(radians, raw)
   local degrees = toDegrees(radians, raw)
   
   if degrees < 0 then
@@ -91,8 +84,7 @@ local function toPositiveDegrees(radians, raw)
   return degrees
 end
 
-
-local function revertWind(a_value)
+function revertWind(a_value)
 	local a_value = a_value + 180
 	if a_value > 360 then
 		return a_value - 360
@@ -100,18 +92,10 @@ local function revertWind(a_value)
 	return a_value
 end
 
-local function toKts(mps)
-	return math.floor(mps * 1.943844 + 0.5)
-end
-
-local function roundTo10(n)
-	return math.floor(n / 10 + 0.5) * 10
-end
-
 -------------------------------------------------------------------------------
 -- convert wind structure to wind string
 local function windToStr(d, s)
-    return string.format("%.3d° @ %.1d%s", roundTo10(d), s, cdata.speed_unit_kts) -- direction wind blows FROM, in kts
+    return string.format("%.3d° @ %.1d%s", roundToNearest(d, 10), s, cdata.speed_unit_kts) -- direction wind blows FROM, in kts
 end
 
 -------------------------------------------------------------------------------
@@ -134,7 +118,7 @@ function composeTurbulenceString(a_weather)
 		if a_weather.groundTurbulence == 0 then
 			return { cdata.NIL }
 		else
-			return { string.format("%0.1f%s (%0.1f%s)", math.floor(a_weather.groundTurbulence * 1.943844 + 0.5) / 10, cdata.speed_unit_kts, math.floor(a_weather.groundTurbulence + 0.5) / 10, cdata.speed_unit) }
+			return { string.format("%0.1f%s (%0.1f%s)", round(mpsToKts(a_weather.groundTurbulence)) / 10, cdata.speed_unit_kts, round(a_weather.groundTurbulence) / 10, cdata.speed_unit) }
 		end
 	else
 		return { cdata.NA }
@@ -155,9 +139,9 @@ function composeWindString(a_weather, a_humanPosition)
     if a_weather.atmosphere_type == 0 then
         local w = a_weather.wind
 
-		local atGroundSpeed = toKts(w.atGround.speed)
-		local at2000Speed = toKts(w.at2000.speed)
-		local at8000Speed = toKts(w.at8000.speed)
+		local atGroundSpeed = round(mpsToKts(w.atGround.speed))
+		local at2000Speed = round(mpsToKts(w.at2000.speed))
+		local at8000Speed = round(mpsToKts(w.at8000.speed))
 
 		if atGroundSpeed == 0 and at2000Speed == 0 and at8000Speed == 0 then
 			return { cdata.NIL }
@@ -173,7 +157,7 @@ function composeWindString(a_weather, a_humanPosition)
 
 		local res = dllWeather.getGroundWindAtPoint({position = a_humanPosition})
 
-		res.v = toKts(res.v)
+		res.v = round(mpsToKts(res.v))
 
 		if res.v == 0 then
 			return { cdata.NIL }
@@ -413,4 +397,15 @@ function colorFromString(colorString)
 	local r, g, b, a = parseColorString(colorString)
 
 	return { r / 255, g / 255, b / 255, a / 255}
+end
+
+function round(n)
+	if n < 0 then
+		return math.ceil(n - 0.5)
+	end
+	return math.floor(n + 0.5)
+end
+
+function roundToNearest(n, x)
+	return round(n / x) * x
 end

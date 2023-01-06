@@ -50,6 +50,7 @@ local config = {
 
 # [Briefing Addons](https://github.com/chump29/DCS_Mod/tree/master/Briefing%20Addons)
 Adds the following to the briefings:
+- Times in Zulu and local
 - Long date
 - Current time
 - Sunrise/sunset times
@@ -70,6 +71,7 @@ Adds the following to the briefings:
 - `[DCS Directory]\Scripts\UI\autobriefingUtils.lua`
 - `[DCS Directory]\Scripts\UI\BriefingDialog.lua`
 - `[DCS Directory]\Scripts\briefing_addons.lua`
+- `[DCS Directory]\Scripts\unit_converter.lua`
 - `[DCS Directory]\Scripts\utils_common.lua`
 - `[DCS Directory]\Scripts\wxDCS.lua`
 

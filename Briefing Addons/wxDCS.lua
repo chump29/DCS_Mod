@@ -8,65 +8,21 @@ local base = _G
 
 module("wxDCS")
 
-local terrain = base.require("terrain")
+local require = base.require
+local autobriefingutils = require("autobriefingutils")
+local BA = require("briefing_addons")
+local convert = require("unit_converter")
+local terrain = require("terrain")
+local UC = require("utils_common")
 
 local math = base.math
 local string = base.string
 
-local theatreData = {
-	["Caucasus"] = {
-		["icao"] = "UGTB",
-		["utc"] = 4,
-		["position"] = { x = -314926.25, y = 479.69479370117, z = 895724 }
-	},
-	["Falklands"] = {
-		["icao"] = "EGYP",
-		["utc"] = -3,
-		["position"] = { x = 73598.5625, y = 74.136428833008, z = 46176.4140625 }
-	},
-	["MarianaIslands"] = {
-		["icao"] = "PGUA",
-		["utc"] = 10,
-		["position"] = { x = 9961.662109375, y = 166.12214660645, z = 13072.155273438 }
-	},
-	["Nevada"] = {
-		["icao"] = "KLSV",
-		["utc"] = -8,
-		["position"] = { x = -399275.84375, y = 561.30914306641, z = -18183.12109375 }
-	},
-	-- Normandy
-	["PersianGulf"] = {
-		["icao"] = "OMAA",
-		["utc"] = 4,
-		["position"] = { x = -187211.25, y = 28.000028610229, z = -163535.515625 }
-	},
-	["Syria"] = {
-		["icao"] = "LCLK",
-		["utc"] = 3,
-		["position"] = { x = -8466.0517578125, y = 5.0000047683716, z = -209773.46875 }
-	}
-	-- TheChannel
-}
-
-local function toFt(m) -- in m
-	return m * 3.280839
-end
-
-local function toKts(m) -- in mps
-	return m * 1.943844
-end
-
-local function reverseWind(d)
-	local dir = d + 180
-	if dir > 360 then
-		return dir - 360
-	end
-	return dir
-end
-
-local function round(n)
-	return math.floor(n + 0.5)
-end
+local theatreData = BA.getTheatreData() or {}
+local mToFt = convert.mToFt
+local mpsToKts = convert.mpsToKts
+local round = UC.round
+local composeDateString = autobriefingutils.composeDateString
 
 local function getICAO(d)
 	if not d.icao or string.len(d.icao) == 0 then
@@ -90,12 +46,7 @@ end
 
 local function getTime(t)
 	local x = t / 60
-	local h = math.floor(x / 60)
-	x = x % 60
-	local m = math.floor(x)
-	x = x - m
-	local s = math.floor(x * 60)
-	return h, m, s
+	return math.floor(x / 60), math.floor(x % 60) -- h, m
 end
 
 local function getDate(d, t, m)
@@ -124,9 +75,9 @@ end
 local function getWindDirectionAndSpeed(w, t)
 	if not w then return "?" end
 	-- NOTE: max settings in ME are s=97 & ft=197
-	local ft = round(toFt(t))
-	local d = reverseWind(round(w.dir / 10) * 10)
-	local s = round(toKts(w.speed))
+	local ft = round(mToFt(t))
+	local d = UC.revertWind(round(w.dir / 10) * 10)
+	local s = round(mpsToKts(w.speed))
 	if s < 3 then
 		if ft < 36 then -- s: 0-2, ft: 0-35
 			return "00000KT"
@@ -350,7 +301,7 @@ local function getPresetClouds(d)
 					elseif n > 1 then
 						a = toAGL(l.altitudeMin, d.msl, d.theatre, d.useDefault)
 					end
-					local ft = toFt(a)
+					local ft = mToFt(a)
 					if ft <= 24000 then -- skipping clouds above FL240
 						if string.len(str) > 0 then
 							str = str .. " "
@@ -378,7 +329,7 @@ local function getClouds(d)
 	if str then
 		return str
 	end
-	local ft = toFt(d.agl)
+	local ft = mToFt(d.agl)
 	if ft > 24000 then -- skipping clouds above FL240
 		return "NSC"
 	end
@@ -402,20 +353,21 @@ end
 
 local function getTemp(t)
 	if not t then return "?" end
+	local str = string.format("%0.2d", math.abs(round(t)))
 	if t < 0 then
-		return "M" .. string.format("%0.2d", math.abs(math.ceil(t - 0.5)))
+		str = "M" .. str
 	end
-	return string.format("%0.2d", math.abs(round(t)))
+	return str
 end
 
 local function getQNH(q)
-	return math.floor(q / 25.4 * 100)
+	return math.floor(convert.mmHgToInHg(q) * 100)
 end
 
 local function getDewPoint(a, f, d, t, q, v)
 	if not t then return "?" end
 	local dp = -15
-	local ft = toFt(a)
+	local ft = mToFt(a)
 	if not f then
 		if d and d > 0 then
 			dp = t - ft / 400
@@ -441,8 +393,8 @@ end
 
 local function getTurbulence(w, t)
 	if not w then return "?" end
-	local s = round(toKts(w))
-	local ft = round(toFt(t))
+	local s = round(mpsToKts(w))
+	local ft = round(mToFt(t))
 	local str = ""
 	if s < 3 and ft >= 36 and ft < 126 then -- s: 0-2, ft: 36-125
 		str = " TURB"
@@ -456,7 +408,7 @@ local function getColor(v, d, a)
 	local vis = v / 1000
 	local ft = 99999
 	if d and d > 0 then
-		ft = toFt(a)
+		ft = mToFt(a)
 	end
 	if vis < 0.8 then
 		return "RED", 1
@@ -544,14 +496,9 @@ function getSunriseAndSunset(d)
 	local srL = MOOSE.GetSunrise(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
 	local ssL = MOOSE.GetSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
 	if srL == "N/R" or ssL == "N/S" then return err end
-
-	local function toTime(h, m, s)
-		return string.format("%0.2d:%0.2d:%0.2d", h, m, s)
-	end
-
 	return {
-		z = { sunrise = toTime(getTime(srZ)), sunset = toTime(getTime(ssZ)), sr = srZ, ss = ssZ },
-		l = { sunrise = toTime(getTime(srL)), sunset = toTime(getTime(ssL)), sr = srL, ss = ssL }
+		z = { sunrise = composeDateString(srZ), sunset = composeDateString(ssZ), sr = srZ, ss = ssZ },
+		l = { sunrise = composeDateString(srL), sunset = composeDateString(ssL), sr = srL, ss = ssL }
 	}
 end
 
@@ -570,7 +517,7 @@ function getCase(d)
 			end
 		end
 		if not p then return NA end
-		ft = toFt(toAGL(d.clouds.base, p.y, d.theatre, useDefault))
+		ft = mToFt(toAGL(d.clouds.base, p.y, d.theatre, useDefault))
 	end
 	local v = getVisibility(d) / 1852
 	local time = d.current_time or d.start_time

@@ -13,6 +13,7 @@ local math              = base.math
 local string            = base.string
 local dllWeather        = require('Weather')
 local UC                = require('utils_common')
+local convert = require("unit_converter")
 
 -- for < DCS 2.8
 local function handleRequire(m)
@@ -23,25 +24,9 @@ end
 local magvar			= handleRequire("magvar")
 local terrain			= require("terrain")
 
-local function toDegrees(radians, raw)
-	local degrees = radians * 180 / math.pi
-
-	if not raw then
-		degrees = math.floor(degrees + 0.5)
-	end
-
-	return degrees
-end
-
-local function toPositiveDegrees(radians, raw)
-	local degrees = toDegrees(radians, raw)
-
-	if degrees < 0 then
-		degrees = degrees + 360
-	end
-
-	return degrees
-end
+local mpsToKts = convert.mpsToKts
+local round = UC.round
+local roundToNearest = UC.roundToNearest
 
 function getMV(d, g)
 	if not magvar or not g or not g.position then
@@ -57,13 +42,6 @@ function getMV(d, g)
 	return string.format("%0.1f° %s (%+0.1f)", math.abs(magVar), dir, magVar * -1)
 end
 
-local function round(n)
-	if n < 0 then
-		return math.ceil(n - 0.5)
-	end
-	return math.floor(n + 0.5)
-end
-
 function getTemp(c)
 	return string.format("%d°C (%d°F)", round(c), round(c * 9 / 5 + 32))
 end
@@ -74,7 +52,7 @@ end
 
 function getQNH(a, q, g)
 	if a == 0 then
-		return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(q / 25.4 * 100) / 100, math.floor(q), math.floor(q * 1.333224))
+		return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(convert.mmHgToInHg(q) * 100) / 100, math.floor(q), math.floor(convert.mmHgToHpa(q)))
 	elseif g and g.position and g.position.y then -- in m
 		local _, pressure = dllWeather.getTemperatureAndPressureAtPoint({position = g.position}) -- QFE in Pa
 		local qnh = toQNH(pressure / 100, g.position.y)
@@ -90,25 +68,13 @@ function getClouds(a, c)
 	if not c.preset and c.density == 0 then
 		return "NIL"
 	end
-	local ft = math.floor(c.base * 3.28084 / 100 + 0.5) * 100 -- rounded to nearest 100m
-	local m = math.floor(c.base / 30) * 30 -- rounded to nearest 30m
+	local ft = roundToNearest(convert.mToFt(c.base), 100)
+	local m = roundToNearest(c.base, 30)
 	return string.format("%dft / %dm", ft, m)
 end
 
-local function reverseWind(dir)
-	local dir = dir + 180
-	if dir > 360 then
-		return dir - 360
-	end
-	return dir
-end
-
-local function toKts(mps)
-	return math.floor(mps * 1.943844 + 0.5)
-end
-
 local function cduWindToStr(d, s, t)
-	return string.format("%0.3d/%0.2d  %+0.2d", reverseWind(d), s, t)
+	return string.format("%0.3d/%0.2d  %+0.2d", UC.revertWind(d), s, t)
 end
 
 function cduWindString(a_weather, a_humanPosition, temperature)
@@ -116,9 +82,9 @@ function cduWindString(a_weather, a_humanPosition, temperature)
 	if a_weather.atmosphere_type == 0 then
 			local w = a_weather.wind
 
-			local atGroundSpeed = toKts(w.atGround.speed)
-			local at2000Speed = toKts(w.at2000.speed)
-			local at8000Speed = toKts(w.at8000.speed)
+			local atGroundSpeed = round(mpsToKts(w.atGround.speed))
+			local at2000Speed = round(mpsToKts(w.at2000.speed))
+			local at8000Speed = round(mpsToKts(w.at8000.speed))
 
 			wind[1] = '00  ' .. cduWindToStr(w.atGround.dir, atGroundSpeed, temperature)
 
@@ -136,13 +102,59 @@ function cduWindString(a_weather, a_humanPosition, temperature)
 		--  param.agl = 1000
 		--  local res = dllWeather.getWindAtPoint(param)
 
-			res.v = toKts(res.v)
+			res.v = round(mpsToKts(res.v))
 
 			if res.v == 0 then
 				return { "NIL" }
 			end
 
-			wind[1] = '00  ' .. cduWindToStr(toPositiveDegrees(res.a+math.pi), res.v, temperature)
+			wind[1] = '00  ' .. cduWindToStr(UC.toPositiveDegrees(res.a+math.pi), res.v, temperature)
 	end
 	return wind
+end
+
+function getTheatreData()
+	return {
+		["Caucasus"] = {
+			["icao"] = "UGTB",
+			["utc"] = 4,
+			["position"] = { x = -314926.25, y = 479.69479370117, z = 895724 }
+		},
+		["Falklands"] = {
+			["icao"] = "EGYP",
+			["utc"] = -3,
+			["position"] = { x = 73598.5625, y = 74.136428833008, z = 46176.4140625 }
+		},
+		["MarianaIslands"] = {
+			["icao"] = "PGUA",
+			["utc"] = 10,
+			["position"] = { x = 9961.662109375, y = 166.12214660645, z = 13072.155273438 }
+		},
+		["Nevada"] = {
+			["icao"] = "KLSV",
+			["utc"] = -8,
+			["position"] = { x = -399275.84375, y = 561.30914306641, z = -18183.12109375 }
+		},
+		-- Normandy
+		["PersianGulf"] = {
+			["icao"] = "OMAA",
+			["utc"] = 4,
+			["position"] = { x = -187211.25, y = 28.000028610229, z = -163535.515625 }
+		},
+		["Syria"] = {
+			["icao"] = "LCLK",
+			["utc"] = 3,
+			["position"] = { x = -8466.0517578125, y = 5.0000047683716, z = -209773.46875 }
+		}
+		-- TheChannel
+	}
+end
+
+function getZuluTime(s, t)
+	local theatreData = getTheatreData()
+	local td = theatreData[t]
+	if td then
+		return s + td.utc * 60 * 60
+	end
+	return s
 end

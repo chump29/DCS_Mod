@@ -8,13 +8,12 @@ do
 
 	local autobriefingutils = require("autobriefingutils")
 	local convert = require("unit_converter")
-	local terrain = require("terrain")
-	local UC = require("utils_common")
+	local utils = require("utils_common")
 	local theatreData = require("theatre_data")
 
 	local mToFt = convert.mToFt
 	local mpsToKts = convert.mpsToKts
-	local round = UC.round
+	local round = utils.round
 	local composeDateString = autobriefingutils.composeDateString
 
 	local function getICAO(d)
@@ -69,7 +68,7 @@ do
 		if not w then return "?" end
 		-- NOTE: max settings in ME are s=97 & ft=197
 		local ft = round(mToFt(t))
-		local d = UC.revertWind(round(w.dir / 10) * 10)
+		local d = utils.revertWind(round(w.dir / 10) * 10)
 		local s = round(mpsToKts(w.speed))
 		if s < 3 then
 			if ft < 36 then -- s: 0-2, ft: 0-35
@@ -479,7 +478,7 @@ do
 			end
 			if not p then return err end
 		end
-		local lat, lon = terrain.convertMetersToLatLon(p.x, p.z)
+		local lat, long = coord.LOtoLL(p)
 		if not lat or not lon then return err end
 
 		-- NOTE: Borrowed (and modified) from MOOSE [https://github.com/FlightControl-Master/MOOSE/blob/fea1839c06a7608182a465a1852800a07e3b43bb/Moose%20Development/Moose/Utilities/Utils.lua#L1612]

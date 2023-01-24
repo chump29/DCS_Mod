@@ -542,7 +542,7 @@ function generateAutoBriefing()
 
     updateStartGroups(dataBrf.tblStartData)
 
-    local metarData = getMetarData(dataBrf)
+    local metarData = getMetarData(dataBrf, tblStartGroups[1])
 
     autoBriefing = {}
     table.insert(autoBriefing, composeEntry(cdata.title_data))

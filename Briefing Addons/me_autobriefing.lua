@@ -587,7 +587,7 @@ function generateAutoBriefing(mission)
 
     local numGroupUnits = #playerUnit.boss.units
 
-    local metarData = getMetarData(mission)
+    local metarData = getMetarData(mission, tblStartGroups[1])
 
     autoBriefing = { }
     table.insert(autoBriefing, composeEntry(cdata.title_data))

@@ -3,20 +3,29 @@
 -- by Chump
 --]]
 
-module("unit_converter")
+do
 
-function mToFt(m)
-	return m * 3.280839
-end
+	local function mToFt(m)
+		return m * 3.280839
+	end
 
-function mpsToKts(mps)
-	return mps * 1.943844
-end
+	local function mpsToKts(mps)
+		return mps * 1.943844
+	end
 
-function mmHgToInHg(mmHg)
-	return mmHg / 25.399999
-end
+	local function mmHgToInHg(mmHg)
+		return mmHg / 25.399999
+	end
 
-function mmHgToHpa(mmHg)
-	return mmHg * 1.333223
+	local function mmHgToHpa(mmHg)
+		return mmHg * 1.333223
+	end
+
+	return {
+		mToFt = mToFt,
+		mpsToKts = mpsToKts,
+		mmHgToInHg = mmHgToInHg,
+		mmHgToHpa = mmHgToHpa
+	}
+
 end

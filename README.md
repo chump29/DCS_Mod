@@ -166,7 +166,7 @@ local config = JTAC_PRIORITY_CONFIG or {
 
 ---
 
-# [Logger](logger.lua)
+# [Logger](logger.lua) <sup>*[module]*</sup>
 Serialize/pretty print LUA objects to a file.
 - `fileName` sets output file name *(default: logger.lua)*
 - `useDesktopPath` tries to write to Desktop instead of current directory  *(default: true)*

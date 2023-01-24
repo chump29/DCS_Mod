@@ -7,12 +7,11 @@
 do
 
 	local autobriefingutils = require("autobriefingutils")
-	local BA = require("briefing_addons")
 	local convert = require("unit_converter")
 	local terrain = require("terrain")
 	local UC = require("utils_common")
+	local theatreData = require("theatre_data")
 
-	local theatreData = BA.getTheatreData() or {}
 	local mToFt = convert.mToFt
 	local mpsToKts = convert.mpsToKts
 	local round = UC.round

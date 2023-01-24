@@ -14,6 +14,7 @@ local string            = base.string
 local dllWeather        = require('Weather')
 local UC                = require('utils_common')
 local convert = require("unit_converter")
+local theatreData = require("theatre_data")
 
 -- for < DCS 2.8
 local function handleRequire(m)
@@ -113,45 +114,7 @@ function cduWindString(a_weather, a_humanPosition, temperature)
 	return wind
 end
 
-function getTheatreData()
-	return {
-		["Caucasus"] = {
-			["icao"] = "UGTB",
-			["utc"] = 4,
-			["position"] = { x = -314926.25, y = 479.69479370117, z = 895724 }
-		},
-		["Falklands"] = {
-			["icao"] = "EGYP",
-			["utc"] = -3,
-			["position"] = { x = 73598.5625, y = 74.136428833008, z = 46176.4140625 }
-		},
-		["MarianaIslands"] = {
-			["icao"] = "PGUA",
-			["utc"] = 10,
-			["position"] = { x = 9961.662109375, y = 166.12214660645, z = 13072.155273438 }
-		},
-		["Nevada"] = {
-			["icao"] = "KLSV",
-			["utc"] = -8,
-			["position"] = { x = -399275.84375, y = 561.30914306641, z = -18183.12109375 }
-		},
-		-- Normandy
-		["PersianGulf"] = {
-			["icao"] = "OMAA",
-			["utc"] = 4,
-			["position"] = { x = -187211.25, y = 28.000028610229, z = -163535.515625 }
-		},
-		["Syria"] = {
-			["icao"] = "LCLK",
-			["utc"] = 3,
-			["position"] = { x = -8466.0517578125, y = 5.0000047683716, z = -209773.46875 }
-		}
-		-- TheChannel
-	}
-end
-
 function getZuluTime(s, t)
-	local theatreData = getTheatreData()
 	local td = theatreData[t]
 	if td then
 		return s + td.utc * 60 * 60

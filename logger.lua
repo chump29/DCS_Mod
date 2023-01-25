@@ -27,8 +27,6 @@ do
 				f:flush()
 				f:close()
 			end
-		else
-			env.info("Environment sanitized!")
 		end
 	end
 

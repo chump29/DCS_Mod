@@ -8,8 +8,9 @@ do
 
 	local autobriefingutils = require("autobriefingutils")
 	local convert = require("unit_converter")
-	local utils = require("utils_common")
+	local terrain = require("terrain")
 	local theatreData = require("theatre_data")
+	local utils = require("utils_common")
 
 	local mToFt = convert.mToFt
 	local mpsToKts = convert.mpsToKts
@@ -107,8 +108,6 @@ do
 			if p and CloudPresets then
 				return CloudPresets[p]
 			end
-		else
-			env.info("wxDCS: dofile not available")
 		end
 		return nil
 	end
@@ -478,7 +477,7 @@ do
 			end
 			if not p then return err end
 		end
-		local lat, long = coord.LOtoLL(p)
+		local lat, lon = terrain.convertMetersToLatLon(p.x, p.z)
 		if not lat or not lon then return err end
 
 		-- NOTE: Borrowed (and modified) from MOOSE [https://github.com/FlightControl-Master/MOOSE/blob/fea1839c06a7608182a465a1852800a07e3b43bb/Moose%20Development/Moose/Utilities/Utils.lua#L1612]

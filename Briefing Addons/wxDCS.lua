@@ -104,6 +104,8 @@ do
 
 	local function getPreset(p)
 		if dofile then
+			local i18 = require("i18n")
+			local _ = i18n.ptranslate
 			local CloudPresets = dofile("Config\\Effects\\getCloudsPresets.lua")
 			if p and CloudPresets then
 				return CloudPresets[p]

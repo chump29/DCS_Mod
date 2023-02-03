@@ -104,8 +104,6 @@ do
 
 	local function getPreset(p)
 		if dofile then
-			local i18 = require("i18n")
-			local _ = i18n.ptranslate
 			local CloudPresets = dofile("Config\\Effects\\getCloudsPresets.lua")
 			if p and CloudPresets then
 				return CloudPresets[p]
@@ -286,7 +284,7 @@ do
 		if p then
 			local str = ""
 			local z, n = 0, 0
-			for _, l in ipairs(p.layers) do
+			for na, l in ipairs(p.layers) do
 				if l.coverage > 0 then
 					local c, i = getCoverage(l.coverage)
 					if i >= z then
@@ -344,7 +342,7 @@ do
 				return "NSC"
 			end
 		end
-		str, _ = getCoverage(c.density / 10)
+		str, na = getCoverage(c.density / 10)
 		return string.format("%s%s%s", str, roundClouds(ft), getCB(ft, c.iprecptns, c.density))
 	end
 

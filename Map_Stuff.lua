@@ -73,7 +73,7 @@ do
 	end
 
 	local function getQNH(qnh)
-	  	return string.format("%0.2finHg / %dhPa", (qnh or 0) / 25.4, qnh or 0)
+	  	return string.format("%0.2finHg / %0.2fmmHg/ %dhPa", (qnh or 0) / 25.399999, qnh or 0, (qnh or 0) * 1.333223)
 	end
 
 	local function getClouds(m)

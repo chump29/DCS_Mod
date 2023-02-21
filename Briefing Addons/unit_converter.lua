@@ -6,19 +6,19 @@
 do
 
 	local function mToFt(m)
-		return m * 3.280839
+		return (m or 0) * 3.280839
 	end
 
 	local function mpsToKts(mps)
-		return mps * 1.943844
+		return (mps or 0) * 1.943844
 	end
 
 	local function mmHgToInHg(mmHg)
-		return mmHg / 25.399999
+		return (mmHg or 0) / 25.399999
 	end
 
 	local function mmHgToHpa(mmHg)
-		return mmHg * 1.333223
+		return (mmHg or 0) * 1.333223
 	end
 
 	return {

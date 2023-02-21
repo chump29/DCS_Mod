@@ -492,8 +492,8 @@ do
 		local ssL = MOOSE.GetSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
 		if srL == "N/R" or ssL == "N/S" then return err end
 		return {
-			z = { sunrise = composeDateString(srZ), sunset = composeDateString(ssZ), sr = srZ, ss = ssZ },
-			l = { sunrise = composeDateString(srL), sunset = composeDateString(ssL), sr = srL, ss = ssL }
+			z = { sunrise = composeDateString(srZ, nil, nil, true), sunset = composeDateString(ssZ, nil, nil, true), sr = srZ, ss = ssZ },
+			l = { sunrise = composeDateString(srL, nil, nil, true), sunset = composeDateString(ssL, nil, nil, true), sr = srL, ss = ssL }
 		}
 	end
 

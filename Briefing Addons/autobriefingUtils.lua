@@ -494,7 +494,7 @@ end
 -------------------------------------------------------------------------------
 -- формирование строки даты\времени в формате hh:mm:ss
 -- если задан параметр include_date, то формат изменяется на ddd/hh:mm:ss
-function composeDateString(start_time, include_date, MissionDate)
+function composeDateString(start_time, include_date, MissionDate, no_secs)
 	local data = convertDaysToData(math.floor(start_time/(60*60*24)), MissionDate)
     -- вывод даты и времени
     local d = math.floor(start_time / (60*60*24))
@@ -509,6 +509,9 @@ function composeDateString(start_time, include_date, MissionDate)
         res = " on " .. data
     end
     --return res .. num2s2(h) .. ':' .. num2s2(m) .. ':' .. num2s2(s)
+    if no_secs then
+        return string.format("%0.2d:%0.2d%s", h, m, res)
+    end
     return string.format("%0.2d:%0.2d:%0.2d%s", h, m, s, res)
 end
 

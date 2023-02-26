@@ -301,7 +301,7 @@ do
 							if string.len(str) > 0 then
 								str = str .. " "
 							end
-							str = string.format("%s%s%s%s", str, c, roundClouds(ft), getCB(ft, p.precipitationPower, d.clouds.density))
+							str = str .. c .. roundClouds(ft) .. getCB(ft, p.precipitationPower, d.clouds.density)
 						end
 					end
 				end
@@ -343,7 +343,7 @@ do
 			end
 		end
 		str, na = getCoverage(c.density / 10)
-		return string.format("%s%s%s", str, roundClouds(ft), getCB(ft, c.iprecptns, c.density))
+		return str .. roundClouds(ft) .. getCB(ft, c.iprecptns, c.density)
 	end
 
 	local function getTemp(t)
@@ -463,43 +463,69 @@ do
 	end
 
 	local NA = "N/A"
+	local ERROR = "Error"
 
 	local function getSunriseAndSunset(d)
-		local err = {
-			z = { sunrise = NA, sunset = NA },
-			l = { sunrise = NA, sunset = NA }
+		local ERR = {
+			z = { sunrise = ERROR, sunset = ERROR },
+			l = { sunrise = ERROR, sunset = ERROR }
 		}
+		local NEVER = function(isDark)
+			if isDark == nil then isDark = false end
+			local sr, ss = 0, -1 -- polar day
+			if isDark then
+				sr = -1 -- polar night
+				ss = 0
+			end
+			return {
+				z = { sunrise = "Never", sunset = "Never", sr = 0, ss = 0 },
+				l = { sunrise = "Never", sunset = "Never", sr = sr, ss = ss }
+			}
+		end
 		local p = d.position
 		if not p then
 			local td = theatreData[d.theatre]
 			if td then
 				p = td.position
 			end
-			if not p then return err end
+			if not p then return ERR end
 		end
 		local lat, lon = terrain.convertMetersToLatLon(p.x, p.z)
-		if not lat or not lon then return err end
+		if not lat or not lon then return ERR end
 
-		-- NOTE: Borrowed (and modified) from MOOSE [https://github.com/FlightControl-Master/MOOSE/blob/fea1839c06a7608182a465a1852800a07e3b43bb/Moose%20Development/Moose/Utilities/Utils.lua#L1612]
-		local MOOSE={}function MOOSE.GetDayOfYear(b,c,d)local e=math.floor;local f=e(275*c/9)local g=e((c+9)/12)local h=1+e((b-4*e(b/4)+2)/3)return f-g*h+d-30 end;function MOOSE.GetSunRiseAndSet(i,j,k,l,m)local n=90.83;local o=j;local p=k;local q=l;local r=i;m=m or 0;local s=math.rad;local t=math.deg;local e=math.floor;local u=function(r)return r-e(r)end;local v=function(w)return math.cos(s(w))end;local x=function(w)return t(math.acos(w))end;local y=function(w)return math.sin(s(w))end;local z=function(w)return t(math.asin(w))end;local A=function(w)return math.tan(s(w))end;local B=function(w)return t(math.atan(w))end;local function C(D,E,F)local G=F-E;local H;if D<E then H=e((E-D)/G)+1;return D+H*G elseif D>=F then H=e((D-F)/G)+1;return D-H*G else return D end end;local I=p/15;local J;if q then J=r+(6-I)/24 else J=r+(18-I)/24 end;local K=0.9856*J-3.289;local L=C(K+1.916*y(K)+0.020*y(2*K)+282.634,0,360)local M=C(B(0.91764*A(L)),0,360)local N=e(L/90)*90;local O=e(M/90)*90;M=M+N-O;M=M/15;local P=0.39782*y(L)local Q=v(z(P))local R=(v(n)-P*y(o))/(Q*v(o))if q and R>1 then return"N/R"elseif R<-1 then return"N/S"end;local S;if q then S=360-x(R)else S=x(R)end;S=S/15;local T=S+M-0.06571*J-6.622;local U=C(T-I+m,0,24)return e(U)*60*60+u(U)*60*60 end;function MOOSE.GetSunrise(d,c,b,j,k,m)local i=MOOSE.GetDayOfYear(b,c,d)return MOOSE.GetSunRiseAndSet(i,j,k,true,m)end;function MOOSE.GetSunset(d,c,b,j,k,m)local i=MOOSE.GetDayOfYear(b,c,d)return MOOSE.GetSunRiseAndSet(i,j,k,false,m)end
+		-- Borrowed/modified from: https://gist.github.com/alexander-yakushev/88531e23a89a0f2acbf1
+		local SUN={getSunriseSunset=function(a,b,c,d,e,f,g)if not a or not b or not c or not d or not e then return"N/A"end;f=f or 0;if g==nil then g=false end;local h=math.rad;local i=math.deg;local j=math.floor;local k=function(l)return l-j(l)end;local m=function(n)return math.cos(h(n))end;local o=function(n)return i(math.acos(n))end;local p=function(n)return math.sin(h(n))end;local q=function(n)return i(math.asin(n))end;local r=function(n)return math.tan(h(n))end;local s=function(n)return i(math.atan(n))end;local function t(a,b,c)local u=j(275*b/9)local v=j((b+9)/12)local w=1+j((c-4*j(c/4)+2)/3)return u-v*w+a-30 end;local function x(y,z,A)local B=A-z;local C;if y<z then C=j((z-y)/B)+1;return y+C*B elseif y>=A then C=j((y-A)/B)+1;return y-C*B end;return y end;local l=t(a,b,c)local D=e/15;local E;if g then E=l+(6-D)/24 else E=l+(18-D)/24 end;local F=0.9856*E-3.289;local G=x(F+1.916*p(F)+0.020*p(2*F)+282.634,0,360)local H=x(s(0.91764*r(G)),0,360)local I=j(G/90)*90;local J=j(H/90)*90;H=H+I-J;H=H/15;local K=0.39782*p(G)local L=m(q(K))local M=90.83;local N=(m(M)-K*p(d))/(L*m(d))if g and N>1 then return"N/R"elseif N<-1 then return"N/S"end;local O;if g then O=360-o(N)else O=o(N)end;O=O/15;local P=O+H-0.06571*E-6.622;local Q=x(P-D+f,0,24)return j(Q)*60*60+k(Q)*60*60 end}
 
-		local srZ = MOOSE.GetSunrise(d.date.Day, d.date.Month, d.date.Year, lat, lon)
-		local ssZ = MOOSE.GetSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon)
-		if srZ == "N/R" or ssZ == "N/S" then return err end
+		local srZ = SUN.getSunriseSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, nil, true)
+		local ssZ = SUN.getSunriseSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon)
+		if srZ == "N/R" then
+			return NEVER(true)
+		elseif ssZ == "N/S" then
+			return NEVER()
+		elseif srZ == NA or ssZ == NA then
+			return ERR
+		end
 
 		local offset = getOffset(d.theatre)
-		local srL = MOOSE.GetSunrise(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
-		local ssL = MOOSE.GetSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
-		if srL == "N/R" or ssL == "N/S" then return err end
+		local srL = SUN.getSunriseSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset, true)
+		local ssL = SUN.getSunriseSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
+		if srL == "N/R" then
+			return NEVER(true)
+		elseif ssL == "N/S" then
+			return NEVER()
+		elseif srZ == NA or ssZ == NA then
+			return ERR
+		end
+
 		return {
-			z = { sunrise = composeDateString(srZ, nil, nil, true), sunset = composeDateString(ssZ, nil, nil, true), sr = srZ, ss = ssZ },
+			z = { sunrise = composeDateString(srZ, nil, nil, true) .. "Z", sunset = composeDateString(ssZ, nil, nil, true) .. "Z", sr = srZ, ss = ssZ },
 			l = { sunrise = composeDateString(srL, nil, nil, true), sunset = composeDateString(ssL, nil, nil, true), sr = srL, ss = ssL }
 		}
 	end
 
 	local function getCase(d)
 		if d.atmosphere > 0 then return NA end
-		if not d.sun.l.sr or not d.sun.l.ss then return NA end
+		if not d.sun.l.sr or not d.sun.l.ss then return ERROR end
 		local ft = 99999
 		if d.clouds.density and d.clouds.density > 0 then
 			local p = d.position
@@ -511,16 +537,24 @@ do
 					useDefault = true
 				end
 			end
-			if not p then return NA end
+			if not p then return ERROR end
 			ft = mToFt(toAGL(d.clouds.base, p.y, d.theatre, useDefault))
 		end
 		local v = getVisibility(d) / 1852
 		local time = d.current_time or d.start_time
 		local case = "I"
-		if time < d.sun.l.sr or time > d.sun.l.ss or ft < 1000 or v < 5 then
+		if d.sun.l.sr == -1 then
 			case = "III"
-		elseif ft < 3000 then
-			case = "II"
+		elseif d.sun.l.ss == -1 then
+			if ft < 3000 then
+				case = "II"
+			end
+		else
+			if time < d.sun.l.sr or time > d.sun.l.ss or ft < 1000 or v < 5 then
+				case = "III"
+			elseif ft < 3000 then
+				case = "II"
+			end
 		end
 		return string.format("Case %s", case)
 	end
@@ -537,7 +571,7 @@ do
 		metar = string.format("%s %s", metar, wind)
 		local vis = getVisibility(d)
 		metar = string.format("%s %0.4d", metar, vis)
-		metar = string.format("%s%s", metar, getWeather(d.clouds.preset, d.clouds.iprecptns, d.fog, d.fog_visibility, d.fog_thickness, d.dust, d.clouds.density, d.temp, d.halo, vis))
+		metar = metar .. getWeather(d.clouds.preset, d.clouds.iprecptns, d.fog, d.fog_visibility, d.fog_thickness, d.dust, d.clouds.density, d.temp, d.halo, vis)
 		metar = string.format("%s %s", metar, getClouds(d))
 		local qnh = getQNH(d.qnh)
 		metar = string.format("%s %s/%s", metar, getTemp(d.temp), getDewPoint(d.agl, d.fog, d.clouds.density, d.temp, qnh, vis))
@@ -546,7 +580,7 @@ do
 		metar = string.format("%s %s", metar, color)
 		metar = string.format("%s RMK AO2", metar)
 		if wind == "/////KT" then
-			metar = string.format("%s%s", metar, getTurbulence(d.wind.speed, d.turbulence))
+			metar = metar .. getTurbulence(d.wind.speed, d.turbulence)
 		end
 		if d.tempo then
 			metar = string.format("%s TEMPO 2400", metar)
@@ -554,7 +588,7 @@ do
 				metar = string.format("%s YLO", metar)
 			end
 		end
-		return string.format("%s=", metar)
+		return metar .. "="
 	end
 
 	return {

@@ -103,7 +103,7 @@ local cdata = {
         qnh = _("QNH"),
         magnetic_variation = _("Magnetic Variation"),
         cdu_wind = _("A-10 CDU Wind"),
-        carrier = _("CARRIER"),
+        recovery = _("Carrier Ops"),
         sunrise = _("Sunrise"),
         sunset = _("Sunset"),
         empty = _(" "),
@@ -551,8 +551,8 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(nil, cdata.start, string.format("%sZ / %s", autobriefingutils.composeDateString(BA.getZuluTime(dataBrf.mission_start_time, metarData.theatre)), autobriefingutils.composeDateString(dataBrf.mission_start_time, true, dataBrf.mission_date))))
     table.insert(autoBriefing, composeEntry(nil, cdata.current, string.format("%sZ / %s", autobriefingutils.composeDateString(BA.getZuluTime(metarData.current_time, metarData.theatre)), autobriefingutils.composeDateString(metarData.current_time))))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, string.format("%sZ / %s", metarData.sun.z.sunrise, metarData.sun.l.sunrise)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%sZ / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, string.format("%s / %s", metarData.sun.z.sunrise, metarData.sun.l.sunrise)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%s / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.my_side, side))
      --   table.insert(autoBriefing, composeEntry(nil, cdata.friends,    composeFriendsString() ))
@@ -596,7 +596,7 @@ function generateAutoBriefing()
     local metar = wx.getMETAR(metarData)
     table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.recovery, wx.getCase(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh, tblStartGroups[1])))
@@ -635,14 +635,14 @@ function generateSimpleAutoBriefing()
     table.insert(autoBriefing, composeEntry(nil, cdata.start, string.format("%sZ / %s", autobriefingutils.composeDateString(BA.getZuluTime(dataBrf.mission_start_time, metarData.theatre)), autobriefingutils.composeDateString(dataBrf.mission_start_time, true, dataBrf.mission_date))))
     table.insert(autoBriefing, composeEntry(nil, cdata.current, string.format("%sZ / %s", autobriefingutils.composeDateString(BA.getZuluTime(metarData.current_time, metarData.theatre)), autobriefingutils.composeDateString(metarData.current_time))))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, string.format("%sZ / %s", metarData.sun.z.sunrise, metarData.sun.l.sunrise)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%sZ / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, string.format("%s / %s", metarData.sun.z.sunrise, metarData.sun.l.sunrise)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.sunset, string.format("%s / %s", metarData.sun.z.sunset, metarData.sun.l.sunset)))
     table.insert(autoBriefing, composeEntry(cdata.description, nil, dataBrf.descText))
     table.insert(autoBriefing, composeEntry(cdata.weather))
     local metar = wx.getMETAR(metarData)
     table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.carrier, wx.getCase(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.recovery, wx.getCase(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh)))

@@ -97,6 +97,7 @@ local cdata =
     sunrise = _("Sunrise"),
     sunset = _("Sunset"),
     empty = _(" "),
+    category = _("Flight Category"),
 
     BACK = _('CANCEL'),
     middleBtn = _('MISSION PLANNER'),
@@ -636,6 +637,8 @@ function generateAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.recovery, wx.getCase(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+    table.insert(autoBriefing, composeEntry(nil, cdata.category, wx.getCategory(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(mission.weather.atmosphere_type, mission.weather.qnh, tblStartGroups[1])))
     table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, BA.getMV(mission.date, tblStartGroups[1])))
@@ -682,6 +685,8 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.recovery, wx.getCase(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+    table.insert(autoBriefing, composeEntry(nil, cdata.category, wx.getCategory(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(mission.weather.season.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(mission.weather.atmosphere_type, mission.weather.qnh)))

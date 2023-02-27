@@ -494,10 +494,10 @@ do
 		if not lat or not lon then return ERR end
 
 		-- Borrowed/modified from: https://gist.github.com/alexander-yakushev/88531e23a89a0f2acbf1
-		local SUN={getSunriseSunset=function(a,b,c,d,e,f,g)if not a or not b or not c or not d or not e then return"N/A"end;f=f or 0;if g==nil then g=false end;local h=math.rad;local i=math.deg;local j=math.floor;local k=function(l)return l-j(l)end;local m=function(n)return math.cos(h(n))end;local o=function(n)return i(math.acos(n))end;local p=function(n)return math.sin(h(n))end;local q=function(n)return i(math.asin(n))end;local r=function(n)return math.tan(h(n))end;local s=function(n)return i(math.atan(n))end;local function t(a,b,c)local u=j(275*b/9)local v=j((b+9)/12)local w=1+j((c-4*j(c/4)+2)/3)return u-v*w+a-30 end;local function x(y,z,A)local B=A-z;local C;if y<z then C=j((z-y)/B)+1;return y+C*B elseif y>=A then C=j((y-A)/B)+1;return y-C*B end;return y end;local l=t(a,b,c)local D=e/15;local E;if g then E=l+(6-D)/24 else E=l+(18-D)/24 end;local F=0.9856*E-3.289;local G=x(F+1.916*p(F)+0.020*p(2*F)+282.634,0,360)local H=x(s(0.91764*r(G)),0,360)local I=j(G/90)*90;local J=j(H/90)*90;H=H+I-J;H=H/15;local K=0.39782*p(G)local L=m(q(K))local M=90.83;local N=(m(M)-K*p(d))/(L*m(d))if g and N>1 then return"N/R"elseif N<-1 then return"N/S"end;local O;if g then O=360-o(N)else O=o(N)end;O=O/15;local P=O+H-0.06571*E-6.622;local Q=x(P-D+f,0,24)return j(Q)*60*60+k(Q)*60*60 end}
+		local SUN={getSunriseOrSunset=function(a,b,c,d,e,f,g)if not a or not b or not c or not d or not e then return"N/A"end;f=f or 0;if g==nil then g=false end;local h=math.rad;local i=math.deg;local j=math.floor;local k=function(l)return l-j(l)end;local m=function(n)return math.cos(h(n))end;local o=function(n)return i(math.acos(n))end;local p=function(n)return math.sin(h(n))end;local q=function(n)return i(math.asin(n))end;local r=function(n)return math.tan(h(n))end;local s=function(n)return i(math.atan(n))end;local function t(a,b,c)local u=j(275*b/9)local v=j((b+9)/12)local w=1+j((c-4*j(c/4)+2)/3)return u-v*w+a-30 end;local function x(y,z,A)local B=A-z;local C;if y<z then C=j((z-y)/B)+1;return y+C*B elseif y>=A then C=j((y-A)/B)+1;return y-C*B end;return y end;local l=t(a,b,c)local D=e/15;local E;if g then E=l+(6-D)/24 else E=l+(18-D)/24 end;local F=0.9856*E-3.289;local G=x(F+1.916*p(F)+0.020*p(2*F)+282.634,0,360)local H=x(s(0.91764*r(G)),0,360)local I=j(G/90)*90;local J=j(H/90)*90;H=H+I-J;H=H/15;local K=0.39782*p(G)local L=m(q(K))local M=90.83;local N=(m(M)-K*p(d))/(L*m(d))if g and N>1 then return"N/R"elseif N<-1 then return"N/S"end;local O;if g then O=360-o(N)else O=o(N)end;O=O/15;local P=O+H-0.06571*E-6.622;local Q=x(P-D+f,0,24)return j(Q)*60*60+k(Q)*60*60 end}
 
-		local srZ = SUN.getSunriseSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, nil, true)
-		local ssZ = SUN.getSunriseSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon)
+		local srZ = SUN.getSunriseOrSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, nil, true)
+		local ssZ = SUN.getSunriseOrSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon)
 		if srZ == "N/R" then
 			return NEVER(true)
 		elseif ssZ == "N/S" then
@@ -507,8 +507,8 @@ do
 		end
 
 		local offset = getOffset(d.theatre)
-		local srL = SUN.getSunriseSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset, true)
-		local ssL = SUN.getSunriseSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
+		local srL = SUN.getSunriseOrSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset, true)
+		local ssL = SUN.getSunriseOrSunset(d.date.Day, d.date.Month, d.date.Year, lat, lon, offset)
 		if srL == "N/R" then
 			return NEVER(true)
 		elseif ssL == "N/S" then
@@ -523,9 +523,7 @@ do
 		}
 	end
 
-	local function getCase(d)
-		if d.atmosphere > 0 then return NA end
-		if not d.sun.l.sr or not d.sun.l.ss then return ERROR end
+	local function getCeiling(d)
 		local ft = 99999
 		if d.clouds.density and d.clouds.density > 0 then
 			local p = d.position
@@ -540,7 +538,14 @@ do
 			if not p then return ERROR end
 			ft = mToFt(toAGL(d.clouds.base, p.y, d.theatre, useDefault))
 		end
-		local v = getVisibility(d) / 1852
+		return ft
+	end
+
+	local function getCase(d)
+		if d.atmosphere > 0 then return NA end
+		if not d.sun.l.sr or not d.sun.l.ss then return ERROR end
+		local ft = getCeiling(d)
+		local v = convert.mToNm(getVisibility(d))
 		local time = d.current_time or d.start_time
 		local case = "I"
 		if d.sun.l.sr == -1 then
@@ -557,6 +562,20 @@ do
 			end
 		end
 		return string.format("Case %s", case)
+	end
+
+	local function getCategory(d)
+		if d.atmosphere > 0 then return NA end
+		local ft = getCeiling(d)
+		local v = convert.mToSm(getVisibility(d))
+		local cat = "VFR"
+		if ft < 500 or v < 1 then
+			cat = "LIFR"
+		elseif ft < 1000 or v < 3 then
+			cat = "IFR"
+		elseif ft <= 3000 or v <= 5 then
+			cat = "MVFR"
+		return cat
 	end
 
 	local function getMETAR(d)
@@ -594,6 +613,7 @@ do
 	return {
 		getSunriseAndSunset = getSunriseAndSunset,
 		getCase = getCase,
+		getCategory = getCategory,
 		getMETAR = getMETAR
 	}
 

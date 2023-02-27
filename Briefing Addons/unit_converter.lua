@@ -21,11 +21,21 @@ do
 		return (mmHg or 0) * 1.333223
 	end
 
+	local function mToNm(m)
+		return (m or 0) / 1852
+	end
+
+	local function mToSm(m)
+		return (m or 0) / 1609.344
+	end
+
 	return {
 		mToFt = mToFt,
 		mpsToKts = mpsToKts,
 		mmHgToInHg = mmHgToInHg,
-		mmHgToHpa = mmHgToHpa
+		mmHgToHpa = mmHgToHpa,
+		mToNm = mToNm,
+		mToSm = mToSm
 	}
 
 end

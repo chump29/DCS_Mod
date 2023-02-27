@@ -108,6 +108,7 @@ local cdata = {
         sunset = _("Sunset"),
         empty = _(" "),
         current = _("Currently"),
+        category = _("Flight Category"),
 
         SITUATION       = _('SITUATION'),
         MISSION         = _('MISSION'),
@@ -598,6 +599,8 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.recovery, wx.getCase(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+    table.insert(autoBriefing, composeEntry(nil, cdata.category, wx.getCategory(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh, tblStartGroups[1])))
     table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, BA.getMV(dataBrf.mission_date, tblStartGroups[1])))
@@ -643,6 +646,8 @@ function generateSimpleAutoBriefing()
     table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.recovery, wx.getCase(metarData)))
+    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+    table.insert(autoBriefing, composeEntry(nil, cdata.category, wx.getCategory(metarData)))
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh)))

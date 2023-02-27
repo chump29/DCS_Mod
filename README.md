@@ -56,6 +56,7 @@ Adds the following to the briefings:
 - Sunrise/sunset times
 - METAR
 - Dynamic Case I/II/III
+- Flight category
 - Temperature (*C & F*)
 - QNH (*inHg & mmHg & hPa*)
 - Magnetic variation

@@ -575,6 +575,7 @@ do
 			cat = "IFR"
 		elseif ft <= 3000 or v <= 5 then
 			cat = "MVFR"
+		end
 		return cat
 	end
 

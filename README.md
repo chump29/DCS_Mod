@@ -142,6 +142,25 @@ local config = CRASH_CREW_CONFIG or {
 
 ---
 
+# [Fire Support](Fire_Support.lua)
+Will call in `arty` or `smoke` by placing a marker with appropriate text.
+
+Configuration Settings:
+```lua
+local config = FIRE_SUPPORT_CONFIG or {
+  diameter = 75, -- in meters
+  power = 68, -- kg of TNT
+  preWaitArty = 10, -- in seconds
+  preWaitSmoke = 5,
+  postWaitArty = 30,
+  postWaitSmoke = 10,
+  rounds = 6, -- number of shots
+  smokeColor = "Random" -- "Green", "Red", "White", "Orange", "Blue", "Random"
+}
+```
+
+---
+
 # [JTAC Priority](JTAC_Priority.lua)
 Replaces `findNearestVisibleEnemy` in JTAC script to target red ground units with priority *(highest to lowest)*:
 - SAM

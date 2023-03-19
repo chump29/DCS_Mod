@@ -13,8 +13,6 @@ do
 		startingId = 10000
 	}
 
-	local dllWeather = require("Weather")
-
 	if config.atc then
 		assert(BASE ~= nil, "MOOSE must be loaded prior to this script!")
 
@@ -107,15 +105,13 @@ do
 			return mps * 1.943844
 		end
 
+		if weather.atmosphere_type > 0 then
+			return "N/A"
+		end
+
 		local wind = "CALM"
-		if weather.atmosphere_type == 0 then
-			if weather.wind.atGround.speed > 0 then
-				wind = string.format("%d° @ %dkts", reverseWind(weather.wind.atGround.dir), math.floor(mpsToKts(weather.wind.atGround.speed)))
-			end
-		else
-			dllWeather.initAtmospere(weather)
-			local res = dllWeather.getGroundWindAtPoint({position = pos or {x = 0, y = 0, z = 0}})
-			wind = string.format("%d° %dkts", toPositiveDegrees(res.a + math.pi), math.floor(mpsToKts(res.v)))
+		if weather.wind.atGround.speed > 0 then
+			wind = string.format("%d° @ %dkts", reverseWind(weather.wind.atGround.dir), math.floor(mpsToKts(weather.wind.atGround.speed)))
 		end
 		return wind
 	end

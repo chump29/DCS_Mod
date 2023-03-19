@@ -200,13 +200,13 @@ Serialize/pretty print LUA objects to a file.
 ---
 
 # [Map Stuff](Map_Stuff.lua)
-Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) and [MiST](https://github.com/mrSkortch/MissionScriptingTools/releases) to add the following to a map:
+Uses [MOOSE](https://github.com/FlightControl-Master/MOOSE/releases) to add the following to a map:
 - Announce when a player joins/dies/crashes
 - Blue airfield data
   - [Pseudo ATC](https://flightcontrol-master.github.io/MOOSE_DOCS/Documentation/Functional.PseudoATC.html)
   - Imports [ATIS](ATIS.lua) data, if available
 
-*NOTE: Must include `sound` file via trigger in editor*
+*NOTE: Must include squelch `sound` file via trigger in editor, if desired*
 
 Configuration settings:
 ```lua

@@ -77,7 +77,7 @@ Adds the following to the briefings:
 - `[DCS Directory]\Scripts\utils_common.lua`
 - `[DCS Directory]\Scripts\wxDCS.lua`
 
-**_or use latest OVGME package from [Releases](https://github.com/chump29/DCS_Mod/releases)_**
+**_or use latest OvGME package from [Releases](https://github.com/chump29/DCS_Mod/releases)_**
 
 ---
 

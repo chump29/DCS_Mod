@@ -17,17 +17,17 @@ do
 	local foundOverride = false
 	local isCTLD = false
 	if ctld and ctld.findNearestVisibleEnemy and ctld.alreadyTarget and ctld.isVehicle and ctld.isInfantry and ctld.getDistance then
-		if config.debug then log("Replacing ctld.findNearestVisibleEnemy...") end
+		log("Replacing ctld.findNearestVisibleEnemy...")
 		isCTLD = true
 		foundOverride = true
 		ctld.findNearestVisibleEnemy = function (j, t, d)
 			findNearestVisibleEnemy(j, t, d)
 		end
 	elseif findNearestVisibleEnemy and alreadyTarget and isVehicle and isInfantry and getDistance then
-		if config.debug then log("Replacing findNearestVisibleEnemy...") end
+		log("Replacing findNearestVisibleEnemy...")
 		foundOverride = true
 	else
-		if config.debug then log("findNearestVisibleEnemy not found") end
+		log("findNearestVisibleEnemy not found")
 	end
 
 	if foundOverride then
@@ -152,7 +152,7 @@ do
 			if #units > 0 then
 				table.sort(units, function (o1, o2) return o1.dist < o2.dist end)
 				local nearestUnit = units[1].unit
-				if config.debug then log(string.format("Nearest unit to JTAC %s is %s (%s) @ %0.2fm", jtacName, nearestUnit:getName(), nearestUnit:getTypeName(), units[1].dist)) end
+				log(string.format("Nearest unit to JTAC %s is %s (%s) @ %0.2fm", jtacName, nearestUnit:getName(), nearestUnit:getTypeName(), units[1].dist))
 				return nearestUnit
 			end
 			return nil

@@ -6,13 +6,13 @@
 do
 
 	local config = FIRE_SUPPORT_CONFIG or {
-		diameter = 75, -- in meters
+		diameter = 50, -- in meters
 		power = 68,
 		preWaitArty = 10, -- in seconds
 		preWaitSmoke = 5,
 		postWaitArty = 30,
 		postWaitSmoke = 10,
-		rounds = 6, -- number of shots
+		rounds = 4, -- number of shots
 		smokeColor = "Random" -- "Green", "Red", "White", "Orange", "Blue", "Random"
 	}
 
@@ -25,7 +25,7 @@ do
 					trigger.action.removeMark(event.idx)
 				end
 				if text == "arty" then
-					if config.artyTime and timer.getTime() < config.artyTime then
+					if config.artyTime and timer.getTime() < config.artyTime - 1 then
 						say(string.format("Arty is cooling down. Try again in %d seconds...", config.artyTime - timer.getTime()))
 						return
 					end

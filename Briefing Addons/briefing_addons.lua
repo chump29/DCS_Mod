@@ -15,14 +15,7 @@ local dllWeather        = require('Weather')
 local UC                = require('utils_common')
 local convert = require("unit_converter")
 local theatreData = require("theatre_data")
-
--- for < DCS 2.8
-local function handleRequire(m)
-	local s, o = base.pcall(require, m)
-	if s then return o end
-	return nil
-end
-local magvar			= handleRequire("magvar")
+local magvar			= require("magvar")
 local terrain			= require("terrain")
 
 local mpsToKts = convert.mpsToKts
@@ -30,17 +23,17 @@ local round = UC.round
 local roundToNearest = UC.roundToNearest
 
 function getMV(d, g)
-	if not magvar or not g or not g.position then
+	if not magvar or not g or not g.position or not d then
 		return "N/A"
 	end
 	magvar.init(d.Month, d.Year)
 	local lat, lon = terrain.convertMetersToLatLon(g.position.x, g.position.z)
-	local magVar = UC.toDegrees(magvar.get_mag_decl(lat, lon), true)
+	local mv = UC.toDegrees(magvar.get_mag_decl(lat, lon), true)
 	local dir = "East"
-	if magVar < 0 then
+	if mv < 0 then
 		dir = "West"
 	end
-	return string.format("%0.1f° %s (%+0.1f)", math.abs(magVar), dir, magVar * -1)
+	return string.format("%0.1f° %s (%+0.1f)", math.abs(mv), dir, -mv), -mv
 end
 
 function getTemp(c)
@@ -78,7 +71,8 @@ local function cduWindToStr(d, s, t)
 	return string.format("%0.3d/%0.2d  %+0.2d", UC.revertWind(d), s, t)
 end
 
-function cduWindString(a_weather, a_humanPosition, temperature)
+function cduWindString(a_weather, a_humanPosition, temperature, mv)
+	mv = mv or 0
 	local wind = {}
 	if a_weather.atmosphere_type == 0 then
 			local w = a_weather.wind
@@ -87,14 +81,18 @@ function cduWindString(a_weather, a_humanPosition, temperature)
 			local at2000Speed = round(mpsToKts(w.at2000.speed))
 			local at8000Speed = round(mpsToKts(w.at8000.speed))
 
-			wind[1] = '00  ' .. cduWindToStr(w.atGround.dir, atGroundSpeed, temperature)
+			local atGroundDir = w.atGround.dir + mv
+			local at2000Dir = w.at2000.dir + mv
+			local at8000Dir = w.at8000.dir + mv
+
+			wind[1] = '00  ' .. cduWindToStr(atGroundDir, atGroundSpeed, temperature)
 
 			--if w.atGround.speed + w.at2000.speed + w.at8000.speed == 0 then return wind end
 
-			local interpolatedWind = {speed = atGroundSpeed*2, dir = w.atGround.dir}
+			local interpolatedWind = {speed = atGroundSpeed*2, dir = atGroundDir}
 			wind[2] = '02  ' .. cduWindToStr(interpolatedWind.dir, interpolatedWind.speed, temperature-4)
-			wind[3] = '07  ' .. cduWindToStr(w.at2000.dir, at2000Speed, temperature-14)
-			wind[4] = '26  ' .. cduWindToStr(w.at8000.dir, at8000Speed, temperature-52)
+			wind[3] = '07  ' .. cduWindToStr(at2000Dir, at2000Speed, temperature-14)
+			wind[4] = '26  ' .. cduWindToStr(at8000Dir, at8000Speed, temperature-52)
 	else
 			local position = a_humanPosition or {x=0, y=0, z=0}
 
@@ -109,7 +107,7 @@ function cduWindString(a_weather, a_humanPosition, temperature)
 				return { "NIL" }
 			end
 
-			wind[1] = '00  ' .. cduWindToStr(UC.toPositiveDegrees(res.a+math.pi), res.v, temperature)
+			wind[1] = '00  ' .. cduWindToStr(UC.toPositiveDegrees(res.a+math.pi) + mv, res.v, temperature)
 	end
 	return wind
 end

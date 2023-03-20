@@ -603,11 +603,12 @@ function generateAutoBriefing()
     table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
     table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
     table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh, tblStartGroups[1])))
-    table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, BA.getMV(dataBrf.mission_date, tblStartGroups[1])))
+    local magvar, mv = BA.getMV(dataBrf.mission_date, tblStartGroups[1])
+    table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, magvar))
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(dataBrf.weather.atmosphere_type, dataBrf.weather.clouds)))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind, UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
     if unitType and string.sub(unitType, 1, 5) == "A-10C" then
-        table.insert(autoBriefing, composeEntry(nil, cdata.cdu_wind, BA.cduWindString(dataBrf.weather, dataBrf.humanPosition, dataBrf.temperature)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.cdu_wind, BA.cduWindString(dataBrf.weather, dataBrf.humanPosition, dataBrf.temperature, mv)))
     end
     table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, UC.composeTurbulenceString(dataBrf.weather)))
     if dataBrf.startTime then

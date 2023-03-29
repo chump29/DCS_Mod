@@ -37,11 +37,7 @@ function getMV(d, g)
 end
 
 function getTemp(c)
-	return string.format("%d°C (%d°F)", round(c), round(c * 9 / 5 + 32))
-end
-
-local function toQNH(q, a)
-	return q + a / 27.3 -- in hPa
+	return string.format("%d°C (%d°F)", round(c), round(convert.cToF(c)))
 end
 
 function getQNH(a, q, g)
@@ -49,8 +45,8 @@ function getQNH(a, q, g)
 		return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(convert.mmHgToInHg(q) * 100) / 100, math.floor(q), math.floor(convert.mmHgToHpa(q)))
 	elseif g and g.position and g.position.y then -- in m
 		local _, pressure = dllWeather.getTemperatureAndPressureAtPoint({position = g.position}) -- QFE in Pa
-		local qnh = toQNH(pressure / 100, g.position.y)
-		return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(qnh * 0.029530), math.floor(qnh * 0.750062), math.floor(qnh))
+		local qnh = convert.qfeToQnh(pressure / 100, g.position.y) -- QNH in hPa
+		return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(convert.hPaToInHg(qnh)), math.floor(convert.hpaToMmHg(qnh)), math.floor(qnh))
 	end
 	return "N/A"
 end

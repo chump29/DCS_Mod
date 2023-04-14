@@ -1125,10 +1125,15 @@ ClientAndAWACSHandler = {
 												end
 											else
 												local groupName, flightNum, aircraftNum = encodeCallsign(pComm:getCallsign())
-												return self.sub.AWACSCallname:make(pComm:getUnit(), base.math.floor(pComm:getCallsign() / 100)) + self.sub.DigitGroups:make('%d-%d', flightNum, aircraftNum)
+												if pComm:getUnit():getDesc().category == 2  then --GROUND UNIT
+													return self.sub.GroundUnitCallname:make(pComm:getUnit(), base.math.floor(pComm:getCallsign() / 100)) + self.sub.DigitGroups:make('%d', flightNum)
+												else
+													return self.sub.AWACSCallname:make(pComm:getUnit(), base.math.floor(pComm:getCallsign() / 100)) + self.sub.DigitGroups:make('%d-%d', flightNum, aircraftNum)
+												end
 											end
 										end,
 										sub = { AWACSCallname = UnitCallname:new('AWACS', false, nil, 'Callsign'),
+												GroundUnitCallname = UnitCallname:new('Ground Units', false, nil, 'Callsign'),
 												Digits = Digits,
 												Index = Index,
 												DigitGroups	= DigitGroups

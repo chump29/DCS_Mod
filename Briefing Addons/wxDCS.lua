@@ -542,7 +542,7 @@ do
 					useDefault = true
 				end
 			end
-			if not p then return ERROR end
+			if not p then p = {} end
 			ft = mToFt(toAGL(d.clouds.base, p.y, d.theatre, useDefault))
 		end
 		return ft

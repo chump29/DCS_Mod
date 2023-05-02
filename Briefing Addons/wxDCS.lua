@@ -466,11 +466,13 @@ do
 	local ERROR = "Error"
 
 	local function getSunriseAndSunset(d)
-		local ERR = {
-			z = { sunrise = ERROR, sunset = ERROR },
-			l = { sunrise = ERROR, sunset = ERROR }
-		}
-		local NEVER = function(isDark)
+		local function create(t)
+			return {
+				strSR = t,
+				strSS = t
+			}
+		end
+		local function NEVER(isDark)
 			if isDark == nil then isDark = false end
 			local sr, ss = 0, -1 -- polar day
 			if isDark then
@@ -478,8 +480,10 @@ do
 				ss = 0
 			end
 			return {
-				z = { sunrise = "Never", sunset = "Never", sr = 0, ss = 0 },
-				l = { sunrise = "Never", sunset = "Never", sr = sr, ss = ss }
+				z = { sr = 0, ss = 0 },
+				l = { sr = sr, ss = ss },
+				strSR = "Never",
+				strSS = "Never"
 			}
 		end
 		local p = d.position
@@ -488,10 +492,10 @@ do
 			if td then
 				p = td.position
 			end
-			if not p then return ERR end
+			if not p then return create(NA) end
 		end
 		local lat, lon = terrain.convertMetersToLatLon(p.x, p.z)
-		if not lat or not lon then return ERR end
+		if not lat or not lon then return create(NA) end
 
 		-- Borrowed/modified from: https://gist.github.com/alexander-yakushev/88531e23a89a0f2acbf1
 		local SUN={getSunriseOrSunset=function(a,b,c,d,e,f,g)if not a or not b or not c or not d or not e then return"N/A"end;f=f or 0;if g==nil then g=false end;local h=math.rad;local i=math.deg;local j=math.floor;local k=function(l)return l-j(l)end;local m=function(n)return math.cos(h(n))end;local o=function(n)return i(math.acos(n))end;local p=function(n)return math.sin(h(n))end;local q=function(n)return i(math.asin(n))end;local r=function(n)return math.tan(h(n))end;local s=function(n)return i(math.atan(n))end;local function t(a,b,c)local u=j(275*b/9)local v=j((b+9)/12)local w=1+j((c-4*j(c/4)+2)/3)return u-v*w+a-30 end;local function x(y,z,A)local B=A-z;local C;if y<z then C=j((z-y)/B)+1;return y+C*B elseif y>=A then C=j((y-A)/B)+1;return y-C*B end;return y end;local l=t(a,b,c)local D=e/15;local E;if g then E=l+(6-D)/24 else E=l+(18-D)/24 end;local F=0.9856*E-3.289;local G=x(F+1.916*p(F)+0.020*p(2*F)+282.634,0,360)local H=x(s(0.91764*r(G)),0,360)local I=j(G/90)*90;local J=j(H/90)*90;H=H+I-J;H=H/15;local K=0.39782*p(G)local L=m(q(K))local M=90.83;local N=(m(M)-K*p(d))/(L*m(d))if g and N>1 then return"N/R"elseif N<-1 then return"N/S"end;local O;if g then O=360-o(N)else O=o(N)end;O=O/15;local P=O+H-0.06571*E-6.622;local Q=x(P-D+f,0,24)return j(Q)*60*60+k(Q)*60*60 end}
@@ -503,7 +507,7 @@ do
 		elseif ssZ == "N/S" then
 			return NEVER()
 		elseif srZ == NA or ssZ == NA then
-			return ERR
+			return create(ERROR)
 		end
 
 		local offset = getOffset(d.theatre)
@@ -514,13 +518,16 @@ do
 		elseif ssL == "N/S" then
 			return NEVER()
 		elseif srZ == NA or ssZ == NA then
-			return ERR
+			return create(ERROR)
 		end
 
-		return {
-			z = { sunrise = composeDateString(srZ, nil, nil, true) .. "Z", sunset = composeDateString(ssZ, nil, nil, true) .. "Z", sr = srZ, ss = ssZ },
-			l = { sunrise = composeDateString(srL, nil, nil, true), sunset = composeDateString(ssL, nil, nil, true), sr = srL, ss = ssL }
+		local r = {
+			z = { sunrise = composeDateString(srZ, nil, nil, true), sunset = composeDateString(ssZ, nil, nil, true), sr = srZ, ss = ssZ },
+			l = { sunrise = composeDateString(srL, nil, nil, true), sunset = composeDateString(ssL, nil, nil, true), sr = srL, ss = ssL },
 		}
+		r.strSR = string.format("%sZ / %s", r.z.sunrise, r.l.sunrise)
+		r.strSS = string.format("%sZ / %s", r.z.sunset, r.l.sunset)
+		return r
 	end
 
 	local function getCeiling(d)
@@ -542,8 +549,7 @@ do
 	end
 
 	local function getCase(d)
-		if d.atmosphere > 0 then return NA end
-		if not d.sun.l.sr or not d.sun.l.ss then return ERROR end
+		if d.atmosphere > 0 or not d.sun.l then return NA end
 		local ft = getCeiling(d)
 		local v = convert.mToNm(getVisibility(d))
 		local time = d.current_time or d.start_time

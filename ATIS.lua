@@ -11,11 +11,14 @@ do
 		frequency_add = 250000 -- in Hz
 	}
 
-	local failMsg = " must be loaded prior to this script!"
-	assert(BASE ~= nil, "MOOSE" .. failMsg)
-	assert(require ~= nil, "REQUIRE" .. failMsg) -- for dofile()
+	assert(BASE ~= nil, "MOOSE must be loaded prior to this script!")
+	assert(require ~= nil, "REQUIRE must be available for this script!") -- for dofile
 
 	local ATISfreqs = {}
+
+	local function log(msg)
+		env.info(string.format("ATIS: %s", msg))
+	end
 
 	local function HzToMHz(freq)
 		if not freq then return nil end
@@ -33,7 +36,7 @@ do
 	local oldRadio = radio
 	dofile(string.format("./Mods/terrains/%s/Radio.lua", env.mission.theatre))
 	if not radio then
-		env.info("ATIS: Could not load Radio data!")
+		log("Could not load Radio data!")
 		return
 	end
 	for _, obj in ipairs(radio) do
@@ -52,7 +55,7 @@ do
 	radio = oldRadio
 
 	if CountArray(ATISfreqs) == 0 then
-		env.info("ATIS: No frequency data found!")
+		log("No frequency data found!")
 		return
 	end
 
@@ -103,7 +106,7 @@ do
 
 	dofile(string.format("./Mods/terrains/%s/Beacons.lua", env.mission.theatre))
 	if not beacons then
-		env.info("ATIS: Could not load Beacons data!")
+		log("Could not load Beacons data!")
 		return
 	end
 	for _, beacon in ipairs(beacons) do
@@ -138,7 +141,7 @@ do
 
 	local airbases = coalition.getAirbases(coalition.side.BLUE)
 	if #airbases == 0 then
-		env.info("ATIS: No coalition airbases found!")
+		log("No coalition airbases found!")
 	end
 
 	for _, airbase in ipairs(airbases) do
@@ -154,7 +157,7 @@ do
 				if Group.getByName(name) then
 					atis:SetRadioRelayUnitName(name)
 				else
-					env.info(string.format("ATIS: ATIS Group (%s) not found! Subtitles are disabled.", name))
+					log(string.format("ATIS Group (%s) not found! Subtitles are disabled.", name))
 				end
 
 				if #obj.ATCfreqs > 0 then
@@ -190,9 +193,9 @@ do
 				end
 				atis:Start()
 				ATISFREQS[callsign] = obj.atisFreq
-				env.info(string.format("ATIS: Broadcasting from %s on %.3f MHz", callsign, ATISFREQS[callsign]))
+				log(string.format("Broadcasting from %s on %.3f MHz", callsign, ATISFREQS[callsign]))
 			else
-				env.info("ATIS: Airfield Object not found!")
+				log("Airfield Object not found!")
 			end
 		end
 	end

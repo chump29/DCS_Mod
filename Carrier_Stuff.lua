@@ -57,7 +57,7 @@ do
 
 		env.info("Carrier Stuff loaded.")
 	else
-		env.info(string.format("CarrierStuff: Carrier unit (%s) not found!", config.carrierUnitName))
+		env.info(string.format("Carrier Stuff: Carrier unit (%s) not found!", config.carrierUnitName))
 	end
 
 end

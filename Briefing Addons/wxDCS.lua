@@ -586,7 +586,9 @@ do
 	end
 
 	local function getMETAR(d)
-		if d.date and d.date.Year < 1968 then return NA end
+		if d.date and d.date.Year < 1968 then
+			return string.format("%s before 1968", NA)
+		end
 		local icao = getICAO(d)
 		local metar = string.format("%s %sZ", icao, getDate(d.date.Day, d.start_time, d.theatre))
 		if d.atmosphere > 0 then

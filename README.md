@@ -13,7 +13,7 @@ local config = ATIS_CONFIG or {
 
 ---
 
-# [AWACS & Wingman Addons](https://github.com/chump29/DCS_Mod/tree/master/AWAC%20%26%20Wingman%20Addons)
+# [AWACS & Wingman Addons](https://github.com/chump29/DCS_Mod/tree/master/AWACS%20%26%20Wingman%20Addons)
 - AWACS picture calls
   - Rounds bearing to nearest 10°
   - Sorts groups nearest to farthest from player

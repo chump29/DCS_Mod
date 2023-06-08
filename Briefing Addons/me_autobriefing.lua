@@ -420,8 +420,8 @@ function getDataUnit(unit)
                     --frequency
                     local unitTypeDesc = DB.unit_by_type[unitType]
                     if unitTypeDesc and unitTypeDesc.HumanRadio then
-                        for _tmp, frequencyL in base.pairs(airdrome.frequencyList) do
-                            local freq = frequencyL/1000000.0
+                        for _tmp, v in base.pairs(airdrome.frequencyList) do
+                            local freq = v[1]/1000000.0
                             if not frequency then
                                 frequency = string.format("%.3f %s", freq, _('MHz'))
                             else
@@ -695,7 +695,7 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(mission.weather.atmosphere_type, mission.weather.clouds)))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind, windString))
     table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, turbulenceString))
-    --table.insert(autoBriefing, composeEntry(nil, cdata.general_visbility, mission.weather.visibility.distance/1000 .. ' ' .. cdata.km_unit))
+    table.insert(autoBriefing, composeEntry(nil, cdata.general_visbility, mission.weather.visibility.distance/1000 .. ' ' .. cdata.km_unit))
     --base.U.traverseTable(autoBriefing)
 end
 

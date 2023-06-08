@@ -397,7 +397,9 @@ function updateAirdrome()
                         local frequencys = DCS.getATCradiosData(radioId)
                         if frequencys then
                             for kk,vv in pairs(frequencys) do
-                                table.insert(frequencyList, vv)
+                                local freq       = vv[1]
+                                local modulation = vv[2]
+                                table.insert(frequencyList,freq)
                             end
                         end
                     end

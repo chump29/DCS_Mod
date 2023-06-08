@@ -120,8 +120,7 @@ local function onNewMission()
                       --  print("--frequencys---")
                         if frequencys then
                             for kk,vv in pairs(frequencys) do
-                                table.insert(frequencyList, vv)  
-                            --    print("--add--",airdromeNumber, name,  vv)  
+                                table.insert(frequencyList, {vv[1], vv[2]})
                             end
                         end
                     end

@@ -695,7 +695,7 @@ function generateSimpleAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(mission.weather.atmosphere_type, mission.weather.clouds)))
     table.insert(autoBriefing, composeEntry(nil, cdata.wind, windString))
     table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, turbulenceString))
-    table.insert(autoBriefing, composeEntry(nil, cdata.general_visbility, mission.weather.visibility.distance/1000 .. ' ' .. cdata.km_unit))
+    --table.insert(autoBriefing, composeEntry(nil, cdata.general_visbility, mission.weather.visibility.distance/1000 .. ' ' .. cdata.km_unit))
     --base.U.traverseTable(autoBriefing)
 end
 

@@ -398,7 +398,7 @@ function updateAirdrome()
                         if frequencys then
                             for kk,vv in pairs(frequencys) do
                                 local freq       = vv[1]
-                                local modulation = vv[2]
+                                --local modulation = vv[2]
                                 table.insert(frequencyList,freq)
                             end
                         end

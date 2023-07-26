@@ -878,6 +878,7 @@ function flyBtnOnChange()
     base.statusbar.show(false)
     base.mapInfoPanel.show(false)
     base.setCoordPanel.show(false)
+    base.copySettings.show(false)
     base.panel_route.show(false)
     music.stop()
 

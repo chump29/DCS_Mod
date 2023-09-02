@@ -46,7 +46,7 @@ function getQNH(a, q, g)
 	elseif g and g.position and g.position.y then -- in m
 		local _, pressure = dllWeather.getTemperatureAndPressureAtPoint({position = g.position}) -- QFE in Pa
 		local qnh = convert.qfeToQnh(pressure / 100, g.position.y) -- QNH in hPa
-		return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(convert.hPaToInHg(qnh)), math.floor(convert.hpaToMmHg(qnh)), math.floor(qnh))
+		return string.format("%0.2finHg / %dmmHg / %0.2dhPa", math.floor(convert.hPaToInHg(qnh)), math.floor(convert.hPaToMmHg(qnh)), math.floor(qnh))
 	end
 	return "N/A"
 end

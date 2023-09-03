@@ -109,6 +109,9 @@ local cdata = {
         empty = _(" "),
         current = _("Currently"),
         category = _("Flight Category"),
+        dynamic = _("DYNAMIC"),
+        forecast = _("Forecast"),
+        unknown = _("Unknown"),
 
         SITUATION       = _('SITUATION'),
         MISSION         = _('MISSION'),
@@ -595,24 +598,30 @@ function generateAutoBriefing()
     end
     table.insert(autoBriefing, composeEntry(cdata.specification))
     table.insert(autoBriefing, composeEntry(nil, cdata.threat, autobriefingutils.composeString(threats_list, '*')))
-    table.insert(autoBriefing, composeEntry(cdata.weather))
-    local metar = wx.getMETAR(metarData)
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
-    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.recovery, wx.getCase(metarData)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.category, wx.getCategory(metarData)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh, tblStartGroups[1])))
+    if metarData.atmosphere == 0 then
+        table.insert(autoBriefing, composeEntry(cdata.weather))
+        local metar = wx.getMETAR(metarData)
+        table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
+        table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+        table.insert(autoBriefing, composeEntry(nil, cdata.recovery, wx.getCase(metarData)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+        table.insert(autoBriefing, composeEntry(nil, cdata.category, wx.getCategory(metarData)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+        table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh, tblStartGroups[1])))
+        table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, magvar))
+        table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(dataBrf.weather.atmosphere_type, dataBrf.weather.clouds)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.wind, UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, UC.composeTurbulenceString(dataBrf.weather)))
+    else
+        table.insert(autoBriefing, composeEntry(cdata.dynamic .. " " .. cdata.weather))
+        table.insert(autoBriefing, composeEntry(nil, cdata.forecast, cdata.unknown))
+    end
     local magvar, mv = BA.getMV(dataBrf.mission_date, tblStartGroups[1])
-    table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, magvar))
-    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(dataBrf.weather.atmosphere_type, dataBrf.weather.clouds)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.wind, UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
     if unitType and string.sub(unitType, 1, 5) == "A-10C" then
+        table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
         table.insert(autoBriefing, composeEntry(nil, cdata.cdu_wind, BA.cduWindString(dataBrf.weather, dataBrf.humanPosition, dataBrf.temperature, mv)))
     end
-    table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, UC.composeTurbulenceString(dataBrf.weather)))
     if dataBrf.startTime then
         table.insert(autoBriefing, composeEntry(cdata.take_off_and_departure))
         table.insert(autoBriefing, composeEntry(nil, cdata.mission_start, string.format("%sZ / %s", autobriefingutils.composeDateString(BA.getZuluTime(dataBrf.startTime, metarData.theatre)), autobriefingutils.composeDateString(dataBrf.startTime))))
@@ -644,18 +653,23 @@ function generateSimpleAutoBriefing()
     table.insert(autoBriefing, composeEntry(nil, cdata.sunrise, metarData.sun.strSR))
     table.insert(autoBriefing, composeEntry(nil, cdata.sunset, metarData.sun.strSS))
     table.insert(autoBriefing, composeEntry(cdata.description, nil, dataBrf.descText))
-    table.insert(autoBriefing, composeEntry(cdata.weather))
-    local metar = wx.getMETAR(metarData)
-    table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
-    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.recovery, wx.getCase(metarData)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.category, wx.getCategory(metarData)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
-    table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(dataBrf.weather.atmosphere_type, dataBrf.weather.clouds)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, BA.getMV(dataBrf.mission_date)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.wind, UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
-    table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, UC.composeTurbulenceString(dataBrf.weather)))
+    if metarData.atmosphere == 0 then
+        table.insert(autoBriefing, composeEntry(cdata.weather))
+        local metar = wx.getMETAR(metarData)
+        table.insert(autoBriefing, composeEntry(nil, cdata.metar, metar, false, string.len(metar) > MAX_WIDTH))
+        table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+        table.insert(autoBriefing, composeEntry(nil, cdata.recovery, wx.getCase(metarData)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+        table.insert(autoBriefing, composeEntry(nil, cdata.category, wx.getCategory(metarData)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.empty, cdata.empty))
+        table.insert(autoBriefing, composeEntry(nil, cdata.temperature, BA.getTemp(dataBrf.temperature)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.qnh, BA.getQNH(dataBrf.weather.atmosphere_type, dataBrf.qnh)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.cloud_base, BA.getClouds(dataBrf.weather.atmosphere_type, dataBrf.weather.clouds)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.magnetic_variation, BA.getMV(dataBrf.mission_date)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.wind, UC.composeWindString(dataBrf.weather, dataBrf.humanPosition)))
+        table.insert(autoBriefing, composeEntry(nil, cdata.turbulence, UC.composeTurbulenceString(dataBrf.weather)))
+    else
+        table.insert(autoBriefing, composeEntry(cdata.dynamic .. " " .. cdata.weather))
+        table.insert(autoBriefing, composeEntry(nil, cdata.forecast, cdata.unknown))
+    end
 end

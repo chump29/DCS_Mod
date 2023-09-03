@@ -549,7 +549,8 @@ do
 	end
 
 	local function getCase(d)
-		if d.atmosphere > 0 or not d.sun.l then return NA end
+		--if d.atmosphere > 0 or not d.sun.l then return NA end
+		if not d.sun.l then return NA end
 		local ft = getCeiling(d)
 		local v = convert.mToNm(getVisibility(d))
 		local time = d.current_time or d.start_time
@@ -571,7 +572,7 @@ do
 	end
 
 	local function getCategory(d)
-		if d.atmosphere > 0 then return NA end
+		--if d.atmosphere > 0 then return NA end
 		local ft = getCeiling(d)
 		local v = convert.mToSm(getVisibility(d))
 		local cat = "VFR"
@@ -591,9 +592,9 @@ do
 		end
 		local icao = getICAO(d)
 		local metar = string.format("%s %sZ", icao, getDate(d.date.Day, d.start_time, d.theatre))
-		if d.atmosphere > 0 then
-			return string.format("%s NIL", metar)
-		end
+		--if d.atmosphere > 0 then
+		--	return string.format("%s NIL", metar)
+		--end
 		metar = string.format("%s AUTO", metar)
 		local wind = getWindDirectionAndSpeed(d.wind, d.turbulence)
 		metar = string.format("%s %s", metar, wind)

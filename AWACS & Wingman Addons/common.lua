@@ -967,24 +967,34 @@ WingmanContactHandler = {
 			Digits					= Digits}
 }
 
-airdromeNames = {}
-do
+function clearAirdromeSubs()
 	for moduleIndex, airdromeNameVariant in base.pairs(airdromeNameVariants) do
 		airdromeNames[airdromeNameVariant] = {}
 	end
 end
 
+local function initAirdromeSubs()
+	for moduleIndex, airdromeNameVariant in base.pairs(airdromeNameVariants) do
+		AirbaseName.sub[base.Airbase.Category.AIRDROME].sub[airdromeNameVariant] = Phrases:new(airdromeNames[airdromeNameVariant], 'Callsign')
+	end
+end
+
+airdromeNames = {}
+do
+	clearAirdromeSubs()
+end
+
 AirbaseName = {
 	make = function(self, comm, airdromeNameVariant)
-		
+
 		local airbaseCategory = comm:getUnit():getDesc().category
 		if airbaseCategory == base.Airbase.Category.AIRDROME then
 			return self.sub[airbaseCategory]:make(comm:getUnit(), comm:getCallsign(), airdromeNameVariant)
 		elseif airbaseCategory == base.Airbase.Category.HELIPAD then
 			return self.sub[airbaseCategory]:make(comm:getUnit(), comm:getCallsign())
-		else		
+		else
 			return _('Ship') --return self.sub[airbaseCategory]:make(comm:getUnit(), --[[comm:getCallsign() or --]] 1) or _('Ship')
-		end		
+		end
 	end,
 	sub = {
 		[base.Airbase.Category.AIRDROME]	= {
@@ -996,15 +1006,13 @@ AirbaseName = {
 				return names:make(callsign)
 			end,
 			sub = {}
-		},		
+		},
 		[base.Airbase.Category.HELIPAD]		= UnitCallname:new('Helipad', false, nil, 'Callsign'),
 		[base.Airbase.Category.SHIP]		= UnitCallname:new('Aircraft Carriers', false, nil,'Aircraft Carriers'),
 	}
 }
 do
-	for moduleIndex, airdromeNameVariant in base.pairs(airdromeNameVariants) do
-		AirbaseName.sub[base.Airbase.Category.AIRDROME].sub[airdromeNameVariant] = Phrases:new(airdromeNames[airdromeNameVariant], 'Callsign')
-	end
+	initAirdromeSubs()
 end
 
 ATCToLeaderHandler = {
@@ -1076,13 +1084,13 @@ Altitude = {
 	make = function(self, alt, country, accuracy)
 		if alt <= 0.0 then
 			base.print('\t Altitude:make')
-		
+
 			base.print('\t\t alt : '..alt)
 			base.print('\t\t country : '..country)
-			if accuracy ~= nil then 
+			if accuracy ~= nil then
 				base.print('\t\t accuracy : '..accuracy)
 			end
-		end		
+		end
 		base.assert(alt > 0.0)
 		local altitudeUnit = unitSystemByCountry[country].altitude
 		return self.sub.at:make() + ' ' + self.sub.Number:make(u.adv_round(alt * altitudeUnit.coeff, accuracy or 1.0))
@@ -1095,7 +1103,7 @@ Altitude = {
 Velocity = {
 	make = function(self, vel, country, accuracy)
 		--base.assert(vel > 0.0)  --The aircraft can stand at the airfield. vel == 0
-		local velocityUnit = unitSystemByCountry[country].velocity		
+		local velocityUnit = unitSystemByCountry[country].velocity
 		return self.sub.at:make() + ' ' + self.sub.Digits:make(u.adv_round(vel * velocityUnit.coeff, accuracy or 1.0))
 	end,
 	sub = {	at		= Phrase:new({_('at velocity'), 'at'}),
@@ -1125,6 +1133,7 @@ ClientAndAWACSHandler = {
 												end
 											else
 												local groupName, flightNum, aircraftNum = encodeCallsign(pComm:getCallsign())
+
 												if pComm:getUnit():getDesc().category == 2  then --GROUND UNIT
 													return self.sub.GroundUnitCallname:make(pComm:getUnit(), base.math.floor(pComm:getCallsign() / 100)) + self.sub.DigitGroups:make('%d', flightNum)
 												else
@@ -1138,7 +1147,7 @@ ClientAndAWACSHandler = {
 												Index = Index,
 												DigitGroups	= DigitGroups
 												},
-									}	
+									}
 		}
 }
 
@@ -1171,14 +1180,14 @@ AWACSTargetDir = {
 		local aspects = {
 			self.sub.cold,
 			self.sub.hot,
-			self.sub.flanking	
+			self.sub.flanking
 		}
 		local receiverPos = receiver:getUnit():getPosition().p
 		local dir = {	x = target.point.x - receiverPos.x,
 						y = target.point.y - receiverPos.y,
 						z = target.point.z - receiverPos.z }
 		return 	self.sub.Direction:make(dir, country) + comma_space_ + self.sub.Altitude:make(target.altitude, country, 500) +
-				comma_space_ + aspects[target.aspect]:make()					
+				comma_space_ + aspects[target.aspect]:make()
 	end,
 	sub = {	Number			= Number,
 			Direction		= Direction,
@@ -1208,7 +1217,7 @@ local ship		= {_('_ship'), 		'ship'}
 local bandit	= {_('_bandit'), 	'bandit'}
 
 TargetShortDescription = {
-	make = function(self, targetDesc, level, coalition, country)		
+	make = function(self, targetDesc, level, coalition, country)
 		base.print('\t\t TargetShortDescription : targetDesc.type = '..#targetDesc.type)
 		local level = base.math.min(level, #targetDesc.type)
 		base.print('\t\t TargetShortDescription : level = '..level)
@@ -1280,7 +1289,7 @@ AirGroupCallsign = {
 					if pUnit:hasAttribute('Tankers') then
 						return self.sub.TankerCallname:make(pUnit, groupName) + self.sub.DigitGroups:make('%d-%d', flightNum, aircraftNum)
 					else
-						if pUnit:hasAttribute('Transports') then							
+						if pUnit:hasAttribute('Transports') then
 							return self.sub.TransportsCallname:make(pUnit, groupName) + self.sub.DigitGroups:make('%d-%d', flightNum, aircraftNum)
 						else
 							return self.sub.AirGroupCallname:make(pUnit, groupName)
@@ -1289,8 +1298,8 @@ AirGroupCallsign = {
 				end
 			else
 				return self.sub.AirGroupCallname:make(pUnit, groupName) + ' ' + self.sub.Digits:make(flightNum)
-			end	
-		end	
+			end
+		end
 	end,
 	sub = { AirGroupCallname	= UnitCallname:new('Air', true, nil, 'Callsign'),
 			AWACSCallname		= UnitCallname:new('AWACS', true, nil, 'Callsign'),
@@ -1397,7 +1406,7 @@ TurnPreStartHandler = {
 	make = function(self, message, language)
 		--base.print("~~~ TurnPreStartHandler side, roll, self.directory", message.parameters.side,message.parameters.roll,self.directory)
 		return 	self.sub.FlightMessageHandler:make(message, language) + ' ' +
-				self.sub.Side:make(message.parameters.side) + self.sub.Roll:make() + 
+				self.sub.Side:make(message.parameters.side) + self.sub.Roll:make() +
 				self.sub.Number:make(message.parameters.roll)
 	end,
 	sub = { FlightMessageHandler	= FlightMessageHandler,
@@ -1406,7 +1415,7 @@ TurnPreStartHandler = {
 													},   'Messages'),
 			Roll				= Phrase:new({_(', roll:'), 'roll'},   'Messages'),
 			Number				= Number}
-} 
+}
 TurnStartHandler = {
 	make = function(self, message, language)
 		return 	self.sub.FlightMessageHandler:make(message, language)
@@ -1433,7 +1442,7 @@ Start_Sender_Callsign_End_Handler = {
 	make = function(self, message, language)
 		return  self.sub._start:make()	+  self.sub.PlayerAircraftCallsign:make(message.sender:getUnit()) + comma_space_ +  Event:make(message.event) + self.sub._end:make()
 	end,
-	sub = {			
+	sub = {
 			PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
 			_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
 			_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages') }
@@ -1443,7 +1452,7 @@ Start_Receiver_Callsign_End_Handler = {
 	make = function(self, message, language)
 		return  self.sub._start:make()	+  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit()) + comma_space_ +  Event:make(message.event) + self.sub._end:make()
 	end,
-	sub = {			
+	sub = {
 			PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
 			_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
 			_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages') }
@@ -1468,12 +1477,12 @@ handlersTable = {
 				bearing = Phrase:new({_('bearing'), 'bearing'}),
 				Digits = Digits }
 	},
-	--WINGMAN -> PLAYER	
+	--WINGMAN -> PLAYER
 	[base.Message.wMsgWingmenCopy] = {
 		make = function(self, message)
 			return 	self.sub.WingmanMessageHandler:make(message) + ' ' + self.sub.report:make()
 		end,
-		sub = {	WingmanMessageHandler	= WingmanMessageHandler,				
+		sub = {	WingmanMessageHandler	= WingmanMessageHandler,
 				report					= PhraseRandom:new({{_('copy'),		'copy'},
 															{_('roger'),	'roger'},
 															{_('affirm'),	'affirm'}}) }
@@ -1482,10 +1491,10 @@ handlersTable = {
 		make = function(self, message)
 			return 	self.sub.WingmanMessageHandler:make(message) + ' ' + self.sub.report:make()
 		end,
-		sub = {	WingmanMessageHandler	= WingmanMessageHandler,				
+		sub = {	WingmanMessageHandler	= WingmanMessageHandler,
 				report					= PhraseRandom:new({{_('unable'),			'unable'},
 															{_('negative'),			'negative'}}) }
-	},	
+	},
 	[base.Message.wMsgWingmenRadarContact]			= WingmanRadarContactHandler,
 	[base.Message.wMsgWingmenContact]				= WingmanContactHandler,
 	[base.Message.wMsgWingmenHelReconBearing]		= WingmanContactHandler,
@@ -1505,7 +1514,7 @@ handlersTable = {
 			end
 			return result
 		end,
-		sub = {	WingmanMessageHandler	= WingmanMessageHandler,				
+		sub = {	WingmanMessageHandler	= WingmanMessageHandler,
 				reportAirplane			= PhraseRandom:new({{_('target destroyed'),			'target destroyed'},
 															{_('rounds on target'),			'rounds on target'}}),
 				reportHelicopter		= PhraseRandom:new({{_('shack'),					'shack'},
@@ -1518,7 +1527,7 @@ handlersTable = {
 		make = function(self, message)
 			return 	self.sub.WingmanMessageHandler:make(message) + ' ' + self.sub.report:make()
 		end,
-		sub = {	WingmanMessageHandler	= WingmanMessageHandler,				
+		sub = {	WingmanMessageHandler	= WingmanMessageHandler,
 				report					= PhraseRandom:new({{_('roger'),	'roger'},
 															{_('roger'),	'roger'} }) }
 	},
@@ -1532,11 +1541,11 @@ handlersTable = {
 	},
 	[base.Message.wMsgATCClearedToTaxiRunWay]		= {
 		make = function(self, message, language)
-			--return self.sub.ATCToLeaderHandler:make(message, language) + space_ + self.sub.Digits:make(message.parameters.runway) + 
-			return self.sub.ATCToLeaderHandler:make(message, language) + space_ + (message.parameters.runway ~= nil and (self.sub.Digits:make(message.parameters.runway)) or '') + 
+			--return self.sub.ATCToLeaderHandler:make(message, language) + space_ + self.sub.Digits:make(message.parameters.runway) +
+			return self.sub.ATCToLeaderHandler:make(message, language) + space_ + (message.parameters.runway ~= nil and (self.sub.Digits:make(message.parameters.runway)) or '') +
 			(message.parameters.runway_side ~= nil and (self.sub.side:make(message.parameters.runway_side)) or '')
 		end,
-		sub = { ATCToLeaderHandler = ATCToLeaderHandler, 
+		sub = { ATCToLeaderHandler = ATCToLeaderHandler,
 				Digits = Digits,
 				--0044066: Trunk: An assertion in radio when trying to request taxi to runway
 				--to match  enum class RWSide{NOT_DEFINED, LEFT, RIGHT, CENTER};
@@ -1557,7 +1566,7 @@ handlersTable = {
 				Runway			= Runway,
 				climb300AtQFE	= Phrase:new({_('climb 300 at QFE'), 'climb 300 at QFE', 'climb three hundred at Qu eF E'}),
 				Pressure		= Pressure }
-	},	
+	},
 	[base.Message.wMsgATCTrafficBearing]			= nil,
 	[base.Message.wMsgATCYouAreClearedForLanding]	= {
 		make = function(self, message, language)
@@ -1566,7 +1575,7 @@ handlersTable = {
 			return 	self.sub.ATCToLeaderHandler:make(message, language) +
 					(message.parameters.runway ~= nil and (comma_space_ + self.sub.Runway:make(message.parameters.runway)) or '') +
 					(wind ~= nil and (comma_space_ + wind) or '')
-		end,	
+		end,
 		sub = {	ATCToLeaderHandler	= ATCToLeaderHandler,
 				Runway				= Runway,
 				Wind				= Wind}
@@ -1599,18 +1608,18 @@ handlersTable = {
 				Pressure			= Pressure,
 				toPatternAlt		= Phrase:new({_('to pattern altitude'), 'to pattern altitude', 'to pattern altitude two thousand'}) }
 	},
-	--[SIDE NUMBER], [VISIBILITY], [CLOUDS], [CLOUD ALTITUDE], [PRESSURE]. [MARSHAL REPORT], [HEADING OF CARRIER]. [MARSHAL-SEE-ME]. 
+	--[SIDE NUMBER], [VISIBILITY], [CLOUDS], [CLOUD ALTITUDE], [PRESSURE]. [MARSHAL REPORT], [HEADING OF CARRIER]. [MARSHAL-SEE-ME].
 	[base.Message.wMsgATCMarshallCopyInbound]				= {
-		make = function(self, message, language)		
+		make = function(self, message, language)
 			local country = message.receiver:getUnit():getCountry()
 			local aircraftType = message.receiver:getUnit():getTypeName()
-						
+
 			local distanceUnit = unitSystemByCountry[country].distance
-			local visibility_distD = base.math.max(1, base.math.floor(message.parameters.visibility * distanceUnit.coeff))			
+			local visibility_distD = base.math.max(1, base.math.floor(message.parameters.visibility * distanceUnit.coeff))
 			if message.parameters.visibility > 19000 then
 				visibility_distD = 11
 			end
-			
+
 			local clouds_density = self.sub.sky_clear:make() + self.sub.altimeter:make()
 			if message.parameters.clouds_density > 2.0 and message.parameters.clouds_density < 9.0 then
 				clouds_density = self.sub.scattered_clouds:make()
@@ -1623,21 +1632,21 @@ handlersTable = {
 				cloudAltIdx = math.min(11,cloudAltIdx)
 				clouds_density = clouds_density + space_ + self.sub.Altitude:make(cloudAltIdx)
 			end
-			
+
 			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit()) + comma_space_
-			res = res + self.sub.visibility:make(visibility_distD) + comma_space_  + clouds_density + space_			
+			res = res + self.sub.visibility:make(visibility_distD) + comma_space_  + clouds_density + space_
 			res = res + self.sub.Pressure:make(message.parameters.pressure, aircraftType, '%.2f') + comma_space_
 			if message.parameters.case == 0 then
 				res = res + self.sub.marshal_report:make() + space_ + Digits:make(message.parameters.BRC * u.units.deg.coeff) + comma_space_
 				res = res + self.sub.SeeMeAtTen:make()
-			end		
-			
+			end
+
 			res = res  + self.sub._end:make()
 			return 	 res
 		end,
 		sub = {	PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
-				Pressure				= Pressure,								
+				Pressure				= Pressure,
 				visibility				= Phrases:new({	{_('mother\'s weather is visibility one mile'), 'visibility_is_1'},
 													{_('mother\'s weather is visibility two miles'), 'visibility_is_2'},
 													{_('mother\'s weather is visibility 3 miles'), 'visibility_is_3'},
@@ -1672,24 +1681,24 @@ handlersTable = {
 				dme_angels				= Phrase:new({_('DME, angels'),'DME_angels'}, 'Messages'),
 				eatTime					= Phrase:new({_('Expected approach time is'),'EAT_TIME'}, 'Messages'),
 				approachButton			= Phrase:new({_('Approach button is 15'),'MARSHAL-15'}, 'Messages'),
-				
+
 				SeeMeAtTen				= Phrase:new({_('report see me at 10.'), 'report_see_me_at_10'}, 'Messages'),
 				_start					= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
 				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),
 			}
 	},
-		
+
 	[base.Message.wMsgATCMarshallCopyInbound2and3]  = {
-		make = function(self, message, language)	
+		make = function(self, message, language)
 			local country = message.receiver:getUnit():getCountry()
 			local aircraftType = message.receiver:getUnit():getTypeName()
-						
+
 			local distanceUnit = unitSystemByCountry[country].distance
-			local visibility_distD = base.math.max(1, base.math.floor(message.parameters.visibility * distanceUnit.coeff))			
+			local visibility_distD = base.math.max(1, base.math.floor(message.parameters.visibility * distanceUnit.coeff))
 			if message.parameters.visibility > 19000 then
 				visibility_distD = 11
 			end
-			
+
 			local clouds_density = self.sub.sky_clear:make() + self.sub.altimeter:make()
 			if message.parameters.clouds_density > 2.0 and message.parameters.clouds_density < 9.0 then
 				clouds_density = self.sub.scattered_clouds:make()
@@ -1697,24 +1706,24 @@ handlersTable = {
 				clouds_density = self.sub.solid_layer:make()
 			end
 			if  message.parameters.clouds_density > 2.0 then
-				local altitudeUnit = unitSystemByCountry[message.sender:getUnit():getCountry()].altitude				
+				local altitudeUnit = unitSystemByCountry[message.sender:getUnit():getCountry()].altitude
 				local cloudAltIdx = u.adv_round(message.parameters.clouds_ceiling * altitudeUnit.coeff/1000, 1.0)
 				cloudAltIdx = math.min(11,cloudAltIdx)
 				clouds_density = clouds_density + space_ + self.sub.Altitude:make(cloudAltIdx)
 			end
-			
+
 			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit()) + comma_space_
-			--res = res + self.sub.visibility:make(visibility_distD) + comma_space_  + clouds_density + space_			
-			
+			--res = res + self.sub.visibility:make(visibility_distD) + comma_space_  + clouds_density + space_
+
 			if message.parameters.case == 0 then
 				res = res + self.sub.marshal_report:make() + space_ + Digits:make(message.parameters.BRC * u.units.deg.coeff) + comma_space_
-				res = res + self.sub.SeeMeAtTen:make()			
+				res = res + self.sub.SeeMeAtTen:make()
 			else
 				if message.parameters.case == 1 then
 					--[[[SIDE NUMBER] flight, [SHIP CALLSIGN] marshal, CASE II recovery, CV-1 approach, expected BRC [CARRIER HEADING], altimeter [PRESSURE]. [SIDE NUMBER] flight, marshal mother’s [BEARING] radial, [DISTANCE] DME, angels [ALTITUDE]. Expected approach time is [TIME], approach button is 15.]]--
 					res = res + self.sub.marshal_report_case2:make((message.parameters.carrierID or 74) - 67)  + space_
-					res = res + Digits:make((message.parameters.BRC or 0 )* u.units.deg.coeff)				
+					res = res + Digits:make((message.parameters.BRC or 0 )* u.units.deg.coeff)
 				else
 					--[[[SIDE NUMBER], [SHIP CALLSIGN] marshal, CASE III recovery, CV-1 approach, expected final bearing [BEARING], altimeter [PRESSURE]. [SIDE NUMBER], marshal mother’s [BEARING] radial, [DISTANCE] DME, angels [ALTITUDE]. Expected approach time is [TIME], approach button is button 15.]]--
 					res = res + self.sub.marshal_report_case3:make((message.parameters.carrierID or 74) - 67)  + comma_space_
@@ -1723,15 +1732,15 @@ handlersTable = {
 				res = res + self.sub.altimeter:make() + space_+ self.sub.Pressure:make(message.parameters.pressure, aircraftType, '%.2f') + comma_space_
 				res = res + self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit()) + comma_space_
 				res = res + self.sub.marshal_mothers:make() + space_ + Digits:make((message.parameters.RBRC or 0 )* u.units.deg.coeff) + space_+ self.sub.radial:make()  + comma_space_
-				res = res + Digits:make((message.parameters.NumberInStack or 0) + 21) + space_+ self.sub.dme_angels:make() + space_ 
+				res = res + Digits:make((message.parameters.NumberInStack or 0) + 21) + space_+ self.sub.dme_angels:make() + space_
 				res = res + Digits:make((message.parameters.NumberInStack or 0) + 6)  + comma_space_
 				res = res + self.sub.eatTime:make() + space_ + Digits:make((message.parameters.EAT or 0), '%02d')  --+ comma_space_ + self.sub.approachButton:make()
-			end		
-			res = res  + self.sub._end:make()			
+			end
+			res = res  + self.sub._end:make()
 			return 	 res
 		end,
 		sub = {	PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
-				Pressure				= Pressure,								
+				Pressure				= Pressure,
 				visibility				= Phrases:new({	{_('mother\'s weather is visibility one mile'), 'visibility_is_1'},
 													{_('mother\'s weather is visibility two miles'), 'visibility_is_2'},
 													{_('mother\'s weather is visibility 3 miles'), 'visibility_is_3'},
@@ -1759,7 +1768,7 @@ handlersTable = {
 				scattered_clouds 		= Phrase:new({_('scattered clouds at'), 'clouds_scattered'}, 'Messages'),
 				solid_layer 			= Phrase:new({_('solid layer at'), 'solid_layer'}, 'Messages'),
 				marshal_report      	= Phrase:new({_('CASE I recovery, expected BRC'),'case_I_recovery_expected_BRC'}, 'Messages'),
-				--marshal_report_case2    = Phrase:new({_('CASE II recovery, CV-1 approach, expected BRC'),'MARSHAL-74-CASE2'}, 'Messages'),	
+				--marshal_report_case2    = Phrase:new({_('CASE II recovery, CV-1 approach, expected BRC'),'MARSHAL-74-CASE2'}, 'Messages'),
 				marshal_report_case2    = Phrases:new(	{{_('Old Salt marshal, CASE II recovery, CV-1 approach, expected BRC'),'MARSHAL-68-CASE2'},
 														 {_('Ike marshal, CASE II recovery, CV-1 approach, expected BRC'),'MARSHAL-69-CASE2'},
 														 {_('Gold Eagle marshal, CASE II recovery, CV-1 approach, expected BRC'),'MARSHAL-70-CASE2'},
@@ -1769,7 +1778,7 @@ handlersTable = {
 														 {_('Courage marshal, CASE II recovery, CV-1 approach, expected BRC'),'MARSHAL-74-CASE2'},
 														 {_('Lone Warrior marshal, CASE II recovery, CV-1 approach, expected BRC'),'MARSHAL-75-CASE2'},
 														 {_('Freedom marshal, CASE II recovery, CV-1 approach, expected BRC'),'MARSHAL-76-CASE2'},
-														 {_('Avenger marshal, CASE II recovery, CV-1 approach, expected BRC'),'MARSHAL-77-CASE2'},		 }, 'Messages'),				
+														 {_('Avenger marshal, CASE II recovery, CV-1 approach, expected BRC'),'MARSHAL-77-CASE2'},		 }, 'Messages'),
 				marshal_report_case3    = Phrases:new(	{{_('Old Salt marshal, CASE III recovery, CV-1 approach'),'MARSHAL-68-CASE3'},
 														 {_('Ike marshal, CASE III recovery, CV-1 approach'),'MARSHAL-69-CASE3'},
 														 {_('Gold Eagle marshal, CASE III recovery, CV-1 approach'),'MARSHAL-70-CASE3'},
@@ -1785,38 +1794,38 @@ handlersTable = {
 				radial					= Phrase:new({_('radial'),'RADIAL'}, 'Messages'),
 				dme_angels				= Phrase:new({_('DME, angels'),'DME_angels'}, 'Messages'),
 				eatTime					= Phrase:new({_('Expected approach time is'),'EAT_TIME'}, 'Messages'),
-				approachButton			= Phrase:new({_('Approach button is 15'),'MARSHAL-15'}, 'Messages'),				
+				approachButton			= Phrase:new({_('Approach button is 15'),'MARSHAL-15'}, 'Messages'),
 				SeeMeAtTen				= Phrase:new({_('report see me at 10.'), 'report_see_me_at_10'}, 'Messages'),
 				_start					= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
 				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),
 			}
 	},
-	
-	--			//NAVY - answer to marshall after inbound call			
+
+	--			//NAVY - answer to marshall after inbound call
 	--[[[base.Message.wMsgLeaderSeeYouAtTen]				= {
 		make = function(self, message, language)
-			local res			
-			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.sender:getUnit()) + comma_space_	
+			local res
+			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.sender:getUnit()) + comma_space_
 			res = res + self.sub.see_you_at_ten:make()
 			res = res  + self.sub._end:make()
 			return res
 		end,
-		sub = {	
+		sub = {
 				PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
 				see_you_at_ten			= Phrase:new({_('see you at 10.'), 'SEE_YOU'}, 'Messages'),
 				_start					= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
 				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),
-				}			
+				}
 	},]]--
 	--[TOWER], [SIDE NUMBER], overhead, angles [ALTITUDE], [NUMBER IN FLGHT], low state [REMAINING FUEL].
 	[base.Message.wMsgLeaderTowerOverhead]				= {
 		make = function(self, message, language)
-			local res			
+			local res
 			local country = message.receiver:getUnit():getCountry()
-			local aircraftType = message.receiver:getUnit():getTypeName()			
+			local aircraftType = message.receiver:getUnit():getTypeName()
 			local low_state = self.sub.Digits:make(u.round(((message.receiver:getUnit():getFuelLowState() or 0)*message.receiver:getUnit():getDesc().fuelMassMax * 2.2046/ 1000), 0.1), '%.1f')
 			--local angelsAlt = self.sub.Digits:make(u.round( message.parameters.altitude*3.281/1000, 0.1), '%.1f')
-			
+
 			local Altitude = u.round( 2*message.parameters.altitude*3.281/1000, 1.0)
 			local angelsAlt = ''
 			if Altitude % 2 == 0 then
@@ -1824,29 +1833,29 @@ handlersTable = {
 			else
 				angelsAlt = self.sub.Digits:make(Altitude/2, '%.1f')
 			end
-			
+
 			--res = self.sub._start:make() +  self.sub.AirbaseName:make(message.sender, getAirdromeNameVariant(language)) + space_ + self.sub.tower:make()
 			res = self.sub._start:make()  + space_ + self.sub.tower:make()
-			res = res + comma_space_ 
+			res = res + comma_space_
 			res = res + self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit())
-			res = res + comma_space_ 
-			res = res + self.sub.overhead:make() + space_ + angelsAlt + comma_space_ 
+			res = res + comma_space_
+			res = res + self.sub.overhead:make() + space_ + angelsAlt + comma_space_
 			if message.receiver:getUnit():getGroup():getSize() > 1 and message.parameters.case == 0 then
 				local wingmansHH = ''
 				for i = 2, 4 do
 					local pWingmen = message.receiver:getUnit():getGroup():getUnit(i)
 					if pWingmen ~= nil and pWingmen ~= message.receiver:getUnit() then
-						wingmansHH = wingmansHH + self.sub.PlayerAircraftCallsign:make(pWingmen) + comma_space_ 
+						wingmansHH = wingmansHH + self.sub.PlayerAircraftCallsign:make(pWingmen) + comma_space_
 					end
 				end
 				res = res + (wingmansHH ~= '' and self.sub.holding_hands:make() + wingmansHH or '')
 				--res = res + self.sub.flight_of:make(message.receiver:getUnit():getGroup():getSize())
-				--res = res + comma_space_			
+				--res = res + comma_space_
 			end
-			if message.receiver:getUnit():getGroup():getSize() == 1 then 
-				res = res + (low_state ~= 0 and (self.sub.state:make() + space_ + low_state) or '')	
+			if message.receiver:getUnit():getGroup():getSize() == 1 then
+				res = res + (low_state ~= 0 and (self.sub.state:make() + space_ + low_state) or '')
 			else
-				res = res + (low_state ~= 0 and (self.sub.low_state:make() + space_ + low_state) or '')			
+				res = res + (low_state ~= 0 and (self.sub.low_state:make() + space_ + low_state) or '')
 			end
 			res = res  + self.sub._end:make()
 			return res
@@ -1854,8 +1863,8 @@ handlersTable = {
 		sub = {	AirbaseName				= AirbaseName,
 				tower					= Phrase:new({_('Tower'), 	'TOWER'}, 'Messages'),
 				PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
-				overhead				= Phrase:new({_('overhead, angels'), 	'OVERHEAD'}, 'Messages'),							
-				Altitude				= Phrase:new({_('angels'), 	'PLAYER-ANGELS'}, 'Messages'),			
+				overhead				= Phrase:new({_('overhead, angels'), 	'OVERHEAD'}, 'Messages'),
+				Altitude				= Phrase:new({_('angels'), 	'PLAYER-ANGELS'}, 'Messages'),
 				flight_of				= Phrases:new({	{_('flight of 1'), 'flight_of_1'},
 														{_('flight of 2'), 'flight_of_2'},
 														{_('flight of 3'), 'flight_of_3'},
@@ -1867,30 +1876,30 @@ handlersTable = {
 				Number					= Number,
 				_start					= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
 				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),
-				}			
-	},	
+				}
+	},
 	--[TOWER], [SIDE NUMBER], overhead, angles [ALTITUDE], [NUMBER IN FLGHT], low state [REMAINING FUEL].
 	[base.Message.wMsgLeaderConfirm]				= {
 		make = function(self, message, language)
-			local res		
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit())
 			res = res  + self.sub._end:make()
 			return res
 		end,
 		sub = {	PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
-	},	
-	
+				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
+	},
+
 	[base.Message.wMsgLeaderConfirmRemainingFuel]				= {
 		make = function(self, message, language)
 			local low_state = self.sub.Digits:make(u.round(((message.receiver:getUnit():getFuelLowState() or 0)*message.receiver:getUnit():getDesc().fuelMassMax * 2.2046/ 1000), 0.1), '%.1f')
-			local res		
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit())
-			if message.receiver:getUnit():getGroup():getSize() == 1 then 
-				res = res + (low_state ~= 0 and (space_ + self.sub.state:make() + space_ + low_state) or '')	
+			if message.receiver:getUnit():getGroup():getSize() == 1 then
+				res = res + (low_state ~= 0 and (space_ + self.sub.state:make() + space_ + low_state) or '')
 			else
-				res = res + (low_state ~= 0 and (space_ + self.sub.low_state:make() + space_ + low_state) or '')			
+				res = res + (low_state ~= 0 and (space_ + self.sub.low_state:make() + space_ + low_state) or '')
 			end
 			res = res  + self.sub._end:make()
 			return res
@@ -1900,10 +1909,10 @@ handlersTable = {
 				state					= Phrase:new({_('state'), 'state'}, 'Messages'),
 				Digits					= Digits,
 				_start					= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
-	},	
-	
-	
+				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
+	},
+
+
 	[base.Message.wMsgLeaderAirborn]				= {
 		make = function(self, message, language)
 			local res
@@ -1915,9 +1924,9 @@ handlersTable = {
 		sub = {	PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
 				airborn				= Phrase:new({_(',airborn'), 'airborn'}, 'Messages'),
 				_start					= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},
-	
+
 	[base.Message.wMsgLeaderPassing2_5Kilo]				= {
 		make = function(self, message, language)
 			local res
@@ -1929,16 +1938,16 @@ handlersTable = {
 		sub = {	PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
 				passing2_5kilo			= Phrase:new({_(', passing 2.5. Kilo.'), 'PASSING_25'}, 'Messages'),
 				_start					= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},
-		
+
 	--[SIDE NUMBER], marshal on the [BEARING], range, [DME] angels [ALTITUDE]. Expected approach time [TIME], approach button is 15.
 	[base.Message.wMsgLeaderInboundMarshallRespond]				= {
 		make = function(self, message, language)
-			local res		
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit())+ comma_space_
 			res = res  + self.sub.marshal_on_the:make() + space_ + Digits:make((message.parameters.RBRC  or 0) * u.units.deg.coeff) + comma_space_
-			res = res + self.sub.Number:make((message.parameters.NumberInStack or 0) +21) + space_+ self.sub.dme_angels:make() + space_ 
+			res = res + self.sub.Number:make((message.parameters.NumberInStack or 0) +21) + space_+ self.sub.dme_angels:make() + space_
 			res = res + self.sub.Number:make((message.parameters.NumberInStack or 0) + 6)  + comma_space_
 			res = res  + self.sub.EAT:make() + space_ + self.sub.Digits:make((message.parameters.EAT or 0),'%02d')-- + comma_space_
 			--res = res  + self.sub.approachButtonIs:make()
@@ -1953,12 +1962,12 @@ handlersTable = {
 				Digits				= Digits,
 				Number				= Number,
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},
-	
+
 	--[[[base.Message.wMsgATCMarshallReadbackCorrect]				= {
 		make = function(self, message, language)
-			local res		
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit())+ comma_space_
 			res = res  + self.sub.readbackCorrect:make()
 			res = res  + self.sub._end:make()
@@ -1967,11 +1976,11 @@ handlersTable = {
 		sub = {	PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
 				readbackCorrect		= Phrase:new({_('readback correct.'), 'READBACK'}, 'Messages'),
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},]]--
 	--[SIDE NUMBER], Tower, Roger.  BRC is [CARRIER HEADING], your signal is Charlie.
 	[base.Message.wMsgATCTowerCopyOverhead]  				= {
-		make = function(self, message, language)							
+		make = function(self, message, language)
 			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit()) + comma_space_
 			res = res + self.sub.Tower_Roger:make() + space_
@@ -1991,11 +2000,11 @@ handlersTable = {
 				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),
 			}
 	},
-	
+
 	[base.Message.wMsgLeaderHornetBall]				= {
 		make = function(self, message, language)
 				--Aircraft nickname indexes to select BallCall
-			local aircraftNickNames = 
+			local aircraftNickNames =
 				{
 					['FA-18C_hornet']	  	= 1,	-- hornet
 					['F/A-18C']	  			= 1,	-- hornet
@@ -2017,12 +2026,12 @@ handlersTable = {
 				}
 			--base.print('	!!!!!~~~~~!!!!!!! aircraftNickNames[message.sender:getUnit():getTypeName()]:',aircraftNickNames[message.sender:getUnit():getTypeName()])
 			local aircraftTypeIdx = aircraftNickNames[message.sender:getUnit():getTypeName()] or 1
-			local res			
+			local res
 			local low_state = self.sub.Digits:make(u.round(((message.sender:getUnit():getFuel() or 0)*message.sender:getUnit():getDesc().fuelMassMax * 2.2046/ 1000), 0.1), '%.1f')
-						
+
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.sender:getUnit())
-			res = res + comma_space_ 
-			res = res + self.sub.hornet_ball:make(aircraftTypeIdx) + comma_space_ 
+			res = res + comma_space_
+			res = res + self.sub.hornet_ball:make(aircraftTypeIdx) + comma_space_
 			res = res + (low_state ~= 0 and (low_state) or '')
 			res = res  + self.sub._end:make()
 			return res
@@ -2042,19 +2051,19 @@ handlersTable = {
 				Digits					= Digits,
 				_start					= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
 				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),
-				}			
+				}
 	},
-	
-	[base.Message.wMsgATCLSORogerBall]  = { 
+
+	[base.Message.wMsgATCLSORogerBall]  = {
 				--)				//NAVY - Roger ball, [WIND OVER DECK SPEED], [OPTIONAL DIRECTION]. - Answer on BALL
-		make = function(self, message, language)							
-			local res			
-			res = self.sub._start:make() + self.sub.Roger_ball:make() 
+		make = function(self, message, language)
+			local res
+			res = self.sub._start:make() + self.sub.Roger_ball:make()
 			if (message.parameters.wind_speed) then
 				local velocityUnit = unitSystemByCountry[message.receiver:getUnit():getCountry()].velocity
 				local windSpeed = base.math.ceil(message.parameters.wind_speed * velocityUnit.coeff) - 20
-				--res = res + comma_space_ + Digits:make(base.math.ceil(message.parameters.wind_speed * velocityUnit.coeff)) + space_ 
-				--res = res + self.sub.knots:make() 
+				--res = res + comma_space_ + Digits:make(base.math.ceil(message.parameters.wind_speed * velocityUnit.coeff)) + space_
+				--res = res + self.sub.knots:make()
 				if (message.parameters.wind_direction and windSpeed > 0 and windSpeed <= 10) then
 					--res = res + comma_space_
 					--[[if message.parameters.wind_direction == 1 then
@@ -2071,9 +2080,9 @@ handlersTable = {
 					end
 				end
 			end
-			if message.parameters.glideslopeError and message.parameters.localizerError then			
+			if message.parameters.glideslopeError and message.parameters.localizerError then
 				if message.parameters.glideslopeError == 0 and message.parameters.localizerError == 0 then
-					res = res + comma_space_ + self.sub.glideslope_error:make(4) + comma_space_ + self.sub.localizer_error:make(4) 
+					res = res + comma_space_ + self.sub.glideslope_error:make(4) + comma_space_ + self.sub.localizer_error:make(4)
 				elseif base.math.abs(message.parameters.glideslopeError) <= 1 and base.math.abs(message.parameters.localizerError) <= 1 then
 					res = res + comma_space_ + self.sub.fly_the_ball:make()
 				else
@@ -2109,7 +2118,7 @@ handlersTable = {
 													{_('Roger ball, 28 knots'), 'LSO-ROGERBALL-28'},
 													{_('Roger ball, 29 knots'), 'LSO-ROGERBALL-29'},
 													{_('Roger ball, 30 knots'), 'LSO-ROGERBALL-30'}},			'Messages'),
-				
+
 				glideslope_error	= Phrases:new({	{ _('you are low')				, 'LSO-LOW' },
 													{ _('you are little low')		, 'LSO-LITTLE-LOW' },
 													{empty_string, ''},
@@ -2126,25 +2135,25 @@ handlersTable = {
 													{ _('little right for line up')	, 'LSO-LITTLE-RIGHT' },
 													{ _('you are lined up left')	, 'LSO-LINED-UP-LEFT' },
 													{empty_string, ''}}	,	'Messages'),
-													
+
 				fly_the_ball		= Phrase:new(	{ _('fly the ball')				, 'LSO-FLY-THE-BALL' }		,   'Messages'),
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
 				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),
 				--knots				= Phrase:new({_('knots'), 'knots'}),
 				--port				= Phrase:new({_('port'), 'port'}),
 				--axial 				= Phrase:new({_('axial'), 'axial'}),
-				--starboard			= Phrase:new({_('starboard'), 'starboard'})				
+				--starboard			= Phrase:new({_('starboard'), 'starboard'})
 			}
 	},
-		
+
 	--[SIDE NUMBER], established angels [ALTITUDE]. State [FUEL LEVEL].
 	[base.Message.wMsgLeaderEstablished]				= {
 		make = function(self, message, language)
-			local res			
+			local res
 			local low_state = self.sub.Digits:make(u.round(((message.sender:getUnit():getFuel() or 0)*message.sender:getUnit():getDesc().fuelMassMax * 2.2046/ 1000), 0.1), '%.1f')
-			
+
 			--local angelsAlt = self.sub.Digits:make(u.round( message.parameters.altitude*3.281/1000, 0.1), '%.1f')
-			
+
 			local Altitude = u.round( 2*message.parameters.altitude*3.281/1000, 1.0)
 			local angelsAlt = ''
 			if Altitude % 2 == 0 then
@@ -2152,15 +2161,15 @@ handlersTable = {
 			else
 				angelsAlt = self.sub.Digits:make(Altitude/2, '%.1f')
 			end
-						
+
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.sender:getUnit())
-			res = res + comma_space_ 
+			res = res + comma_space_
 			res = res + self.sub.established:make() + space_+ angelsAlt
 			res = res + self.sub.state:make() + space_+ (low_state ~= 0 and (low_state) or '')
 			res = res  + self.sub._end:make()
 			return res
 		end,
-		sub = {	
+		sub = {
 				established				= Phrase:new({_('established angels'), 	'established'}, 'Messages'),
 				PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
 				Digits					= Digits,
@@ -2168,17 +2177,17 @@ handlersTable = {
 				state					= Phrase:new({_('. State'), 'state'}, 'Messages'),
 				_start					= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
 				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),
-				}			
+				}
 	},
-	
+
 	--[SIDE NUMBER] commencing, [ALTIMETER], state [FUEL LEVEL].
 	[base.Message.wMsgLeaderCommencing]				= {
 		make = function(self, message, language)
-			local res			
+			local res
 			local low_state = self.sub.Digits:make(u.round(((message.sender:getUnit():getFuel() or 0)*message.sender:getUnit():getDesc().fuelMassMax * 2.2046/ 1000), 0.1), '%.1f')
-			
+
 			--local angelsAlt = self.sub.Digits:make(u.round( message.parameters.altitude*3.281/1000, 0.1), '%.1f')
-			
+
 			local Altitude = u.round( 2*message.parameters.altitude*3.281/1000, 1.0)
 			local angelsAlt = ''
 			if Altitude % 2 == 0 then
@@ -2186,17 +2195,17 @@ handlersTable = {
 			else
 				angelsAlt = self.sub.Digits:make(Altitude/2, '%.1f')
 			end
-						
-			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.sender:getUnit())+ comma_space_ 
-			--res = res + self.sub.commencing:make() + comma_space_ + angelsAlt			
-			res = res + self.sub.commencing:make() + comma_space_ 
+
+			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.sender:getUnit())+ comma_space_
+			--res = res + self.sub.commencing:make() + comma_space_ + angelsAlt
+			res = res + self.sub.commencing:make() + comma_space_
 			res = res + self.sub.state:make() + space_+ (low_state ~= 0 and (low_state) or '')+ comma_space_
 			res = res+ self.sub.altimeter:make()+ space_
-			res = res+ self.sub.Pressure:make(message.parameters.pressure, aircraftType, '%.2f') 			
+			res = res+ self.sub.Pressure:make(message.parameters.pressure, aircraftType, '%.2f')
 			res = res  + self.sub._end:make()
 			return res
 		end,
-		sub = {	
+		sub = {
 				commencing				= Phrase:new({_('commencing'), 	'commence'}, 'Messages'),
 				PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
 				altimeter				= Phrase:new({_('altimeter'), 	'altimeter'}, 'Messages'),
@@ -2206,14 +2215,14 @@ handlersTable = {
 				state					= Phrase:new({_('State'), 'state'}, 'Messages'),
 				_start					= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
 				_end					= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),
-				}			
+				}
 	},
-	
+
 	--[SIDE NUMBER], roger, state [FUEL LEVEL].
 	[base.Message.wMsgATCMarshallRogerState]				= {
 		make = function(self, message, language)
-			local low_state = self.sub.Digits:make(u.round(((message.receiver:getUnit():getFuel() or 0)*message.receiver:getUnit():getDesc().fuelMassMax * 2.2046/ 1000), 0.1), '%.1f')		
-			local res		
+			local low_state = self.sub.Digits:make(u.round(((message.receiver:getUnit():getFuel() or 0)*message.receiver:getUnit():getDesc().fuelMassMax * 2.2046/ 1000), 0.1), '%.1f')
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit())+ comma_space_
 			res = res  + self.sub.roger_state:make() + space_ + low_state
 			res = res  + self.sub._end:make()
@@ -2223,16 +2232,16 @@ handlersTable = {
 				roger_state			= Phrase:new({_('roger, state'), 'ROGER_STATE'}, 'Messages'),
 				Digits				= Digits,
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},
-	
+
 	--[SIDE NUMBER], radar contact [DME] miles, expected final bearing 309.
 	[base.Message.wMsgATCMarshallCopyCommencing]				= {
 		make = function(self, message, language)
-				
-			local res		
+
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit()) + comma_space_
-			res = res  + self.sub.radar_contact:make() + space_ + self.sub.Digits:make(message.parameters.DME)+ space_ 
+			res = res  + self.sub.radar_contact:make() + space_ + self.sub.Digits:make(message.parameters.DME)+ space_
 			res = res  + self.sub.miles:make() + space_ + self.sub.Digits:make(message.parameters.BRC * u.units.deg.coeff)
 			res = res  + self.sub._end:make()
 			return res
@@ -2242,14 +2251,14 @@ handlersTable = {
 				miles				= Phrase:new({_('miles, expected final bearing'), 'MARSHAL-FINAL'}, 'Messages'),
 				Digits				= Digits,
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},
-	
-		
+
+
 	--[SIDE NUMBER], checking in, [DISTANCE TO CARRIER] miles.
 	[base.Message.wMsgLeaderCheckingIn]				= {
-		make = function(self, message, language)				
-			local res		
+		make = function(self, message, language)
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.sender:getUnit()) + comma_space_
 			res = res  + self.sub.checking_in:make() + comma_space_
 			--res = res  + self.sub.Digits:make(message.parameters.DME)+ space_  + self.sub.miles:make()
@@ -2263,13 +2272,13 @@ handlersTable = {
 				Digits				= Digits,
 				Number				= Number,
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},
-		
+
 	--[SIDE NUMBER], final bearing [BEARING].
 	[base.Message.wMsgATCTowerFinalBearing]				= {
-		make = function(self, message, language)				
-			local res		
+		make = function(self, message, language)
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit()) + comma_space_
 			if message.parameters.case == 1 then
 				res = res  + self.sub.b_r_c:make()
@@ -2287,13 +2296,13 @@ handlersTable = {
 				b_r_c				= Phrase:new({_('BRC'), 'BRC'}, 'Messages'),
 				Digits				= Digits,
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},
-	
+
 	--[SIDE NUMBER] final radar contact, [DISTANCE TO CARRIER] miles.
 	[base.Message.wMsgATCTowerFinalContact]			= {
-		make = function(self, message, language)				
-			local res		
+		make = function(self, message, language)
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit()) + comma_space_
 			res = res  + self.sub.final_contact:make() + comma_space_
 			res = res  + self.sub.Digits:make(message.parameters.DME)+ space_  + self.sub.miles:make()
@@ -2305,13 +2314,13 @@ handlersTable = {
 				miles				= Phrase:new({_('miles.'), 'miles'}, 'Messages'),
 				Digits				= Digits,
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},
-	
+
 	--[SIDE NUMBER], ACLS lock on [DISTANCE TO CARRIER] miles, say needles.
 	[base.Message.wMsgATCTowerSayNeedles]			= {
-		make = function(self, message, language)				
-			local res		
+		make = function(self, message, language)
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit()) + comma_space_
 			res = res  + self.sub.lock_on:make() + comma_space_
 			res = res  + self.sub.Digits:make(message.parameters.DME)+ space_  + self.sub.miles:make() + self.sub.needles:make()
@@ -2324,13 +2333,13 @@ handlersTable = {
 				needles				= Phrase:new({_('say needles.'), 'SAY_NEEDLES'}, 'Messages'),
 				Digits				= Digits,
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},
-	
+
 	--[SIDE NUMBERS], [GLIDEPATH][LOCALIZER].
 	[base.Message.wMsgLeaderSayNeedle] = {
-		make = function(self, message, language)				
-			local res		
+		make = function(self, message, language)
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit()) + comma_space_
 			res = res  + self.sub.needles:make(message.parameters.needles) + comma_space_
 			res = res  + self.sub._end:make()
@@ -2339,21 +2348,21 @@ handlersTable = {
 		sub = {	PlayerAircraftCallsign	= USNAVYPlayerAircraftCallsign,
 				needles				= Phrases:new({	    {_('down and left'), 	'down_left'},
 														{_('down and on'), 		'down_on'},
-														{_('down and right'), 	'down_right'},														
+														{_('down and right'), 	'down_right'},
 														{_('on and left'), 		'ON_LEFT'},
 														{_('on and on'), 		'ON_ON'},
-														{_('on and right'), 	'ON_RIGHT'},														
+														{_('on and right'), 	'ON_RIGHT'},
 														{_('up and left'), 		'UP_LEFT'},
 														{_('up and on'), 		'UP_ON'},
 														{_('up and right'), 	'UP_RIGHT'}, },			'Messages'),
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},
-		
+
 	--[SIDE NDUMBER], [GLIDEPATH LOCATION], [COURSE LOCATION], ¾ mile, call the ball.
 	[base.Message.wMsgATCTowerCallTheBall] = {
-		make = function(self, message, language)				
-			local res		
+		make = function(self, message, language)
+			local res
 			res = self.sub._start:make() +  self.sub.PlayerAircraftCallsign:make(message.receiver:getUnit()) + comma_space_
 			res = res  + self.sub.glidepath:make(message.parameters.glidepath) + comma_space_
 			res = res  + self.sub.localizer:make(message.parameters.localizer) + comma_space_
@@ -2370,60 +2379,60 @@ handlersTable = {
 														{_('on course'), 			'ON_CRS'},
 														{_('right of course'), 		'RIGHT_OF_CRS'},},			'Messages'),
 				_start				= Phrase:new(	{ empty_string, '_start' }		,   'Messages'),
-				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}			
+				_end				= Phrase:new(	{ empty_string, '_end' }		,   'Messages'),}
 	},
-	
-	
+
+
 	[base.Message.wMsgATCDepartureRadarContact] 		= Start_Receiver_Callsign_End_Handler, --  [SIDE NUMBER],radar contact, altimeter 29.92.
 	[base.Message.wMsgATCDepartureClearedToSwitch]  	= Start_Receiver_Callsign_End_Handler,--[SIDE NUMBER], cleared to switch.
-		
+
 	[base.Message.wMsgATCMarshallCopyTen]			= StartEndHandler,
-	
-	[base.Message.wMsgATCMarshallSwitchApproach]	= Start_Receiver_Callsign_End_Handler,	--[SIDE NUMBER], switch approach.  
+
+	[base.Message.wMsgATCMarshallSwitchApproach]	= Start_Receiver_Callsign_End_Handler,	--[SIDE NUMBER], switch approach.
 	[base.Message.wMsgLeaderPlatform]				= Start_Sender_Callsign_End_Handler,	--[SIDE NUMBER], platform.
-	[base.Message.wMsgATCTowerRoger]				= Start_Receiver_Callsign_End_Handler, 	--[SIDE NUMBER], roger.	
+	[base.Message.wMsgATCTowerRoger]				= Start_Receiver_Callsign_End_Handler, 	--[SIDE NUMBER], roger.
 	[base.Message.wMsgATCMarshallReadbackCorrect]	= Start_Receiver_Callsign_End_Handler,
 	[base.Message.wMsgLeaderSeeYouAtTen]			= Start_Sender_Callsign_End_Handler,
 	[base.Message.wMsgATCTowerConcurFlyMode2]		= Start_Receiver_Callsign_End_Handler,
-	[base.Message.wMsgATCTowerSwitchMenu]			= Start_Receiver_Callsign_End_Handler, 	--[SIDE NUMBER], roger.	
-	
+	[base.Message.wMsgATCTowerSwitchMenu]			= Start_Receiver_Callsign_End_Handler, 	--[SIDE NUMBER], roger.
+
 	[base.Message.wMsgATCTowerFlyBullseye]			= Start_Receiver_Callsign_End_Handler,
 	[base.Message.wMsgATCTowerApproachGlidepath] 	= Start_Receiver_Callsign_End_Handler,
-		
-	[base.Message.wMsgATCLSOWaveOFFGear]  			= StartEndHandler,				
-	[base.Message.wMsgATCLSOWaveOFFFlaps]  			= StartEndHandler,				
-	[base.Message.wMsgATCLSOWaveOFFWaveOFFWaveOFF]  = StartEndHandler,	
-	[base.Message.wMsgATCLSOYoureHigh]  			= StartEndHandler,	
-	[base.Message.wMsgATCLSOYoureLow]  				= StartEndHandler,	
-	[base.Message.wMsgATCLSOYoureGoingHigh]  		= StartEndHandler,	
-	[base.Message.wMsgATCLSOYoureGoingLow]  		= StartEndHandler,	
-	[base.Message.wMsgATCLSOLinedUpLeft]  			= StartEndHandler,	
-	[base.Message.wMsgATCLSOLinedUpRight]  			= StartEndHandler,	
-	[base.Message.wMsgATCLSODriftingLeft]  			= StartEndHandler,	
-	[base.Message.wMsgATCLSODriftingRight]  		= StartEndHandler,	
-	[base.Message.wMsgATCLSOYoureFast] 			 	= StartEndHandler,	
-	[base.Message.wMsgATCLSOYoureSlow]  			= StartEndHandler,	
-	[base.Message.wMsgATCLSOEasyNose]  				= StartEndHandler,	
-	[base.Message.wMsgATCLSOEasyWings]  			= StartEndHandler,	
-	[base.Message.wMsgATCLSOEasyIt]  				= StartEndHandler,	
-	[base.Message.wMsgATCLSOYoureHighClose]  		= StartEndHandler,	
-	[base.Message.wMsgATCLSOPower]  				= StartEndHandler,	
-	[base.Message.wMsgATCLSOPowerX2]  				= StartEndHandler,	
-	[base.Message.wMsgATCLSOPowerX3]  				= StartEndHandler,	
-	[base.Message.wMsgATCLSOEasyItX2]  				= StartEndHandler,	
-	[base.Message.wMsgATCLSORight4LineUp]  			= StartEndHandler,	
-	[base.Message.wMsgATCLSOLeft4LineUp]  			= StartEndHandler,	
-	[base.Message.wMsgATCLSOFoulDeck]  				= StartEndHandler,	
-	[base.Message.wMsgATCLSOBolterX3] 				= StartEndHandler,	
-	[base.Message.wMsgATCLSOYoureLittleHigh]  		= StartEndHandler,	
-	[base.Message.wMsgATCLSOYoureLittleLow]  		= StartEndHandler,	
-	[base.Message.wMsgATCLSOLittleRight4LineUp]  	= StartEndHandler,	
-	[base.Message.wMsgATCLSOLittleLeft4LineUp]  	= StartEndHandler,	
-	[base.Message.wMsgATCLSOFlyTheBall]  			= StartEndHandler,	
-	[base.Message.wMsgATCLSOOnGlideslope]  			= StartEndHandler,	
-	[base.Message.wMsgATCLSOOnCenterLine]  			= StartEndHandler,	
-	--[base.Message.wMsgATCLSOOnSpeed]  				= StartEndHandler,	
-	
+
+	[base.Message.wMsgATCLSOWaveOFFGear]  			= StartEndHandler,
+	[base.Message.wMsgATCLSOWaveOFFFlaps]  			= StartEndHandler,
+	[base.Message.wMsgATCLSOWaveOFFWaveOFFWaveOFF]  = StartEndHandler,
+	[base.Message.wMsgATCLSOYoureHigh]  			= StartEndHandler,
+	[base.Message.wMsgATCLSOYoureLow]  				= StartEndHandler,
+	[base.Message.wMsgATCLSOYoureGoingHigh]  		= StartEndHandler,
+	[base.Message.wMsgATCLSOYoureGoingLow]  		= StartEndHandler,
+	[base.Message.wMsgATCLSOLinedUpLeft]  			= StartEndHandler,
+	[base.Message.wMsgATCLSOLinedUpRight]  			= StartEndHandler,
+	[base.Message.wMsgATCLSODriftingLeft]  			= StartEndHandler,
+	[base.Message.wMsgATCLSODriftingRight]  		= StartEndHandler,
+	[base.Message.wMsgATCLSOYoureFast] 			 	= StartEndHandler,
+	[base.Message.wMsgATCLSOYoureSlow]  			= StartEndHandler,
+	[base.Message.wMsgATCLSOEasyNose]  				= StartEndHandler,
+	[base.Message.wMsgATCLSOEasyWings]  			= StartEndHandler,
+	[base.Message.wMsgATCLSOEasyIt]  				= StartEndHandler,
+	[base.Message.wMsgATCLSOYoureHighClose]  		= StartEndHandler,
+	[base.Message.wMsgATCLSOPower]  				= StartEndHandler,
+	[base.Message.wMsgATCLSOPowerX2]  				= StartEndHandler,
+	[base.Message.wMsgATCLSOPowerX3]  				= StartEndHandler,
+	[base.Message.wMsgATCLSOEasyItX2]  				= StartEndHandler,
+	[base.Message.wMsgATCLSORight4LineUp]  			= StartEndHandler,
+	[base.Message.wMsgATCLSOLeft4LineUp]  			= StartEndHandler,
+	[base.Message.wMsgATCLSOFoulDeck]  				= StartEndHandler,
+	[base.Message.wMsgATCLSOBolterX3] 				= StartEndHandler,
+	[base.Message.wMsgATCLSOYoureLittleHigh]  		= StartEndHandler,
+	[base.Message.wMsgATCLSOYoureLittleLow]  		= StartEndHandler,
+	[base.Message.wMsgATCLSOLittleRight4LineUp]  	= StartEndHandler,
+	[base.Message.wMsgATCLSOLittleLeft4LineUp]  	= StartEndHandler,
+	[base.Message.wMsgATCLSOFlyTheBall]  			= StartEndHandler,
+	[base.Message.wMsgATCLSOOnGlideslope]  			= StartEndHandler,
+	[base.Message.wMsgATCLSOOnCenterLine]  			= StartEndHandler,
+	--[base.Message.wMsgATCLSOOnSpeed]  				= StartEndHandler,
+
 	[base.Message.wMsgATCClearedControlHover]		= {
 		make = function(self, message, language)
 			local wind = self.sub.Wind:make(message.parameters.wind)
@@ -2515,11 +2524,11 @@ handlersTable = {
 			  }
 	},
 	[base.Message.wMsgLeaderSpecialCommand] = {
-		make = function(self, message)	
+		make = function(self, message)
 			if 	   message.parameters.type == 7   then  		return self.sub.ladder:make()-- fix alert message when stow ladder was called
 			elseif message.parameters.type == 9   then  		return self.sub.INERTIAL_STARTER:make()
 			elseif message.parameters.type == 15  then  		return self.sub.START_PRIMING_ENGINES:make()
-			elseif message.parameters.type == 5   then  		
+			elseif message.parameters.type == 5   then
 				if message.parameters.power_source == 0 then	return self.sub.USE_TURBO:make()
 				else											return self.sub.USE_REGULAR:make()
 				end
@@ -2546,7 +2555,7 @@ handlersTable = {
 			else
 				return self.sub[message.parameters.name][message.parameters.value]:make()
 			end
-		end,		
+		end,
 		sub = {
 			['EPPU'] = {
 				sub = {
@@ -2558,7 +2567,7 @@ handlersTable = {
 			HMS    = Phrase:new({_('request HMD installation'),	'request HMD installation'}),
 			NVG    = Phrase:new({_('request NVG installation'),	'request NVG installation'}),
 			USE_TURBO      = Phrase:new({_('request to turn on turbo-gear'),	'request to turn on turbo-gear'}),
-			USE_REGULAR    = Phrase:new({_('request to turn off turbo-gear'),	'request to turn off turbo-gear'}),			
+			USE_REGULAR    = Phrase:new({_('request to turn off turbo-gear'),	'request to turn off turbo-gear'}),
 			INERTIAL_STARTER   = Phrase:new({_('run inertial starter'),	'Run the starter'}),
 			START_PRIMING_ENGINES = Phrase:new({_("start priming engines"), 'Run the starter'}),
 		}
@@ -2567,7 +2576,7 @@ handlersTable = {
 	[base.Message.wMsgGroundDone] = {
 		make = function(self, message)
 			return self.sub[message.parameters.name][message.parameters.value]:make()
-		end,		
+		end,
 		sub = {
 			['EPPU'] = {
 				sub = {
@@ -2582,7 +2591,7 @@ handlersTable = {
 	[base.Message.wMsgFlightAirbone]				= FlightMessageHandler,
 	[base.Message.wMsgFlightPassingWaypoint] 		= PassingWaypointHandler,
 	[base.Message.wMsgFlightOnStation]				= OnStationHandler,
-	[base.Message.wMsgFlightDepartingStation]		= DepartingWaypointHandler,	
+	[base.Message.wMsgFlightDepartingStation]		= DepartingWaypointHandler,
 	[base.Message.wMsgFlightTallyBandit]			= BanditHandler,
 	[base.Message.wMsgFlightTally] 					= TargetHandler,
 	[base.Message.wMsgFlightEngagingBandit]			= BanditHandler,
@@ -2606,7 +2615,7 @@ LeaderToATCHandler = {
 		--base.print( '\t LeaderToATCHandler : make' )
 		--base.print( '\t LeaderToATCHandler : AirbaseName:make :'.. self.sub.AirbaseName:make(message.receiver, getAirdromeNameVariant(language)))
 		--base.print( '\t LeaderToATCHandler : PlayerAircraftCallsign:make :'.. self.sub.PlayerAircraftCallsign:make(message.sender, language == 'RUS'))
-		--base.print( '\t LeaderToATCHandler : Event:make :'.. Event:make(message.event))		
+		--base.print( '\t LeaderToATCHandler : Event:make :'.. Event:make(message.event))
 		if message.receiver:getUnit():getDesc().category == base.Airbase.Category.SHIP and message.receiver:getUnit():getCoalition() == 2  then
 			return 	self.sub.PlayerAircraftCallsign:make(message.sender,message.receiver, language == 'RUS') + comma_space_ + Event:make(message.event)
 		else
@@ -2640,20 +2649,20 @@ rangeHandlersTable = {
 					if message.parameters.direction then
 						result = result + space_ + self.sub.FromCompassDirection8:make(message.parameters.direction)
 					end
-				end				
-				return result 
+				end
+				return result
 			end,
 			sub = {
 				atMySPI					= Phrase:new({_('at my SPI'),	'at my SPI'}),
 				ToWingmen				= ToWingmen,
-				FromCompassDirection8	= FromCompassDirection8,				
+				FromCompassDirection8	= FromCompassDirection8,
 				Weapon 					= Phrases:new( { 	{_('with missiles'), 		'with missiles'},
 															{_('with unguided bombs'), 	'with unguided bombs'},
 															{_('with guided bombs'), 	'with guided bombs'},
 															{_('with rockets'), 		'with rockets'},
 															{_('with markers'), 		'with markers'},
 															{_('with guns'),			'with guns'}
-														}, 
+														},
 														'Weapon' )
 			}
 		}
@@ -2677,20 +2686,20 @@ rangeHandlersTable = {
 	{
 		range = { base.Message.wMsgLeaderToATCNull,				base.Message.wMsgLeaderToATCMaximum },
 		handler = LeaderToATCHandler
-	},	
+	},
 	--ATC -> PLAYER
 	{
 		range = { base.Message.wMsgATCNull, 					base.Message.wMsgATCMaximum },
 		handler = {
-			make = function(self, message)				
-				if message.event < base.Message.wMsgATCLSORogerBall then 
+			make = function(self, message)
+				if message.event < base.Message.wMsgATCLSORogerBall then
 					return  self.sub.PlayerAircraftCallsign:make(message.receiver,message.sender) + comma_space_ + Event:make(message.event)
 				else
 					return  Event:make(message.event)
 				end
 			end,
 			sub = { PlayerAircraftCallsign = PlayerAircraftCallsign }
-		}		
+		}
 	},
 	--BETTY
 	{
@@ -2715,17 +2724,17 @@ rangeHandlersTable = {
 	--ExternalCargo
 	{
 		range = { base.Message.wMsgExternalCargo_Null, 	base.Message.wMsgExternalCargo_Maximum },
-		handler = SimpleHandler	
+		handler = SimpleHandler
 	},
 	--Mi8 Checklist
 	{
 		range = { base.Message.wMsgMi8_Checklist_Null, 	base.Message.wMsgMi8_Checklist_Maximum },
-		handler = SimpleHandler	
+		handler = SimpleHandler
 	},
 	--Mi8 Procedures Messages
 	{
 		range = { base.Message.wMsgMi8_CrewProcedures_Null, 	base.Message.wMsgMi8_CrewProcedures_Maximum },
-		handler = SimpleHandler	
+		handler = SimpleHandler
 	},
 	--A-10 VMU
 	{
@@ -2736,7 +2745,7 @@ rangeHandlersTable = {
 	{
 		range = {base.Message.wMsgLeaderToGroundCrewNull,		base.Message.wMsgLeaderToGroundCrewMaximum },
 		handler = SimpleHandler
-	},	
+	},
 	--GROUND CREW -> PLAYER
 	{
 		range = {base.Message.wMsgGroundCrewNull,				base.Message.wMsgGroundCrewMaximum },
@@ -2754,7 +2763,7 @@ function findRangeHandler(self, event)
 		if v.range[1] <= event and event <= v.range[2]  then
 			return v.handler
 		end
-	end	
+	end
 	return nil
 end
 
@@ -2782,7 +2791,7 @@ local languageByCountry = {
 	[nations.SPAIN]			= language.SPA,
 	[nations.INSURGENTS]	= language.RUS,
 	[nations.ABKHAZIA]		= language.RUS,
-	[nations.SOUTH_OSETIA]	= language.RUS,	
+	[nations.SOUTH_OSETIA]	= language.RUS,
 	[nations.ITALY]			= language.ENG,
 	[nations.AUSTRALIA]		= language.ENG,
 	[nations.SWITZERLAND]	= language.GER,
@@ -2846,7 +2855,7 @@ role = {
 						name = _('WINGMAN'),
 						dir = 'WINGMAN',
 						range = { base.Message.wMsgWingmenNull, 	base.Message.wMsgWingmenMaximum },
-					},	
+					},
 	ATC			= 	{
 						name = _('ATC'),
 						dir = 'ATC',
@@ -2873,77 +2882,77 @@ role = {
 						range = { base.Message.wMsgATCNAVYLSONull, 		base.Message.wMsgATCNAVYLSOMaximum },
 					},
 
-					
+
 	AWACS		= 	{
 						name = _('AWACS'),
 						dir = 'AWACS',
 						range = { base.Message.wMsgAWACSNull,		base.Message.wMsgAWACSMaximum },
-					},	
+					},
 	TANKER		= 	{
 						name = _('TANKER'),
-						dir = 'TANKER',					
+						dir = 'TANKER',
 						range = { base.Message.wMsgTankerNull,		base.Message.wMsgTankerMaximum },
-					},	
+					},
 	JTAC		= 	{
 						name = _('JTAC'),
 						dir = 'JTAC',
 						range = { base.Message.wMsgFACNull, 		base.Message.wMsgFACMaximum },
-					},	
+					},
 	CCC			= 	{
 						name = _('CCC'),
-						dir = 'CCC',					
+						dir = 'CCC',
 						range = { base.Message.wMsgCCCNull, 		base.Message.wMsgCCCMaximum },
 					},
 	ALLIED_FLIGHT=	{
 						name = _('Allied Flight'),
 						dir = 'Allied Flight',
 						range = { base.Message.wMsgFlightNull, 		base.Message.wMsgFlightMaximum },
-					},	
+					},
 	BETTY		= 	{
 						name = _('BETTY'),
-						dir = 'BETTY',						
+						dir = 'BETTY',
 						range = { base.Message.wMsgBettyNull,		base.Message.wMsgBettyMaximum },
 						singletone = true
 					},
 	ALMAZ		=	{
 						name = _('ALMAZ'),
-						dir = 'ALMAZ',						
+						dir = 'ALMAZ',
 						range = { base.Message.wMsgALMAZ_Null,		base.Message.wMsgALMAZ_Maximum },
 						singletone = true
 					},
 	RI65		=	{
 						name = _('RI65'),
-						dir = 'RI65',						
+						dir = 'RI65',
 						range = { base.Message.wMsgRI65_Null,		base.Message.wMsgRI65_Maximum },
 						singletone = true
-					},					
+					},
 	AutopilotAdjustment	=	{
 						name = _('AutopilotAdjustment'),
-						dir = '',						
+						dir = '',
 						range = { base.Message.wMsgAutopilotAdjustment_Null,	base.Message.wMsgAutopilotAdjustment_Maximum },
 						singletone = true
-					},	
+					},
 	ExternalCargo = {
 						name = _('ExternalCargo'),
-						dir = 'External Cargo',						
+						dir = 'External Cargo',
 						range = { base.Message.wMsgExternalCargo_Null,	base.Message.wMsgExternalCargo_Maximum },
-						singletone = true	
+						singletone = true
 					},
 	Mi8_Checklist	= 	{
 						name = _('Mi-8 Checklist'),
-						dir = '',						
+						dir = '',
 						range = { base.Message.wMsgMi8_Checklist_Null,	base.Message.wMsgMi8_Checklist_Maximum },
 						singletone = true
 					},
 	Mi8_CrewProcedures	= 	{
 						name = _('Mi-8 Crew Procedures'),
-						dir = '',						
+						dir = '',
 						range = { base.Message.wMsgMi8_CrewProcedures_Null,	base.Message.wMsgMi8_CrewProcedures_Maximum },
 						singletone = true
 					},
 	A10_VMU		= 	{
 						name = _('A-10 VMU'),
-						dir = 'A-10 VMU',						
+						dir = 'A-10 VMU',
 						range = { base.Message.wMsgA10_VMU_Null,	base.Message.wMsgA10_VMU_Maximum },
 						singletone = true
 					},
@@ -2989,9 +2998,9 @@ do
 		end
 		if voiceCounter > 0 then
 			tbl.voices = voiceCounter
-		end	
-	end	
-	
+		end
+	end
+
 	local function findAccents(dir, tbl)
 		local found = false
 		for accentName, accentValue in base.pairs(accent) do
@@ -3000,7 +3009,7 @@ do
 				found = true
 				_debug_print('\t\t\"'..accentName..'\" accent found')
 				tbl.accents = tbl.accents or {}
-				tbl.accents[accentValue] = {}				
+				tbl.accents[accentValue] = {}
 				findVoices(subDir, tbl.accents[accentValue])
 			end
 		end
@@ -3008,7 +3017,7 @@ do
 			findVoices(dir, tbl)
 		end
 	end
-	
+
 	local function findModules(dir, languageValue, roleDir, tbl)
 		local langdir = get_subdir(dir, languageValue)
 		if not langdir then return end
@@ -3016,15 +3025,15 @@ do
 			if moduleName ~= '.' and moduleName ~= '..' then
 				if modDir then
 					local subDir = get_subdir(modDir, base.string.lower(roleDir))
-					if subDir then						
-						_debug_print('\t\"'..moduleName..'\" - \"'..languageValue..'\" found')						
+					if subDir then
+						_debug_print('\t\"'..moduleName..'\" - \"'..languageValue..'\" found')
 						local moduleTbl = nil
 						if moduleName ~= nil then
 							tbl.modules = tbl.modules or {}
 							tbl.modules[moduleName] = tbl.modules[moduleName] or {}
 							moduleTbl = tbl.modules[moduleName]
 						end
-						
+
 						if moduleTbl.language ~= nil then
 							moduleTbl.languages = {
 								[moduleTbl.language] = {
@@ -3049,14 +3058,14 @@ do
 			end
 		end
 	end
-		
+
 	local function findLanguages(dir, roleDir, tbl)
 		-- Modules + langugages or languages
 		for languageIndex, languageValue in base.pairs(language) do
 			findModules(dir, languageValue, roleDir, tbl)
 		end
 	end
-	
+
 	for roleIndex, roleTbl in base.pairs(role) do
 		_debug_print('\"'..roleTbl.dir..'\" role')
 		findLanguages(speechIndex, roleTbl.dir, roleTbl)
@@ -3072,13 +3081,13 @@ function findRole(self, event)
 end
 
 function getHandler(self, event)
-	local handler = self.handlersTable[event]	
+	local handler = self.handlersTable[event]
 	if handler == nil then
 		handler = self:findRangeHandler(event)
 	end
 	if handler == nil then
 		handler = self.SimpleHandler
-	end	
+	end
 	return handler
 end
 
@@ -3129,18 +3138,12 @@ local function getMessageModuleAndLanguage(roleData, module, language)
 end
 
 function Initialize()
-	--base.print( '\t Common::AirbaseName : Initialize()' )
-	for moduleIndex, airdromeNameVariant in base.pairs(airdromeNameVariants) do
-		AirbaseName.sub[base.Airbase.Category.AIRDROME].sub[airdromeNameVariant] = Phrases:new(airdromeNames[airdromeNameVariant], 'Callsign')
-	end
+	initAirdromeSubs()
 end
 
 --[[
 function Release()
-	airdromeNames = {}
-	for moduleIndex, airdromeNameVariant in base.pairs(airdromeNameVariants) do
-		airdromeNames[airdromeNameVariant] = {}
-	end
+	clearAirdromeSubs()
 	--base.print( '\t Common::AirbaseName : Release()' )
 end
 ]]

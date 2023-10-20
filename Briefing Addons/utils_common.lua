@@ -402,6 +402,17 @@ function colorFromString(colorString)
 	return { r / 255, g / 255, b / 255, a / 255}
 end
 
+local char_set = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+function genId(a_numSymbols)
+	local result = ""
+	for i = 1, a_numSymbols do
+		local rn = math.random(1, #char_set)
+		local character = string.sub(char_set, rn, rn)
+		result = result..character
+	end
+	return result
+end
+
 function round(n)
 	if n < 0 then
 		return math.ceil(n - 0.5)

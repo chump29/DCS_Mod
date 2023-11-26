@@ -74,6 +74,16 @@ function toDegrees(radians, raw)
   return degrees
 end
 
+function toRadians(degrees, raw)
+  local radians = degrees * math.pi / 180
+
+  if not raw then
+    radians = math.floor(radians + 0.5)
+  end
+
+  return radians
+end
+
 function toPositiveDegrees(radians, raw)
   local degrees = toDegrees(radians, raw)
   

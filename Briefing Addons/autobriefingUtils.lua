@@ -175,7 +175,7 @@ local function createDataItem_(scrollPane, itemText, x, y, h, w, isMultiline)
 end
 
 local function createSectionGrid_(a_scrollPane, a_data, a_x, a_y, a_w) 
-    grid = Grid.new()
+    local grid = Grid.new()
     grid:setSkin(gridSkin)    
     
     local w1 = base.math.floor(106*a_w/390)
@@ -321,135 +321,7 @@ function updateScrollPane(scrollPane, a_width)
                 
                 for i =1, #data do
                     local itemHeight = createDataItem_(scrollPane, data[i], columnPos, rowPos, rowHeight, sectionWidth-130, rec.isMultiline)
-                    
-                    rowPos = rowPos + itemHeight
-                end
-                if #data < 1 then
-                    rowPos = rowPos + rowHeight
-                end
-            else
-                rowPos = rowPos + rowHeight
-            end 
-        elseif rec.needGrid == true then
-            local itemHeight = createSectionGrid_(scrollPane, rec.data, tabPos, rowPos, sectionWidth) 
-            rowPos = rowPos + itemHeight    
-        end
-        
-    end
-    
-    local item = Static.new("")
-    item:setPosition(0, rowPos+15)
-    scrollPane:insertWidget(item) 
 
-    scrollPane:updateWidgetsBounds()    
-end
-
--- текст брифинга в планшете брифинг рума
-
-------------------------------------------
-
-------------------------------------------
-function updateScrollPaneBriefingRoom(scrollPane, a_width)	-- BriefingRoom  briefing(on tablet pc)
-	local rowPos = 0
-    local rowHeight = 45
-    local tabPos = 13
-    local columnPos = 500
-    local sectionX = 50						-- title offset
-    local sectionWidth = a_width
-    local sectionHeight = rowHeight + 50
-    local sectionOffset = 20				-- vertical between sections
-
-    scrollPane:clear()
-    
-    for i = 1, #autoBriefing do
-        local rec = autoBriefing[i]     
-        
-        if rec.section then -- запись - название секции. должна быть синей 
-            if i > 1 then
-                rowPos = rowPos + sectionOffset  
-            end
-            createSectionItem_(scrollPane, rec.section, sectionX, rowPos, sectionWidth, sectionHeight)
-            rowPos = rowPos + sectionHeight
-            
-            if rec.data then -- если в секции есть данные
-                local itemHeight = createSectionDataItem_(scrollPane, rec.data, tabPos, rowPos, sectionWidth)
-                
-                rowPos = rowPos + itemHeight
-            end
-        elseif (not rec.section) and rec.title then -- запись не секция и есть название 
-            createTitleItem_(scrollPane, rec.title, tabPos, rowPos, rowHeight)
-            
-            if rec.data then
-                local data = {}
-                
-                if base.type(rec.data) == 'table' then
-                    data = rec.data
-                else 
-                    data[1] = rec.data
-                end
-                
-                for i =1, #data do
-					  local itemHeight = createDataItem_(scrollPane, data[i], columnPos, rowPos, rowHeight, sectionWidth - 300, rec.isMultiline)
-                    rowPos = rowPos + itemHeight
-                end
-                if #data < 1 then
-                    rowPos = rowPos + rowHeight
-                end
-            else
-                rowPos = rowPos + rowHeight
-            end 
-        elseif rec.needGrid == true then
-            local itemHeight = createSectionGrid_(scrollPane, rec.data, tabPos, rowPos, sectionWidth) 
-            rowPos = rowPos + itemHeight    
-        end
-        
-    end
-    
-    scrollPane:updateWidgetsBounds()    
-end
-
-function updateBaseBriefingScrollPane(scrollPane, a_width)	-- BriefingRoom simple briefing(on TV)
-    local rowPos = 0
-    local rowHeight = 40
-    local tabPos = 13
-    local columnPos = 500
-    local sectionX = 25
-    local sectionWidth = a_width
-    local sectionHeight = rowHeight + 13
-    local sectionOffset = 50
-    
-    scrollPane:clear()
-    
-    for i = 1, #autoBriefing do
-        local rec = autoBriefing[i]     
-        
-        if rec.section then -- запись - название секции. должна быть синей 
-            if i > 1 then
-                rowPos = rowPos + sectionOffset  
-            end
-            createSectionItem_(scrollPane, rec.section, sectionX, rowPos, sectionWidth, sectionHeight)
-            rowPos = rowPos + sectionHeight
-            
-            if rec.data then -- если в секции есть данные
-                local itemHeight = createSectionDataItem_(scrollPane, rec.data, tabPos, rowPos, sectionWidth)
-                
-                rowPos = rowPos + itemHeight
-            end
-        elseif (not rec.section) and rec.title then -- запись не секция и есть название 
-            createTitleItem_(scrollPane, rec.title, tabPos, rowPos, rowHeight)
-            
-            if rec.data then
-                local data = {}
-                
-                if base.type(rec.data) == 'table' then
-                    data = rec.data
-                else 
-                    data[1] = rec.data
-                end
-                
-                for i =1, #data do
-                    local itemHeight = createDataItem_(scrollPane, data[i], columnPos, rowPos, rowHeight, sectionWidth-130, rec.isMultiline)
-                    
                     rowPos = rowPos + itemHeight
                 end
                 if #data < 1 then

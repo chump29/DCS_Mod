@@ -35,7 +35,7 @@ do
 		if not event or not event.initiator then return end
 
 		local unit = event.initiator
-		if not unit or unit:getDesc().category > 2 or not unit:isActive() then return end -- NOTE: Unit.getCategory is broken, only testing for 0=airplane, 1=helicopter, 2=ground_unit
+		if not unit or Object.getCategory(unit) > 2 or not unit:isActive() then return end -- NOTE: only testing for 0=airplane, 1=helicopter, 2=ground_unit
 
 		local playerName = unit:getPlayerName()
 		if not playerName then return end

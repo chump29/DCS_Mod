@@ -25,7 +25,7 @@ do
 		if not event or not event.initiator then return end
 
 		local unit = event.initiator
-		local unitCategory = unit:getDesc().category
+		local unitCategory = Object.getCategory(unit)
 		if not unit or unitCategory > 3 or not unit:isActive() then return end -- NOTE: only testing for 0=airplane, 1=helicopter, 2=ground_unit, 3=ship
 
 		local playerName = unit:getPlayerName()
@@ -40,28 +40,34 @@ do
 		end
 
 		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
-			local unitTypeName = unit:getGroup():getName()
-			if unitCategory <= 1 then -- airplane/helicopter only
-				unitTypeName = UNIT:Find(unit):GetNatoReportingName()
+			local group = unit:getGroup()
+			if group then
+				local unitTypeName = group:getName()
+				if unitCategory <= 1 then -- airplane/helicopter only
+					unitTypeName = UNIT:Find(unit):GetNatoReportingName()
+				end
+				say(string.format("%s just took control of: %s %s", playerName, string.upper(unit:getTypeName()), string.upper(unitTypeName)))
 			end
-			say(string.format("%s just took control of: %s %s", playerName, string.upper(unit:getTypeName()), string.upper(unitTypeName)))
 
 		elseif event.id == world.event.S_EVENT_PILOT_DEAD then
 			say(string.format("%s is dead!", playerName))
 
 		elseif event.id == world.event.S_EVENT_CRASH then
-			local category = unit:getGroup():getCategory()
-			local cat = "unknown"
-			if category == Group.Category.HELICOPTER then
-				cat = "helicopter"
-			elseif category == Group.Category.AIRPLANE then
-				cat = "plane"
-			elseif category == Group.Category.GROUND then
-				cat = "vehicle"
-			elseif category == Group.Category.SHIP then
-				cat = "ship"
+			local group = unit:getGroup()
+			if group then
+				local category = Object.getCategory(group)
+				local cat = "unknown"
+				if category == Group.Category.HELICOPTER then
+					cat = "helicopter"
+				elseif category == Group.Category.AIRPLANE then
+					cat = "plane"
+				elseif category == Group.Category.GROUND then
+					cat = "vehicle"
+				elseif category == Group.Category.SHIP then
+					cat = "ship"
+				end
+				say(string.format("%s's %s has crashed!", playerName, cat))
 			end
-			say(string.format("%s's %s has crashed!", playerName, cat))
 
 		end
 	end

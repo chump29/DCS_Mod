@@ -7,12 +7,12 @@ local U						= require('me_utilities')
 local UC				    = require('utils_common')
 local i18n					= require('i18n')
 local DCS                   = require('DCS')
+local terrainDATA			= require('me_terrainDATA')
 
 local controller_
 local missionData_
 local airdromesById_
 local idCounter_ = 0
-local tblOriginalAirdromes
 
 local function setController(controller)
 	controller_	= controller
@@ -46,7 +46,6 @@ end
 local function onNewMission()
 	idCounter_ 		= 0
 	airdromesById_	= {}
-    tblOriginalAirdromes = {}
 	
 	local coalitionName = CoalitionController.neutralCoalitionName()
 	
@@ -55,13 +54,13 @@ local function onNewMission()
         radio= Terrain.getRadio()
     end
 	
-	local Airdromes = Terrain.GetTerrainConfig('Airdromes')
+	local Airdromes = terrainDATA.getTerrainDATA('Airdromes')
    
 	if Airdromes == nil then
 		return
 	end
 	
-	for airdromeNumber, airdromeInfo in pairs(Terrain.GetTerrainConfig('Airdromes')) do
+	for airdromeNumber, airdromeInfo in pairs(Airdromes) do
         if (airdromeInfo.reference_point) and (airdromeInfo.abandoned ~= true)  then 
             local x, y			= airdromeInfo.reference_point.x, airdromeInfo.reference_point.y
             local height        = Terrain.GetHeight(x, y)
@@ -147,14 +146,8 @@ local function onNewMission()
             end
 
             airdromesById_[id]	= airdrome
-            
-            tblOriginalAirdromes[airdromeNumber] = airdromeInfo
         end
 	end	
-end
-
-local function getTblOriginalAirdromes()
-    return tblOriginalAirdromes
 end
 
 local function getAirdromes()
@@ -218,6 +211,5 @@ return {
 	getAirdromeId			= getAirdromeId,
 	getAirdromeNumber		= getAirdromeNumber,
 	getAirdromeRoadnet		= getAirdromeRoadnet,
-    getTblOriginalAirdromes = getTblOriginalAirdromes,
-	setAirdromeCoalition	= setAirdromeCoalition,
+ 	setAirdromeCoalition	= setAirdromeCoalition,
 }

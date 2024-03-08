@@ -16,6 +16,7 @@ local tonumber = base.tonumber
 local table = base.table
 local math = base.math
 local string = base.string
+local debug = base.debug
 
 local Tools 					= require('tools')
 local Static 					= require('Static')
@@ -25,7 +26,7 @@ local GridHeaderCell            = require('GridHeaderCell')
 local Skin                      = require('Skin')
 local EditBox			        = require('EditBox')
 local dllWeather                = require('Weather')
-local U = require("me_utilities")
+local U                         = require('me_utilities')
 
 i18n.setup(_M)
 
@@ -356,6 +357,19 @@ function composeString(list, multiplier)
     if base.next(list) then
         for k,v in pairs(list) do
             table.insert(str, "'" ..tostring(k) .."'" .. multiplier .. tostring(v))
+        end
+        return str
+    else
+        return cdata.NA
+    end
+end
+-- то же что и функция выше, но выходная строка не содержит апострофов
+function composeString2(list, multiplier)
+    multiplier = multiplier or ' '
+    local str = {}
+    if base.next(list) then
+        for k,v in pairs(list) do
+            table.insert(str, tostring(k) .." " .. multiplier .. " " .. tostring(v))
         end
         return str
     else

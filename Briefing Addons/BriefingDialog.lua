@@ -138,6 +138,7 @@ function create()
     sbHorz = pCenter.bgPanel.sbHorz
     sbVert = pCenter.bgPanel.sbVert
 
+
     buttonClose = DialogLoader.findWidgetByName(window, 'buttonClose')
     buttonFly = DialogLoader.findWidgetByName(window, 'buttonFly')
     staticPause = DialogLoader.findWidgetByName(window, 'staticPause')
@@ -179,6 +180,7 @@ function show()
     if not window then
          create()
     end
+
 
     if window:getVisible() == false then
         DCS.lockAllMouseInput()
@@ -571,7 +573,8 @@ function generateAutoBriefing()
 --   table.insert(autoBriefing, composeEntry(nil, cdata.fuel,       playerUnit.payload.fuel..'('..getFuelPods()..')' ))
 --   table.insert(autoBriefing, composeEntry(nil, cdata.weapon,     dataBrf.weaponsString ))
     table.insert(autoBriefing, composeEntry(cdata.allies_flight_title))
-    table.insert(autoBriefing, composeEntry(nil, cdata.allies_flight, autobriefingutils.composeString(allies_list, '*')))
+    table.insert(autoBriefing, composeEntry(nil, cdata.allies_flight, autobriefingutils.composeString2(allies_list, '*') ))
+
     if dataBrf.descriptionTbl == nil then
         table.insert(autoBriefing, composeEntry(cdata.description, nil, dataBrf.descText))
         if dataBrf.mission_goal ~= "" then
@@ -597,7 +600,7 @@ function generateAutoBriefing()
         end
     end
     table.insert(autoBriefing, composeEntry(cdata.specification))
-    table.insert(autoBriefing, composeEntry(nil, cdata.threat, autobriefingutils.composeString(threats_list, '*')))
+    table.insert(autoBriefing, composeEntry(nil, cdata.threat, autobriefingutils.composeString2(threats_list, '*') ))
     if metarData.atmosphere == 0 then
         table.insert(autoBriefing, composeEntry(cdata.weather))
         local metar = wx.getMETAR(metarData)

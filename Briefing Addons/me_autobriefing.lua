@@ -132,6 +132,10 @@ returnToME = false
 local indexPict = 1
 local listPict = {}
 
+local function displayName(key)
+    return DB.getDisplayNameByName(key)
+end
+
 local window
 
 -------------------------------------------------------------------------------
@@ -607,11 +611,11 @@ function generateAutoBriefing(mission)
     table.insert(autoBriefing, composeEntry(nil, cdata.enemies, enemiesString))
     table.insert(autoBriefing, composeEntry(cdata.mission_data))
     table.insert(autoBriefing, composeEntry(nil, cdata.my_task, group.task))
-    table.insert(autoBriefing, composeEntry(nil, cdata.flight, DB.getDisplayNameByName(playerUnit.type).."*"..numGroupUnits))
+    table.insert(autoBriefing, composeEntry(nil, cdata.flight, displayName(playerUnit.type).." * "..numGroupUnits ))
     table.insert(autoBriefing, composeEntry(nil, cdata.fuel, composeFuelString()))
     table.insert(autoBriefing, composeEntry(nil, cdata.weapon, composeWeaponsString()))
     table.insert(autoBriefing, composeEntry(cdata.allies_flight_title))
-    table.insert(autoBriefing, composeEntry(nil, cdata.allies_flight, autobriefingutils.composeString(allies_list, '*')))
+    table.insert(autoBriefing, composeEntry(nil, cdata.allies_flight, autobriefingutils.composeString2(allies_list, '*') ))
     if mission.descriptionTbl == nil then
         table.insert(autoBriefing, composeEntry(cdata.description, nil, mission.descriptionText))
         table.insert(autoBriefing, composeEntry(cdata.mission_goal, nil, mission_goal))
@@ -633,7 +637,7 @@ function generateAutoBriefing(mission)
         end
     end
     table.insert(autoBriefing, composeEntry(cdata.specification))
-    table.insert(autoBriefing, composeEntry(nil, cdata.threat, autobriefingutils.composeString(threats_list, '*')))
+    table.insert(autoBriefing, composeEntry(nil, cdata.threat, autobriefingutils.composeString2(threats_list, '*') ))
     if metarData.atmosphere == 0 then
         table.insert(autoBriefing, composeEntry(cdata.weather))
         local metar = wx.getMETAR(metarData)
@@ -767,12 +771,12 @@ function getThreats()
         local country = group.boss
         local _coalition = country.boss
         if coalition ~= _coalition then
-            local threat = v
+
             if (not group.hidden) and (group.type ~= 'static') then
-                if threats_list[v['type']] then
-                    threats_list[v['type']] = threats_list[v['type']] + 1
+                if threats_list[displayName(v['type'])] then
+                    threats_list[displayName(v['type'])] = threats_list[displayName(v['type'])] + 1
                 else
-                    threats_list[v['type']] = 1
+                    threats_list[displayName(v['type'])] = 1
                 end
             end
         end
@@ -791,12 +795,12 @@ function getAllies()
         local country = group.boss
         local _coalition = country.boss
         if coalition == _coalition then
-            local threat = v
+
             if (not group.hidden) and ((group.type == 'plane') or (group.type == 'helicopter')) and (group.units[1].skill ~= crutches.getPlayerSkill()) then
-                if allies_list[v['type']] then
-                    allies_list[v['type']] = allies_list[v['type']] + 1
+                if allies_list[displayName(v['type'])] then
+                    allies_list[displayName(v['type'])] = allies_list[displayName(v['type'])] + 1
                 else
-                    allies_list[v['type']] = 1
+                    allies_list[displayName(v['type'])] = 1
                 end
             end
         end

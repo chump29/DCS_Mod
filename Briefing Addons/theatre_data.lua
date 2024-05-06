@@ -14,6 +14,11 @@ return {
 		["utc"] = -3,
 		["position"] = { x = 73598.5625, y = 74.136428833008, z = 46176.4140625 }
 	},
+	["Kola"] = {
+		["icao"] = "", --
+		["utc"] = 0,
+		["position"] = { x = 0, y = 0, z = 0 }
+	},
 	["MarianaIslands"] = {
 		["icao"] = "PGUA", -- Andersen
 		["utc"] = 10,

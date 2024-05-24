@@ -4,6 +4,13 @@
 --]]
 
 return {
+--[[
+	["Afghanistan"] = {
+		["icao"] = "", --
+		["utc"] = 4.5,
+		["position"] = { x = 0, y = 0, z = 0 }
+	},
+--]]
 	["Caucasus"] = {
 		["icao"] = "UGTB", -- Tbilisi
 		["utc"] = 4,
@@ -15,9 +22,9 @@ return {
 		["position"] = { x = 73598.5625, y = 74.136428833008, z = 46176.4140625 }
 	},
 	["Kola"] = {
-		["icao"] = "", --
-		["utc"] = 0,
-		["position"] = { x = 0, y = 0, z = 0 }
+		["icao"] = "EFRO", -- Rovaniemi
+		["utc"] = 3,
+		["position"] = { x = -152274.906250, y = 151624.968756, z = 193.327167 }
 	},
 	["MarianaIslands"] = {
 		["icao"] = "PGUA", -- Andersen

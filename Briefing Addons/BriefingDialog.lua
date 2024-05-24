@@ -128,6 +128,7 @@ local cdata = {
 
 function create()
     window = DialogLoader.spawnDialogFromFile('MissionEditor/modules/dialogs/briefing_dialog.dlg', cdata)
+    window:assignClutterBit(1)--BIT_BRIEFING
 
     containerMain = window.containerMain
     panelBottom = containerMain.panelBottom
@@ -581,7 +582,7 @@ function generateAutoBriefing()
             table.insert(autoBriefing, composeEntry(cdata.mission_goal, nil, dataBrf.mission_goal))
         end
     else
-        base.U.traverseTable(dataBrf.descriptionTbl)
+--      base.U.traverseTable(dataBrf.descriptionTbl)
 --      base.print("--dataBrf.side--",dataBrf.side)
         if dataBrf.descriptionTbl[dataBrf.side].situation and dataBrf.descriptionTbl[dataBrf.side].situation ~= "" then
             table.insert(autoBriefing, composeEntry(cdata.SITUATION, nil, dataBrf.descriptionTbl[dataBrf.side].situation))

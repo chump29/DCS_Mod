@@ -43,6 +43,31 @@ local cdata =
 	NIL = _("NIL")
 }
 
+actions = {
+  turningPoint   = { name=_('Turning point'),        type='Turning Point',  action='Turning Point' },
+  flyOverPoint   = { name=_('Fly over point'),       type='Turning Point',  action='Fly Over Point' },
+  finPoint       = { name=_('Fin point (N/A)'),      type='Fin Point',      action='Fin Point' },
+  takeoffRunway  	= { name=_('Takeoff from runway')		, type='TakeOff',        action='From Runway' },
+  takeoffParking	= { name=_('Takeoff from parking')		, type='TakeOffParking', action='From Parking Area' },
+  takeoffParkingHot = { name=_('Takeoff from parking hot')	, type='TakeOffParkingHot', action='From Parking Area Hot' },
+  LandingReFuAr 	= { name=_('LandingReFuAr')				, type='LandingReFuAr', action='LandingReFuAr' },
+
+  takeoffGround	    = { name=_('Takeoff from ground')		, type='TakeOffGround', action='From Ground Area' },
+  takeoffGroundHot  = { name=_('Takeoff from ground hot')	, type='TakeOffGroundHot', action='From Ground Area Hot' },
+
+  landing 		 = { name=_('Landing'),              type='Land',           action='Landing' },
+  offRoad 		 = { name=_('Offroad'),              type='Turning Point',  action='Off Road' },
+  onRoad 		 = { name=_('On road'),              type='Turning Point',  action='On Road' },
+  rank 			 = { name=_('Rank'),                 type='Turning Point',  action='Rank' },
+  cone 			 = { name=_('Cone'),                 type='Turning Point',  action='Cone' },
+  vee 			 = { name=_('Vee'),                  type='Turning Point',  action='Vee' },
+  diamond 		 = { name=_('Diamond'),              type='Turning Point',  action='Diamond' },
+  echelonL 		 = { name=_('Echelon Left'),         type='Turning Point',  action='EchelonL' },
+  echelonR 		 = { name=_('Echelon Right'),        type='Turning Point',  action='EchelonR' },
+  customForm 	 = { name=_('Custom'),               type='Turning Point',  action='Custom' },
+  onRailroads 	 = { name=_('On railroads'),         type='On Railroads',  action='On Railroads' },
+}
+
 local missionTheatreCache
 local missionTheatreCacheChanged = false
 local missionTheatreCacheFilename = 'MissionEditor/MissionTheatreCache.lua'

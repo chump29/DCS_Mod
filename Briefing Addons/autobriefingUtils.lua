@@ -91,9 +91,9 @@ end
 
 function isLeapYear(year)
     local result = 0
-    --Год является високосным, если он кратен 4 и при этом не кратен 100,
-    --либо кратен 400. Год не является високосным, если он не кратен 4, 
-    --либо кратен 100 и не кратен 400.
+    --Р“РѕРґ СЏРІР»СЏРµС‚СЃСЏ РІРёСЃРѕРєРѕСЃРЅС‹Рј, РµСЃР»Рё РѕРЅ РєСЂР°С‚РµРЅ 4 Рё РїСЂРё СЌС‚РѕРј РЅРµ РєСЂР°С‚РµРЅ 100,
+    --Р»РёР±Рѕ РєСЂР°С‚РµРЅ 400. Р“РѕРґ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РІРёСЃРѕРєРѕСЃРЅС‹Рј, РµСЃР»Рё РѕРЅ РЅРµ РєСЂР°С‚РµРЅ 4,
+    --Р»РёР±Рѕ РєСЂР°С‚РµРЅ 100 Рё РЅРµ РєСЂР°С‚РµРЅ 400.
     if (((year%4) == 0) and (((year%100) ~= 0) or ((year%400) == 0))) then
         result = 1
     end
@@ -280,7 +280,7 @@ local function createSectionGrid_(a_scrollPane, a_data, a_x, a_y, a_w)
 end
 
 -------------------------------------------------------------------------------
--- обновление текста автобрифинга 
+-- РѕР±РЅРѕРІР»РµРЅРёРµ С‚РµРєСЃС‚Р° Р°РІС‚РѕР±СЂРёС„РёРЅРіР°
 function updateScrollPane(scrollPane, a_width)
     local rowPos = 0
     local rowHeight = 20
@@ -296,19 +296,19 @@ function updateScrollPane(scrollPane, a_width)
     for i = 1, #autoBriefing do
         local rec = autoBriefing[i]     
         
-        if rec.section then -- запись - название секции. должна быть синей 
+        if rec.section then -- Р·Р°РїРёСЃСЊ - РЅР°Р·РІР°РЅРёРµ СЃРµРєС†РёРё. РґРѕР»Р¶РЅР° Р±С‹С‚СЊ СЃРёРЅРµР№
             if i > 1 then
                 rowPos = rowPos + sectionOffset  
             end
             createSectionItem_(scrollPane, rec.section, sectionX, rowPos, sectionWidth, sectionHeight)
             rowPos = rowPos + sectionHeight
             
-            if rec.data then -- если в секции есть данные
+            if rec.data then -- РµСЃР»Рё РІ СЃРµРєС†РёРё РµСЃС‚СЊ РґР°РЅРЅС‹Рµ
                 local itemHeight = createSectionDataItem_(scrollPane, rec.data, tabPos, rowPos, sectionWidth)
                 
                 rowPos = rowPos + itemHeight
             end
-        elseif (not rec.section) and rec.title then -- запись не секция и есть название 
+        elseif (not rec.section) and rec.title then -- Р·Р°РїРёСЃСЊ РЅРµ СЃРµРєС†РёСЏ Рё РµСЃС‚СЊ РЅР°Р·РІР°РЅРёРµ
             createTitleItem_(scrollPane, rec.title, tabPos, rowPos, rowHeight)
             
             if rec.data then
@@ -346,11 +346,11 @@ function updateScrollPane(scrollPane, a_width)
 end
 
 -------------------------------------------------------------------------------
--- формирование строки из списка
--- на входе таблица с ключами, соответствующими названиям элементов списка, и значениями,
--- соответствующими количеству элементов
--- входной список записывается в строку
--- через знак multiplier указывается кол-во элементв
+-- С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ СЃС‚СЂРѕРєРё РёР· СЃРїРёСЃРєР°
+-- РЅР° РІС…РѕРґРµ С‚Р°Р±Р»РёС†Р° СЃ РєР»СЋС‡Р°РјРё, СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёРјРё РЅР°Р·РІР°РЅРёСЏРј СЌР»РµРјРµРЅС‚РѕРІ СЃРїРёСЃРєР°, Рё Р·РЅР°С‡РµРЅРёСЏРјРё,
+-- СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёРјРё РєРѕР»РёС‡РµСЃС‚РІСѓ СЌР»РµРјРµРЅС‚РѕРІ
+-- РІС…РѕРґРЅРѕР№ СЃРїРёСЃРѕРє Р·Р°РїРёСЃС‹РІР°РµС‚СЃСЏ РІ СЃС‚СЂРѕРєСѓ
+-- С‡РµСЂРµР· Р·РЅР°Рє multiplier СѓРєР°Р·С‹РІР°РµС‚СЃСЏ РєРѕР»-РІРѕ СЌР»РµРјРµРЅС‚РІ
 function composeString(list, multiplier)
     multiplier = multiplier or ' '
     local str = {}
@@ -363,7 +363,7 @@ function composeString(list, multiplier)
         return cdata.NA
     end
 end
--- то же что и функция выше, но выходная строка не содержит апострофов
+-- С‚Рѕ Р¶Рµ С‡С‚Рѕ Рё С„СѓРЅРєС†РёСЏ РІС‹С€Рµ, РЅРѕ РІС‹С…РѕРґРЅР°СЏ СЃС‚СЂРѕРєР° РЅРµ СЃРѕРґРµСЂР¶РёС‚ Р°РїРѕСЃС‚СЂРѕС„РѕРІ
 function composeString2(list, multiplier)
     multiplier = multiplier or ' '
     local str = {}
@@ -378,11 +378,11 @@ function composeString2(list, multiplier)
 end
 
 -------------------------------------------------------------------------------
--- формирование строки даты\времени в формате hh:mm:ss
--- если задан параметр include_date, то формат изменяется на ddd/hh:mm:ss
+-- С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ СЃС‚СЂРѕРєРё РґР°С‚С‹\РІСЂРµРјРµРЅРё РІ С„РѕСЂРјР°С‚Рµ hh:mm:ss
+-- РµСЃР»Рё Р·Р°РґР°РЅ РїР°СЂР°РјРµС‚СЂ include_date, С‚Рѕ С„РѕСЂРјР°С‚ РёР·РјРµРЅСЏРµС‚СЃСЏ РЅР° ddd/hh:mm:ss
 function composeDateString(start_time, include_date, MissionDate, no_secs)
 	local data = convertDaysToData(math.floor(start_time/(60*60*24)), MissionDate)
-    -- вывод даты и времени
+    -- РІС‹РІРѕРґ РґР°С‚С‹ Рё РІСЂРµРјРµРЅРё
     local d = math.floor(start_time / (60*60*24))
     start_time = start_time - d * 60*60*24
     local h = math.floor(start_time / (60*60))
@@ -413,25 +413,25 @@ function convertDaysToData(a_days, MissionDate)
 
 	local NumDayInMounts =
 	{
-		31, --Январь
-		28, --Февраль
-		31,	--Март
-		30,	--Апрель
-		31,	--Май
-		30,	--Июнь
-		31,	--Июль
-		31,	--Август
-		30,	--Сентябрь
-		31,	--Октябрь
-		30,	--Ноябрь
-		31	--Декабрь
+        31, --РЇРЅРІР°СЂСЊ
+        28, --Р¤РµРІСЂР°Р»СЊ
+        31, --РњР°СЂС‚
+        30, --РђРїСЂРµР»СЊ
+        31, --РњР°Р№
+        30, --РСЋРЅСЊ
+        31, --РСЋР»СЊ
+        31, --РђРІРіСѓСЃС‚
+        30, --РЎРµРЅС‚СЏР±СЂСЊ
+        31, --РћРєС‚СЏР±СЂСЊ
+        30, --РќРѕСЏР±СЂСЊ
+        31  --Р”РµРєР°Р±СЂСЊ
 	}
     
     if MissionDate == nil then
         MissionDate = { Year = base.MissionDate.Year, Month = base.MissionDate.Month, Day = base.MissionDate.Day }
     end
 	
-	-- начальную дату берем из миссии
+	-- РЅР°С‡Р°Р»СЊРЅСѓСЋ РґР°С‚Сѓ Р±РµСЂРµРј РёР· РјРёСЃСЃРёРё
 	local day	= MissionDate.Day 
 	local month	= MissionDate.Month  
 	local year 	= MissionDate.Year

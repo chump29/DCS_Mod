@@ -45,6 +45,7 @@ local dataImagesCount = 0
 local returnScreen = nil
 local airdromesById_ = {}
 local tblStartGroups = {}
+local DTC_choosedUnitId = 0
 
 local function _(text, dText)
     local newText = gettext.translate(text)
@@ -74,7 +75,7 @@ local cdata = {
         flight = _('Flight'),
         fuel = _('Fuel'),
         weapon = _('Weapon'),
-        description = _('DESCRIPTION'),
+        description = _('SITUATION'),
         mission_goal = _('MISSION GOAL'),
         specification = _('KNOWN THREATS'),
         awacs = _('AWACS'),
@@ -118,6 +119,8 @@ local cdata = {
         EXECUTION       = _('EXECUTION'),
         ADMIN           = _('ADMINISTRATION / LOGISTICS'),
         COMMAND         = _('COMMAND / SIGNAL'),
+
+        OpenDTC = _('Open DTC'),
     }
 
     if base.LOFAC then
@@ -144,6 +147,7 @@ function create()
     buttonFly = DialogLoader.findWidgetByName(window, 'buttonFly')
     staticPause = DialogLoader.findWidgetByName(window, 'staticPause')
     buttonBack = DialogLoader.findWidgetByName(window, 'buttonBack')
+    buttonDTC = DialogLoader.findWidgetByName(window, 'buttonDTC')
 
     buttonPrev = pCenter.buttonPrev
     buttonNext = pCenter.buttonNext
@@ -160,8 +164,10 @@ function create()
     buttonNext.onChange = Next_onChange
     buttonFly.onChange = Fly_onChange
     buttonBack.onChange = Back_onChange
+    buttonDTC.onChange = DTC_onChange
 
     buttonBack:setVisible(false)
+    buttonDTC:setVisible(false)
 
     local screenWidth, screenHeight = Gui.GetWindowSize()
 
@@ -207,6 +213,12 @@ function show()
     update()
     window:setVisible(true)
     setPause(true)
+
+    if checkAvailabilityDTC(unitType) then
+        buttonDTC:setVisible(true)
+    else
+        buttonDTC:setVisible(false)
+    end
 end
 
 function hide()
@@ -215,6 +227,10 @@ function hide()
             DCS.unlockMouseInput()
         end
         window:setVisible(false)
+
+        if checkAvailabilityDTC(unitType) then
+            DCS.toggleDTC(unitType, false)
+        end
     end
 end
 
@@ -276,6 +292,10 @@ function Back_onChange()
     end
 end
 
+function DTC_onChange()
+    DCS.toggleDTC(unitType, true)
+end
+
 function Fly_onChange()
     if DCS.isMultiplayer() then
         net.spawn_player()
@@ -284,6 +304,7 @@ function Fly_onChange()
     end
     hide()
     setPause(false)
+    savePlayerId()
 end
 
 function setPause(b)
@@ -475,9 +496,15 @@ local function getMetarData(b, g)
     b.weather.mission_date = b.weather.mission_date or {}
     b.weather.fog = b.weather.fog or {}
     b.weather.season = b.weather.season or {}
-    b.weather.visibility = b.weather.visibility or {}
     b.weather.wind = b.weather.wind or {}
     b.weather.halo = b.weather.halo or {}
+    local vis = b.weather.visibility -- visibility: table | number
+    if type(vis) == "table" then
+        vis = vis.distance
+    end
+    if type(vis) ~= "number" then
+        vis = 80000 -- default?
+    end
     local d = {
         atmosphere = b.weather.atmosphere_type,
         clouds = b.weather.clouds,
@@ -492,7 +519,7 @@ local function getMetarData(b, g)
         theatre = b.theatre or TheatreOfWarData.getName(),
         start_time = b.mission_start_time,
         turbulence = b.weather.groundTurbulence,
-        visibility = b.weather.visibility.distance, -- always 80000
+        visibility = vis,
         wind = b.weather.wind.atGround,
         halo = b.weather.halo.preset,
         current_time = b.mission_start_time + DCS.getModelTime()
@@ -675,5 +702,38 @@ function generateSimpleAutoBriefing()
     else
         table.insert(autoBriefing, composeEntry(cdata.dynamic .. " " .. cdata.weather))
         table.insert(autoBriefing, composeEntry(nil, cdata.forecast, cdata.unknown))
+    end
+end
+
+function savePlayerId()
+    DTC_choosedUnitId = DCS.getPlayerUnit()
+end
+
+function resetPlayerId()
+    DTC_choosedUnitId = 0
+end
+
+function onMissionLoadEnd()
+    resetPlayerId()
+end
+
+function checkAvailabilityDTC()
+    local unitTypeDesc = DB.unit_by_type[unitType]
+    if unitTypeDesc ~= nil and unitTypeDesc.DTC then
+        local unitId = DCS.getPlayerUnit()
+        if DTC_choosedUnitId == unitId then
+            return false
+        end
+        local unitCoal = DCS.getPlayerCoalition()
+        for k,v in base.pairs(DCS.getAvailableSlots(unitCoal)) do
+            if v.unitId == unitId then
+                if v.multicrew_place == 1 then
+                    return true
+                end
+            end
+        end
+        return false
+    else
+        return false
     end
 end

@@ -40,6 +40,7 @@ local Gui                       = require('dxgui')
 local imagePreview              = require('imagePreview')
 local Analytics                 = require("Analytics")
 local ProductType               = require('me_ProductType')
+local MissionGenerator          = require('MissionGenerator')
 local BA = require("briefing_addons")
 local wx = require("wxDCS")
 
@@ -62,7 +63,7 @@ local cdata =
     flight = _('Flight'),
     fuel = _('Fuel'),
     weapon = _('Weapon'),
-    description = _('DESCRIPTION'),
+    description = _('SITUATION'),
     mission_goal = _('MISSION GOAL'),
     specification = _('KNOWN THREATS'),
     awacs = _('AWACS'),
@@ -155,6 +156,7 @@ local function create_()
     flyBtn = panelBottom.buttonFly
     pCenter = containerMain.pCenter
     buttonClose = containerMain.panelTop.buttonClose
+    buttonDTC = panelBottom.buttonDTC
 
     local width, height = Gui.GetWindowSize()
     window:setBounds(0,0,width, height)
@@ -166,6 +168,7 @@ local function create_()
     window.pMeFon:setVisible(true)
     window.pSimFon:setVisible(false)
     panelBottom.staticPause:setVisible(false)
+    buttonDTC:setVisible(false)
 
     cancelBtn.onChange = cancelBtnOnChange
     buttonClose.onChange = cancelBtnOnChange
@@ -478,9 +481,15 @@ local function getMetarData(m, g)
     m.weather.date = m.weather.date or {}
     m.weather.fog = m.weather.fog or {}
     m.weather.season = m.weather.season or {}
-    m.weather.visibility = m.weather.visibility or {}
     m.weather.wind = m.weather.wind or {}
     m.weather.halo = m.weather.halo or {}
+    local vis = b.weather.visibility -- visibility: table | number
+    if type(vis) == "table" then
+        vis = vis.distance
+    end
+    if type(vis) ~= "number" then
+        vis = 80000 -- default?
+    end
     local d = {
         atmosphere = m.weather.atmosphere_type,
         clouds = m.weather.clouds,
@@ -495,7 +504,7 @@ local function getMetarData(m, g)
         theatre = m.theatre,
         start_time = m.start_time,
         turbulence = m.weather.groundTurbulence,
-        visibility = m.weather.visibility.distance, -- always 80000
+        visibility = vis,
         wind = m.weather.wind.atGround,
         halo = m.weather.halo.preset
     }
@@ -857,6 +866,8 @@ function cancelBtnOnChange()
         panel_campaign.returnFromAutobrief()
     elseif (returnScreen == 'mainmenu') then
         base.mmw.show(true)
+    elseif (returnScreen == 'iag') then
+        base.InstantActionEditor.onReturnFromBriefing()
     elseif (returnScreen == 'editor') or returnToME == true then
         base.setPlannerMission(false)
         base.MapWindow.show(true)
@@ -876,7 +887,6 @@ function missionEditorBtnOnChange()
 
     waitScreen.setUpdateFunction(function()
         base.setPlannerMission(true)
-
         base.MapWindow.show(true)
 
         base.mmw.show(false)
@@ -898,6 +908,9 @@ function flyBtnOnChange()
     base.setCoordPanel.show(false)
     base.copySettings.show(false)
     base.panel_route.show(false)
+    if (returnScreen == 'iag') then
+        MissionGenerator.resetGeneratorInstantAction()
+    end
     music.stop()
 
     if MissionModule.checkMissionIntroduction() then
@@ -906,3 +919,5 @@ function flyBtnOnChange()
         Fly({command = '--mission'})
     end
 end
+
+

@@ -35,8 +35,8 @@ local function getAirdromeBounds()
 	return airdromeBounds
 end
 
--- для избежания конфликта с id объектов в миссиях, созданных до AirdromeData,
--- у аэродромов id сделаем отрицательными
+-- РґР»СЏ РёР·Р±РµР¶Р°РЅРёСЏ РєРѕРЅС„Р»РёРєС‚Р° СЃ id РѕР±СЉРµРєС‚РѕРІ РІ РјРёСЃСЃРёСЏС…, СЃРѕР·РґР°РЅРЅС‹С… РґРѕ AirdromeData,
+-- Сѓ Р°СЌСЂРѕРґСЂРѕРјРѕРІ id СЃРґРµР»Р°РµРј РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹РјРё
 local function getNewId()
 	idCounter_ = idCounter_ - 1
 	

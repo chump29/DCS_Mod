@@ -4,13 +4,11 @@
 --]]
 
 return {
---[[
 	["Afghanistan"] = {
-		["icao"] = "", --
+		["icao"] = "OAKN", -- Kandahar
 		["utc"] = 4.5,
-		["position"] = { x = 0, y = 0, z = 0 }
+		["position"] = { x = -269742.43749636, y = 1016.1134222516, z = -29349.91601069 }
 	},
---]]
 	["Caucasus"] = {
 		["icao"] = "UGTB", -- Tbilisi
 		["utc"] = 4,
@@ -20,6 +18,11 @@ return {
 		["icao"] = "EGYP", -- Mount Pleasant
 		["utc"] = -3,
 		["position"] = { x = 73598.5625, y = 74.136428833008, z = 46176.4140625 }
+	},
+	["Iraq"] = {
+		["icao"] = "ORBI", -- Baghdad
+		["utc"] = 3,
+		["position"] = { x = -94.732298777226, y = 28.931600075331, z = 633.64019836606 }
 	},
 	["Kola"] = {
 		["icao"] = "EFRO", -- Rovaniemi
@@ -56,5 +59,4 @@ return {
 		["utc"] = 3,
 		["position"] = { x = -8466.0517578125, y = 5.0000047683716, z = -209773.46875 }
 	}
-	-- TheChannel
 }

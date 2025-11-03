@@ -498,13 +498,7 @@ local function getMetarData(b, g)
     b.weather.season = b.weather.season or {}
     b.weather.wind = b.weather.wind or {}
     b.weather.halo = b.weather.halo or {}
-    local vis = b.weather.visibility -- visibility: table | number
-    if type(vis) == "table" then
-        vis = vis.distance
-    end
-    if type(vis) ~= "number" then
-        vis = 80000 -- default?
-    end
+    b.weather.visibility = b.weather.visibility or {}
     local d = {
         atmosphere = b.weather.atmosphere_type,
         clouds = b.weather.clouds,
@@ -519,7 +513,7 @@ local function getMetarData(b, g)
         theatre = b.theatre or TheatreOfWarData.getName(),
         start_time = b.mission_start_time,
         turbulence = b.weather.groundTurbulence,
-        visibility = vis,
+        visibility = b.weather.visibility.distance,
         wind = b.weather.wind.atGround,
         halo = b.weather.halo.preset,
         current_time = b.mission_start_time + DCS.getModelTime()

@@ -116,8 +116,11 @@ do
 		if not d.visibility then return -1 end
 		local vis = d.visibility
 		local preset = getPreset(d.clouds.preset)
-		if preset and preset.precipitationPower > 0 then
-			vis = 8000
+		if preset and preset.precipitationPower > 0 and preset.precipitationPower < 0.5 then
+			vis = 16000 -- 10mi
+			d.tempo = true
+		elseif preset and preset.precipitationPower > 0 and preset.precipitationPower >= 0.5 then
+			vis = 8000 -- 5mi
 			d.tempo = true
 		elseif d.clouds.iprecptns and (d.clouds.iprecptns == 2 or d.clouds.iprecptns == 4) then
 			vis = 3050
@@ -139,7 +142,7 @@ do
 			m = 50
 		elseif vis < 5000 then
 			m = 100
-		elseif vis < 10000 then
+		elseif vis <= 16000 then -- 10000, but account for 16000
 			m = 1000
 		end
 		if m then
@@ -612,7 +615,11 @@ do
 			metar = metar .. getTurbulence(d.wind.speed, d.turbulence)
 		end
 		if d.tempo then
-			metar = string.format("%s TEMPO 2400", metar)
+			if d.vis == 16000 then
+				metar = string.format("%s TEMPO 5000", metar)
+			else
+				metar = string.format("%s TEMPO 2400", metar)
+			end
 			if num > 3 then
 				metar = string.format("%s YLO", metar)
 			end

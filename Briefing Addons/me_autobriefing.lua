@@ -483,13 +483,7 @@ local function getMetarData(m, g)
     m.weather.season = m.weather.season or {}
     m.weather.wind = m.weather.wind or {}
     m.weather.halo = m.weather.halo or {}
-    local vis = b.weather.visibility -- visibility: table | number
-    if type(vis) == "table" then
-        vis = vis.distance
-    end
-    if type(vis) ~= "number" then
-        vis = 80000 -- default?
-    end
+    m.weather.visibility = m.weather.visibility or {}
     local d = {
         atmosphere = m.weather.atmosphere_type,
         clouds = m.weather.clouds,
@@ -504,7 +498,7 @@ local function getMetarData(m, g)
         theatre = m.theatre,
         start_time = m.start_time,
         turbulence = m.weather.groundTurbulence,
-        visibility = vis,
+        visibility = m.weather.visibility.distance,
         wind = m.weather.wind.atGround,
         halo = m.weather.halo.preset
     }

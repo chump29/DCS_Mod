@@ -5,34 +5,40 @@
 
 return {
 	["Afghanistan"] = {
-		["icao"] = "OAKN", -- Kandahar
+		["icao"] = "OAKB", -- Kabul
 		["utc"] = 4.5,
-		["position"] = { x = -269742.43749636, y = 1016.1134222516, z = -29349.91601069 }
+		["position"] = { x = 82809.624999985, y = 1789.0030307532, z = 270166.96875005 }
 	},
 	["Caucasus"] = {
 		["icao"] = "UGTB", -- Tbilisi
 		["utc"] = 4,
 		["position"] = { x = -314926.25, y = 479.69479370117, z = 895724 }
 	},
+	-- Cold War Germany
 	["Falklands"] = {
 		["icao"] = "EGYP", -- Mount Pleasant
 		["utc"] = -3,
 		["position"] = { x = 73598.5625, y = 74.136428833008, z = 46176.4140625 }
 	},
 	["Iraq"] = {
-		["icao"] = "ORBI", -- Baghdad
+		["icao"] = "ORAA", -- Al Asad
 		["utc"] = 3,
-		["position"] = { x = -94.732298777226, y = 28.931600075331, z = 633.64019836606 }
+		["position"] = { x = 61461.214843715, y = 173.11999774068, z = -164404.98437494 }
 	},
 	["Kola"] = {
 		["icao"] = "EFRO", -- Rovaniemi
 		["utc"] = 3,
-		["position"] = { x = -152274.906250, y = 151624.968756, z = 193.327167 }
+		["position"] = { x = -152710.53126071, y = 192.9624356434, z = 151342.21875192 }
 	},
 	["MarianaIslands"] = {
 		["icao"] = "PGUA", -- Andersen
 		["utc"] = 10,
 		["position"] = { x = 9961.662109375, y = 166.12214660645, z = 13072.155273438 }
+	},
+	["MarianaIslandsWWII"] = {
+		["icao"] = "PGRO", -- Rota
+		["utc"] = 10,
+		["position"] = { x = 75883.695312576, y = 181.40367944341, z = 48742.8359375 }
 	},
 	["Nevada"] = {
 		["icao"] = "KLSV", -- Nellis
@@ -59,4 +65,5 @@ return {
 		["utc"] = 3,
 		["position"] = { x = -8466.0517578125, y = 5.0000047683716, z = -209773.46875 }
 	}
+	-- TheChannel
 }

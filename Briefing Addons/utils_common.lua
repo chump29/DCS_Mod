@@ -119,10 +119,10 @@ function toPositiveDegrees(radians, raw)
   return degrees
 end
 
-function revertWind(a_value)
+local function revertWind(a_value)
 	local a_value = a_value + 180
-	if a_value > 360 then
-		return a_value - 360
+	if a_value >= 360 then
+		a_value = a_value - 360
 	end
 	return a_value
 end
